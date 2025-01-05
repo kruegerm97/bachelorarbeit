@@ -1,0 +1,73 @@
+1. Einleitung
+1.1 Problemstellung und Forschungsfragen
+
+Die rasante Entwicklung von Large Language Models (LLMs), wie beispielsweise ChatGPT, hat in den vergangenen Jahren sowohl im privaten als auch im beruflichen Umfeld für Aufsehen gesorgt. Während LLMs anfangs vor allem zur Verarbeitung und Erzeugung natürlicher Sprache eingesetzt wurden, zeigt sich zunehmend, dass diese Modelle ebenso in der Lage sind, Programmiercode in diversen Sprachen zu generieren. Insbesondere bei der Programmiersprache Python, die für Datenanalyse und Machine Learning weit verbreitet ist, wird das Potenzial zur automatisierten Code-Generierung deutlich sichtbar.
+
+Vor diesem Hintergrund stellt sich die Frage, ob und inwiefern LLMs tatsächlich qualitativ hochwertigen Python-Code für datenanalytische Aufgaben erzeugen können und wie sich dieser Code im Vergleich zu manuell geschriebenen Skripten verhält. Auch sind die Grenzen und potenziellen Risiken einer solchen automatisierten Generierung zu beleuchten, etwa in Bezug auf Fehlerraten, Performanz oder Wartbarkeit des Codes.
+
+Daraus leitet sich folgende Hauptforschungsfrage ab:
+
+    Inwieweit eignet sich die automatisierte Code-Generierung durch Large Language Models (LLMs) zur Durchführung gängiger Datenanalyseaufgaben in Python, und wie schneidet dieser Code im Vergleich zu manuell geschriebenen Skripten hinsichtlich Effizienz, Korrektheit und Wartbarkeit ab?
+
+Um die Hauptforschungsfrage zu konkretisieren, werden mehrere Unterfragen betrachtet:
+
+    Qualität & Korrektheit: Wie hoch ist die Korrektheit und Vollständigkeit des generierten Codes hinsichtlich Syntax, Bibliotheksaufrufen und Implementierung von Analyseaufgaben?
+    Effizienz & Performanz: Inwieweit ist der automatisch erzeugte Code hinsichtlich Laufzeit und Ressourcenverbrauch konkurrenzfähig zu manuell programmiertem Code?
+    Wartbarkeit & Verständlichkeit: Wie gut lässt sich LLM-generierter Code verstehen, dokumentieren und weiterentwickeln?
+    Einsatzgebiete & Grenzen: Für welche spezifischen Aufgaben in der Datenanalyse ist der Einsatz von LLMs besonders geeignet, und wo stößt diese Technik an ihre Grenzen?
+
+1.2 Relevanz der Thematik
+
+Die Automatisierung von Programmieraufgaben durch LLMs bietet enorme Potenziale. Zum einen könnten sich Entwicklungsprozesse beschleunigen, da Programmierer durch automatisch generierte Code-Vorschläge entlastet werden. Zum anderen könnte der Zugang zu Datenanalyse und Machine Learning demokratisiert werden, indem Personen mit weniger Programmiererfahrung mithilfe von LLMs komplexe Analysen erstellen. Zudem steigt die Bedeutung datengetriebener Entscheidungsprozesse in Unternehmen kontinuierlich, sodass ein effizientes Tool für Code-Generierung gerade in diesem Bereich einen Wettbewerbsvorteil darstellen kann.
+
+Allerdings sind mit dieser Entwicklung auch Herausforderungen verbunden, zum Beispiel die Verlässlichkeit und Interpretierbarkeit des automatisch generierten Codes. Fehler im LLM-Code können teils schwierig zu erkennen sein, insbesondere, wenn Anwender selbst nur eingeschränkte Programmierkenntnisse besitzen. Aus wissenschaftlicher Sicht ist es daher unerlässlich, die Genauigkeit und Qualität des generierten Codes empirisch zu untersuchen und Empfehlungen für den praktischen Einsatz in der Datenanalyse abzuleiten.
+1.3 Zielsetzung
+
+Ziel dieser Arbeit ist es, systematisch zu untersuchen, wie gut sich moderne LLMs für die automatisierte Code-Generierung im Bereich Python-Datenanalyse eignen. Dazu wird in einem empirischen Experiment Code durch LLMs erzeugt, mit manuell geschriebenen Skripten verglichen und hinsichtlich Effizienz, Korrektheit und Wartbarkeit bewertet. Auf Basis dieser Evaluation werden Einsatzempfehlungen für verschiedene Datenanalyse-Szenarien abgeleitet und die Grenzen der Technologie aufgezeigt. Abschließend wird ein Zukunftsausblick gegeben, in dem auf mögliche Weiterentwicklungen von LLMs und deren potenziellen Einfluss auf den Programmieralltag in der Datenanalyse eingegangen wird.
+1.4 Aufbau der Arbeit
+
+Die Arbeit gliedert sich in sieben Kapitel. Nach dieser Einleitung (Kapitel 1), in der die Problemstellung, die Forschungsfragen, die Relevanz des Themas sowie die Zielsetzung dargelegt wurden, werden in Kapitel 2 die Grundlagen vorgestellt. Dort werden zunächst Large Language Models (LLMs) erklärt, danach folgt eine kurze Einführung in Python mit dem Schwerpunkt Datenanalyse. Abschließend wird auf die Idee und Funktionsweise der automatisierten Code-Generierung eingegangen.
+
+In Kapitel 3 erfolgt eine Darstellung des aktuellen Stands der Forschung zur Nutzung von LLMs in der Programmierung. Verschiedene LLM-Modelle werden einander gegenübergestellt, und Studien zur Code-Generierung werden zusammengefasst.
+
+Kapitel 4 erläutert die Methodik dieser Arbeit. Es werden die Vorgehensweise, die Testfälle, die verwendeten Tools und die Kriterien zur Auswertung detailliert beschrieben.
+
+In Kapitel 5 folgt die Auswertung der Python-Code-Generierung. Der generierte Code wird dort dem manuell erstellten Code gegenübergestellt. Eine Analyse der Effizienz, Performanz und Verständlichkeit bildet den Kern dieses Kapitels.
+
+Kapitel 6 zieht ein Fazit, beantwortet die Forschungsfragen und gibt einen Ausblick auf zukünftige Entwicklungen. Abschließend enthält Kapitel 7 den Anhang, bestehend aus dem Literaturverzeichnis, einem Quellcodeverzeichnis, Tabellenverzeichnis und einer Übersicht der verwendeten Tools.
+
+1. Einleitung
+1.1 Problemstellung und Forschungsfragen
+
+Die rasante Entwicklung von Large Language Models (LLMs), wie beispielsweise ChatGPT, hat in den vergangenen Jahren sowohl im privaten als auch im beruflichen Umfeld für große Aufmerksamkeit gesorgt. Während LLMs ursprünglich vor allem zur Verarbeitung und Generierung natürlicher Sprache eingesetzt wurden, zeigt sich zunehmend, dass sie auch Programmiercode in diversen Sprachen generieren können. Insbesondere für Python – eine häufig genutzte Sprache für Datenanalyse und Machine Learning – sind die Fortschritte in der automatisierten Code-Generierung bereits beachtlich 1,2.
+
+Aktuelle Forschungsarbeiten befassen sich mit der Evaluation solcher Code-Generierungen, insbesondere um Fehlerquellen und Qualitätsmerkmale systematisch zu erfassen 3,4. Die Bereitstellung öffentlicher Evaluierungsdatensätze und -frameworks (z. B. HumanEval, EvalPlus) ermöglicht dabei standardisierte Vergleichsstudien verschiedener LLMs 3,4. Diese Entwicklungen eröffnen neue Anwendungsfelder im Bereich der Datenanalyse: Statt den Code manuell zu schreiben, könnten Anwender in Zukunft in natürlicher Sprache ihre Anforderungen formulieren und vom Modell direkt einen passenden Python-Code generieren lassen 5.
+
+Vor diesem Hintergrund stellt sich die Frage, ob und inwiefern LLMs tatsächlich qualitativ hochwertigen Python-Code für datenanalytische Aufgaben erzeugen können und wie dieser Code im Vergleich zu manuell erstellten Skripten abschneidet. Auch potenzielle Grenzen einer solchen automatisierten Generierung, beispielsweise in Bezug auf Performanz, Wartbarkeit oder Fehlerraten, spielen hierbei eine zentrale Rolle 6.
+
+Dies führt zu folgender Hauptforschungsfrage:
+
+    Inwieweit eignet sich die automatisierte Code-Generierung durch Large Language Models (LLMs) zur Durchführung gängiger Datenanalyseaufgaben in Python, und wie schneidet dieser Code im Vergleich zu manuell geschriebenen Skripten hinsichtlich Effizienz, Korrektheit und Wartbarkeit ab?
+
+Um diese umfassende Fragestellung einzugrenzen, werden mehrere Unterfragen betrachtet:
+
+    Qualität & Korrektheit: Wie hoch ist die Korrektheit und Vollständigkeit des generierten Codes hinsichtlich Syntax und Analyseprozess (z. B. Datenbereinigung, Modellierung)?
+    Effizienz & Performanz: Inwieweit entspricht der automatisch erzeugte Code modernen Standards bezüglich Laufzeit und Ressourcenverbrauch?
+    Wartbarkeit & Verständlichkeit: Wie gut lässt sich der generierte Code verstehen, warten und erweitern?
+    Einsatzgebiete & Grenzen: Für welche spezifischen Aufgaben in der Datenanalyse bietet sich LLM-Code-Generierung an, und wo stößt diese Technologie an ihre Grenzen?
+
+1.2 Relevanz der Thematik
+
+Die Möglichkeit, Programmiercode mittels LLMs zu generieren, hat das Potenzial, Entwicklungsprozesse zu beschleunigen und neue Nutzergruppen anzusprechen, die bisher nur wenig Erfahrung mit Programmierung haben. Gerade in der Datenanalyse können repetitive Arbeitsschritte – wie das Aufsetzen von Standardpipelines oder das Schreiben von Boilerplate-Code – signifikant reduziert werden. Damit ließen sich Datenanalyseprojekte schneller umsetzen und Fachleute hätten mehr Zeit, sich auf komplexe oder kreative Aufgaben zu konzentrieren 2.
+
+Allerdings sind vielfältige Herausforderungen zu bedenken: Neben möglichen Fehlern (z. B. Syntax-Fehler, inkorrekte Funktionsaufrufe) stellt sich auch die Frage nach Performanz, insbesondere wenn große Datenmengen verarbeitet werden müssen 5. Gleichzeitig verlangen Unternehmen und Organisationen eine gewisse Wartbarkeit und Transparenz des Codes, was bei automatisch erzeugten Skripten nicht immer garantiert ist 6. Dieser Punkt wird in der Forschung bereits intensiv diskutiert, da unvollständige oder intransparente Code-Generierung auch zu Sicherheitsrisiken führen könnte 1.
+
+1.3 Zielsetzung
+
+Ziel dieser Arbeit ist es, systematisch zu untersuchen, wie gut sich moderne LLMs für die automatisierte Code-Generierung im Bereich Python-Datenanalyse eignen. Dabei wird in einem empirischen Experiment Code durch ein LLM erzeugt und mit manuell geschriebenem Code verglichen. Dieser Vergleich erfolgt anhand definierter Kriterien wie Korrektheit, Performance (z. B. Laufzeit), Wartbarkeit und Verständlichkeit. Auf Basis der Ergebnisse werden Handlungsempfehlungen für den praktischen Einsatz abgeleitet und Grenzen der Technologie aufgezeigt 3,4. Abschließend bietet ein Ausblick die Möglichkeit, zukünftige Entwicklungen im Bereich LLMs und deren Potenzial für den Datenanalyseprozess zu skizzieren.
+
+1.4 Aufbau der Arbeit
+
+In Kapitel 2 werden zunächst die Grundlagen erläutert. Dabei stehen die Funktionsweise von LLMs sowie ein kurzer Überblick über Python und dessen Relevanz in der Datenanalyse im Vordergrund. Anschließend folgt in Kapitel 3 eine Darstellung des aktuellen Stands der Forschung, in der verschiedene Modelle, Publikationen und Evaluationstechniken vorgestellt werden. In Kapitel 4 wird die Methodik der Arbeit präsentiert: Dazu zählen das Vorgehensmodell, die Testfälle, die verwendeten Tools und die Evaluation der Ergebnisse.
+
+Kapitel 5 widmet sich der Auswertung: Hier werden LLM-generierter Code und manuell erstellter Code im Hinblick auf die zuvor definierten Kriterien verglichen und diskutiert. Darauf aufbauend fasst Kapitel 6 die zentralen Erkenntnisse zusammen und gibt einen Ausblick auf mögliche zukünftige Entwicklungen. Kapitel 7 beinhaltet schließlich den Anhang, inklusive Literaturverzeichnis, Quellcodeauszüge, Tabellenverzeichnis sowie einer Dokumentation der verwendeten Tools.

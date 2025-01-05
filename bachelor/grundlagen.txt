@@ -1,0 +1,105 @@
+2. Grundlagen
+
+Im folgenden Kapitel werden die theoretischen und technischen Grundlagen dargelegt, die zum Verständnis der Arbeit erforderlich sind. Zunächst wird in Abschnitt 2.1 erläutert, was unter Large Language Models (LLMs) zu verstehen ist und welche Entwicklungen in diesem Bereich in den letzten Jahren stattgefunden haben. Abschnitt 2.2 gibt einen Überblick über die Programmiersprache Python und ihren Stellenwert für die Datenanalyse. Anschließend widmet sich Abschnitt 2.3 dem Konzept der automatisierten Code-Generierung, wobei spezielle Anforderungen im Bereich Datenanalyse im Fokus stehen.
+2.1 Einführung in Large Language Models
+2.1.1 Grundlegendes Konzept und Entwicklung
+
+Large Language Models (LLMs) sind KI-Modelle, die mithilfe von Deep-Learning-Architekturen darauf trainiert werden, menschliche Sprache zu verstehen und zu generieren. Zu den bekanntesten Beispielen gehören GPT-Modelle (Generative Pre-trained Transformer), BERT (Bidirectional Encoder Representations from Transformers) oder neuere Varianten wie ChatGPT. Diese Modelle basieren in der Regel auf Transformern, einer Netzarchitektur, die auf Attention-Mechanismen setzt und damit besonders gut mit sequentiellen Daten umgehen kann 11.
+
+In den vergangenen Jahren hat sich gezeigt, dass LLMs nicht nur grammatikalisch korrekte Sätze generieren können, sondern auch in der Lage sind, komplexe semantische Zusammenhänge zu erfassen. Dies liegt vor allem an der enormen Größe dieser Modelle und der Vielzahl an Parametern (teilweise mehrere 100 Milliarden), die in umfangreichen Datensätzen (Internet-Korpora, wissenschaftliche Artikel, Forenbeiträge etc.) trainiert werden 22.
+2.1.2 LLMs für Programmieraufgaben
+
+Neben dem Verfassen von Texten können LLMs inzwischen auch Code generieren. Dies liegt daran, dass viele dieser Modelle auch mit Programmiercodes aller Art trainiert wurden: von JavaScript und C++ bis hin zu Python. Gerade bei Python, einer weit verbreiteten Sprache, sind die Modelle bereits relativ ausgereift. Plattformen wie GitHub Copilot oder neuere Ausgaben von ChatGPT zeigen, dass LLMs in der Praxis bereits produktiv bei der Code-Generierung eingesetzt werden. Dennoch sind offene Fragen bezüglich Fehleranfälligkeit, Performance und Wartbarkeit des LLM-Codes vorhanden 33.
+2.2 Einführung in Python
+2.2.1 Relevanz für die Datenanalyse
+
+Python hat sich zu einer der wichtigsten Sprachen für Datenanalyse und Machine Learning entwickelt 44. Gründe hierfür sind:
+
+    Eine große Community und breite Unterstützung durch Bibliotheken (z. B. NumPy, pandas, Matplotlib, scikit-learn).
+    Eine einfache, gut lesbare Syntax, die Einsteigern eine steile Lernkurve ermöglicht.
+    Eine aktive Open-Source-Kultur, durch die Bibliotheken ständig erweitert und optimiert werden.
+
+Datenanalytische Aufgaben lassen sich in Python meist schlanker lösen als in vielen anderen Sprachen. Daher ist es naheliegend, dass LLMs verstärkt darauf trainiert werden, Python-Code zu generieren, insbesondere für Aufgaben wie Datenvorverarbeitung, explorative Analysen oder Modelltraining.
+2.2.2 Typische Schritte einer Datenanalyse in Python
+
+Eine klassische Datenanalyse in Python gliedert sich häufig in folgende Schritte:
+
+    Datenimport: Einlesen von CSV-Dateien, SQL-Datenbanken oder Online-APIs.
+    Datenbereinigung: Entfernen oder Ergänzen fehlender Werte, Umwandeln von Datentypen.
+    Deskriptive Analyse: Erstellen von statistischen Kennzahlen (Mittelwerte, Standardabweichungen etc.) und ersten Visualisierungen.
+    Feature Engineering: Generierung zusätzlicher Merkmale, Skalierung, Kodierung.
+    Modellierung: Einsatz von Machine-Learning-Algorithmen (z. B. lineare Regression, Entscheidungsbäume, neuronale Netze).
+    Evaluation & Visualisierung: Bewerten der Modelle mithilfe von Metriken (Accuracy, F1-Score etc.) und Darstellung der Ergebnisse.
+
+In der vorliegenden Arbeit wird untersucht, ob und wie gut LLMs diese Schritte automatisiert in Code übersetzen können und welche Potenziale bzw. Defizite sich dabei ergeben.
+2.3 Einführung in die automatisierte Code-Generierung
+2.3.1 Historische Entwicklung und Grundprinzip
+
+Die Idee, Code automatisiert zu erstellen, ist nicht neu. Bereits in den 1980er-Jahren wurden Expertensysteme entwickelt, die Codefragmente erzeugten, um wiederkehrende Programmieraufgaben zu erleichtern. Später kamen Codegeneratoren für spezifische Frameworks (z. B. Rails scaffolding in Ruby) hinzu 55.
+
+Mit dem Aufkommen großer vortrainierter Sprachmodelle hat diese Idee jedoch einen Quantensprung erlebt: Statt simpler Templates oder regelbasierter Generatoren können LLMs potenziell für viele unterschiedliche Aufgaben Code schreiben, ohne dass der Nutzer sich um die zugrunde liegende Logik kümmern muss. Anhand kurzer Prompt-Beispiele (sogenannte few-shot learning) lassen sich Modelle wie ChatGPT dazu bringen, komplexe Skripte zu erzeugen.
+2.3.2 Nutzen und Herausforderung in der Datenanalyse
+
+Gerade in der Datenanalyse fallen viele repetitive Aufgaben an, zum Beispiel das Einrichten einer Entwicklungsumgebung oder das Schreiben von Boilerplate-Code zum Datenimport und -cleaning. Durch eine automatisierte Code-Generierung lässt sich an dieser Stelle wertvolle Zeit einsparen. Zudem können Anwender, die nicht tief in Python eingearbeitet sind, schnell erste Analysen durchführen und das Rapid Prototyping beschleunigen.
+
+Allerdings ergeben sich auch kritische Fragestellungen:
+
+    Zuverlässigkeit: Gibt der generierte Code verlässlich korrekte Ergebnisse zurück?
+    Performanz: Wird der Code so optimiert, dass er für große Datenmengen geeignet ist?
+    Verständlichkeit: Ist der Code ausreichend kommentiert und wartbar?
+
+Diese Fragen bilden den Kern der vorliegenden Arbeit und werden in den folgenden Kapiteln mithilfe eines empirischen Vergleichs (LLM-generierter vs. manuell geschriebener Code) beantwortet.
+
+2. Grundlagen
+
+Im folgenden Kapitel werden die theoretischen und technischen Grundlagen dargelegt, die zum Verständnis der Arbeit erforderlich sind. Abschnitt 2.1 widmet sich den Large Language Models, ihrer Funktionsweise und ihrer zunehmenden Rolle in der Code-Generierung. Anschließend wird in Abschnitt 2.2 das Potenzial der Programmiersprache Python für die Datenanalyse erläutert. In Abschnitt 2.3 erfolgt eine Einführung in das Konzept der automatisierten Code-Generierung, wobei spezifische Anforderungen an die Datenanalyse im Fokus stehen.
+2.1 Einführung in Large Language Models
+2.1.1 Grundlegendes Konzept und aktuelle Entwicklungen
+
+Large Language Models (LLMs) sind KI-Modelle, die mithilfe von Deep-Learning-Architekturen darauf trainiert werden, natürliche Sprache zu verstehen und zu generieren 1,21,2. Moderne Modelle wie GPT oder Code-specific-LLMs beruhen dabei oft auf Transformer-Architekturen, die sowohl in Richtung Text- als auch Code-Generierung enorme Fortschritte erzielt haben 2,62,6. Mit der zunehmenden Größe der Modelle (teilweise mehrere hundert Milliarden Parameter) steigen allerdings auch die Anforderungen an Daten und Rechenkapazitäten 55.
+
+Verschiedene Forschungsarbeiten haben in den letzten Jahren Benchmarks und Evaluierungsdatensätze speziell für Code-Generierung aufgebaut. Beispiele sind HumanEval 33 und EvalPlus 44, die standardisierte Aufgaben und Testfälle bereitstellen, an denen sich die Modelle messen lassen. Einige Studien berichten, dass LLMs bereits in der Lage sind, einfache bis mittelschwere Programmieraufgaben (z. B. Implementieren einer Sortierfunktion oder einer kleinen Webanwendung) automatisiert zu lösen 4,54,5. Komplexere Fragestellungen, insbesondere wenn sie spezielles Domänenwissen erfordern, bleiben jedoch oft eine Herausforderung 11.
+2.1.2 Anwendung in der Python-Programmierung
+
+Während LLMs prinzipiell in vielen Programmiersprachen Code generieren können, hat sich Python als einer der Schwerpunkte herauskristallisiert 2,62,6. Dies liegt unter anderem an der großen Verbreitung von Python in der Wissenschaft und Industrie, insbesondere im Bereich Datenanalyse und Machine Learning. Die zahlreichen Bibliotheken (z. B. NumPy, pandas, scikit-learn) bieten ein reichhaltiges Ökosystem, das LLMs bei ihrem Training und in ihren Antworten nutzen können 55.
+
+Diverse Implementierungen – darunter ChatGPT, GitHub Copilot oder andere LLM-Varianten – können mittlerweile Python-Skripte produzieren, welche Datensätze einlesen, bereinigen, analysieren und sogar erste Machine-Learning-Modelle trainieren. Ob diese generierten Codes jedoch performant, fehlerfrei und langfristig wartbar sind, bleibt Gegenstand aktueller Forschung.
+2.2 Einführung in Python für die Datenanalyse
+2.2.1 Bedeutung und Bibliotheken
+
+Python hat sich als eine der wichtigsten Sprachen für Datenanalyse etabliert, unter anderem aufgrund seiner leichten Erlernbarkeit und einer sehr aktiven Community 55. Spezialisierte Bibliotheken wie:
+
+    pandas für Datenstrukturen und Datenbearbeitung,
+    NumPy für numerische Berechnungen,
+    Matplotlib oder seaborn für Visualisierungen,
+    scikit-learn für Machine-Learning-Aufgaben,
+
+ermöglichen es Anwendern, schnell und effizient datengetriebene Projekte umzusetzen. Viele dieser Bibliotheken wurden in den LLM-Trainingskorpora berücksichtigt, sodass generierter Python-Code häufig bereits Standardfunktionen und -methoden aus diesen Packages verwendet.
+2.2.2 Typische Schritte einer Datenanalyse
+
+Eine klassische Datenanalyse in Python folgt oft folgenden Schritten:
+
+    Datenimport (CSV-Dateien, Datenbanken, APIs)
+    Datenbereinigung (Umgang mit fehlenden Werten, Duplikaten, Datentypen)
+    Explorative Analyse und Visualisierung (Statistische Kennzahlen, erste Plots)
+    Feature Engineering (Erstellung neuer Variablen, Skalierung, Kodierung)
+    Modellierung (Trainieren und Evaluieren von Machine-Learning-Modellen)
+    Kommunikation (Ergebnisse präsentieren, Dokumentation)
+
+Im Rahmen dieser Arbeit wird untersucht, ob LLMs diese Standardprozedur automatisieren können und an welchen Stellen noch manueller Eingriff notwendig wird 44.
+2.3 Automatisierte Code-Generierung für Datenanalyse
+2.3.1 Funktionsweise und Vorteile
+
+Automatisierte Code-Generierung mithilfe von LLMs unterscheidet sich von klassischen Code-Generatoren dadurch, dass keine starren Templates oder regelbasierten Systeme zum Einsatz kommen. Stattdessen wird das Modell anhand eines Prompts instruiert, im Stil natürlicher Sprache den gewünschten Code zu erzeugen 22. Dadurch kann sich das System flexibel an unterschiedliche Anforderungen anpassen und mit mehr Kontextinformationen umgehen als traditionelle Code-Generatoren 11.
+
+Gerade in der Datenanalyse besteht ein hoher Bedarf an wiederkehrenden Skriptbausteinen, beispielsweise für das Einlesen und Bereinigen von Datensätzen. Hier können LLMs Zeitersparnis bieten, indem sie Boilerplate-Code generieren, der dann nur noch geringfügig angepasst werden muss 33.
+2.3.2 Herausforderungen und Grenzen
+
+Trotz der erzielten Fortschritte stößt die automatisierte Code-Generierung in der Praxis oft an Grenzen 4,5,64,5,6:
+
+    Komplexe Datenstrukturen und domänenspezifisches Wissen können die Modelle überfordern.
+    Performanz: Der generierte Code ist nicht immer optimal hinsichtlich Laufzeit oder Speicherverbrauch.
+    Wartbarkeit: Kommentare, klare Code-Struktur und dokumentierte Funktionen fehlen teils oder werden inkonsistent implementiert.
+    Fehleranfälligkeit: Auch Code, der auf den ersten Blick funktionstüchtig erscheint, kann subtile Bugs enthalten oder Sicherheitslücken aufweisen.
+
+Die Bewertung dieser Aspekte erfordert eine systematische Vorgehensweise, wie sie im weiteren Verlauf dieser Arbeit beschrieben wird. Auf Basis definierter Testfälle werden LLM-generierte Skripte mit manuell programmierten Lösungen verglichen, um so Stärken und Schwächen von LLMs in der Datenanalyse aufzuzeigen.
