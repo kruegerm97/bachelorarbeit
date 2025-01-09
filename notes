@@ -1,6 +1,15 @@
 paper wie laesst man code generieren
 wie validiert man code und daten
 
+Plan:
+Theorieteil ueber fruehere/aehnliche Tests, z.B. EvalPlus paper
+LLMs: GPTo1, Code Llama, Github Copilot (CodeX), Starcoder
+Nur ein LLM gpto1
+mehrere testfaelle: spezifischer, visuelle darstellung etc.
+berlin data 
+
 Fragen:
 Wie genau Quellen einbinden? github links und ist web:1 okay?
 Muss Deckblatt Vorlage 1:1 verwendet werden?
+Sollen Daten auch visuell angezeigt werden nach Analyse oder soll die Fragestellung nach einem gezielten Wert stattfinden, z.B. wie viele ... im Jahr ...?
+Kein Zugriff auf alte Arbeiten trotz VPN Zugang.

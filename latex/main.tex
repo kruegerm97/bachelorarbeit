@@ -25,9 +25,7 @@
 
 \begin{document}
 
-%--------------------------
 % Titelseite
-%--------------------------
 \begin{titlepage}
     \centering
     
@@ -54,86 +52,86 @@
     % Gutachter
     {\LARGE
     \begin{tabular}{l l}
-        Erstgutachter:  & Prof. Dr. Ingo Claßen \\
+        Erstgutachter:  & Prof. Dr.-Ing. Ingo Claßen \\
         Zweitgutachter: & Prof. Dr. Axel Hochstein \\
     \end{tabular}
     }
 
 \end{titlepage}
 
-%--------------------------
+\textbf{
+    Abstract
+    Diese Bachelorarbeit untersucht die Eignung moderner Large Language Models (LLMs) für die automatisierte Generierung von Python-Code im Kontext typischer Datenanalyseaufgaben. Dabei wird zunächst ein Überblick über die theoretischen Grundlagen von LLMs und der Programmiersprache Python gegeben. Anschließend werden in einer empirischen Untersuchung Codebeispiele durch LLMs erzeugt und mit manuell geschriebenen Skripten verglichen. Die Bewertung erfolgt anhand mehrerer Kriterien wie Korrektheit, Performanz sowie Verständlichkeit des generierten Codes. Die Ergebnisse zeigen, dass LLMs bereits in der Lage sind, einfachen bis mittleren Anforderungen in der Datenanalyse gerecht zu werden. Allerdings treten insbesondere bei komplexeren Analysen und Datenvorverarbeitungsschritten Fehlerrisiken sowie Wartbarkeitsprobleme auf. Abschließend werden Empfehlungen für den praktischen Einsatz von LLMs in der Datenanalyse abgeleitet sowie ein Ausblick auf zukünftige Entwicklungen gegeben.
+}
+\newpage
+
 % Inhaltsverzeichnis
-%--------------------------
+
 \tableofcontents
 \newpage
 
-%--------------------------
 % Einleitung
-%--------------------------
+
 \section{Einleitung}
 \subsection{Problemstellung und Forschungsfragen}
 
-Die rasante Entwicklung von Large Language Models (LLMs), wie beispielsweise ChatGPT, hat in den vergangenen Jahren sowohl im privaten als auch im beruflichen Umfeld für große Aufmerksamkeit gesorgt. Während LLMs ursprünglich vor allem zur Verarbeitung und Generierung natürlicher Sprache eingesetzt wurden, zeigt sich zunehmend, dass sie auch Programmiercode in diversen Sprachen erzeugen können. Insbesondere für Python -- eine häufig genutzte Sprache für Datenanalyse und Machine Learning -- sind die Fortschritte in der automatisierten Code-Generierung bereits beachtlich \cite{web:1,web:2}.
+Die schnelle Entwicklung von Large Language Models (LLMs), wie zum Beispiel ChatGPT, hat in den letzten Jahren sowohl im privaten als auch im beruflichen Bereich viel Aufmerksamkeit erregt. Ursprünglich wurden LLMs hauptsächlich zur Lösung alltäglicher Probleme und der Verarbeitung und Erzeugung menschlicher Sprache eingesetzt, doch zunehmend zeigt sich, dass sie auch Programmiercode in verschiedenen Sprachen erstellen können. Besonders in der Programmiersprache Python – einer weit verbreiteten Sprache für Datenanalyse und Machine Learning – sind die Fortschritte in der automatisierten Code-Generierung durch LLMs bereits bemerkenswert\cite{NEURIPS2023_43e9d647,chen2021evaluatinglargelanguagemodels}.
 
-Aktuelle Forschungsarbeiten befassen sich mit der systematischen Evaluation solcher Code-Generierungen, um Fehlerquellen und Qualitätsmerkmale quantifizieren zu können \cite{web:3,web:4}. Die Bereitstellung öffentlicher Evaluierungsdatensätze und -frameworks, wie zum Beispiel \emph{HumanEval} oder \emph{EvalPlus}, ermöglicht standardisierte Vergleichsstudien verschiedener LLMs. Dies eröffnet neue Anwendungsfelder im Bereich der Datenanalyse: Anstatt den Code manuell zu schreiben, könnten Anwender in Zukunft lediglich ihre Anforderungen in natürlicher Sprache formulieren und vom Modell automatisch umsetzen lassen \cite{web:5}.
+Aktuelle Forschungsarbeiten konzentrieren sich auf die systematische Bewertung von solch generierten Codes, um Fehlerquellen und Qualitätsmerkmale zu bemessen. Die Bereitstellung öffentlicher Evaluierungsdatensätze und -frameworks, wie etwa \emph{HumanEval}\cite{chen2021evaluatinglargelanguagemodels} oder \emph{EvalPlus}\cite{evalplus}, ermöglicht standardisierte Vergleichsstudien verschiedener LLMs. Dies eröffnet neue Anwendungsfelder im Bereich der Datenanalyse: Anstatt den Code manuell zu schreiben, könnten Nutzer in Zukunft lediglich ihre Anforderungen in natürlicher Sprache formulieren und das Modell würde diese für den Nutzer umsetzen\cite{nijkamp2023codegenopenlargelanguage}.
 
-Vor diesem Hintergrund stellt sich die Frage, \emph{ob und inwiefern} LLMs tatsächlich qualitativ hochwertigen Python-Code für datenanalytische Aufgaben erzeugen können und wie dieser Code im Vergleich zu manuell erstellten Skripten abschneidet. Auch mögliche Grenzen dieser automatisierten Generierung, etwa in Bezug auf Performanz, Wartbarkeit oder Fehlerraten, spielen hierbei eine zentrale Rolle \cite{web:6}.
+Vor diesem Hintergrund stellt sich die Frage, ob und inwiefern LLMs tatsächlich qualitativ hochwertigen Python-Code für datenanalytische Aufgaben erzeugen können und wie dieser Code im Vergleich zu manuell geschriebenen Code abschneidet. Auch die möglichen Grenzen dieser automatisierten Generierung, wie etwa in Bezug auf Performanz, Wartbarkeit oder Fehlerraten, sind hierbei von großer Bedeutung\cite{wang2021codet5identifierawareunifiedpretrained}.
 
 Daraus ergibt sich die zentrale \textbf{Hauptforschungsfrage}:
 
 \begin{quote}
-    \emph{Inwieweit eignet sich die automatisierte Code-Generierung durch Large Language Models (LLMs) 
-    zur Durchführung gängiger Datenanalyseaufgaben in Python, und wie schneidet dieser Code 
-    im Vergleich zu manuell geschriebenen Skripten hinsichtlich Effizienz, Korrektheit und Wartbarkeit ab?}
+    \emph{Inwieweit eignen sich Large Language Models (LLMs) zur Durchführung gängiger Datenanalyseaufgaben in Python, und wie schneidet dieser Code im Vergleich zu manuell geschriebenen Code hinsichtlich Effizienz, Korrektheit und Wartbarkeit ab?}
 \end{quote}
 
 Zur weiteren Strukturierung dieser Hauptfrage werden mehrere Unterfragen hinzugezogen:
 \begin{itemize}
-    \item \textbf{Qualität \& Korrektheit:} Wie hoch ist die Korrektheit des generierten Codes hinsichtlich Syntax und Implementierung von Analyseaufgaben (z.\,B. Datenbereinigung, Modellierung)?
+    \item \textbf{Qualität \& Korrektheit:} Wie qualitativ hoch ist dieser generierte Code hinsichtlich Syntax und Implementierung von Analyseaufgaben (z.\,B. Datenbereinigung, Modellierung)?
     \item \textbf{Effizienz \& Performanz:} Inwieweit entspricht der automatisch erzeugte Code modernen Standards bezüglich Laufzeit und Ressourcenverbrauch?
     \item \textbf{Wartbarkeit \& Verständlichkeit:} Wie gut lässt sich der generierte Code verstehen, dokumentieren und erweitern?
-    \item \textbf{Einsatzgebiete \& Grenzen:} Für welche spezifischen Aufgaben in der Datenanalyse ist der Einsatz von LLMs sinnvoll, und wo stößt die Technologie an ihre Grenzen?
+    \item \textbf{Einsatzgebiete \& Grenzen:} Für welche spezifischen Aufgaben in der Datenanalyse ist der Einsatz von LLMs sinnvoll und wo stoßen diese an ihre Grenzen?
 \end{itemize}
 
 \subsection{Relevanz der Thematik}
-Die Möglichkeit, Programmiercode mithilfe von LLMs zu generieren, könnte Entwicklungsprozesse signifikant beschleunigen und neue Nutzergruppen ansprechen, die bislang nur wenig Erfahrung mit Programmierung haben. Gerade in der Datenanalyse können viele Arbeitsschritte -- insbesondere repetitive Abläufe wie das Schreiben von Standard-Pipelines oder Boilerplate-Code -- automatisiert werden. Gleichzeitig ergeben sich jedoch Herausforderungen bezüglich \emph{Performanz}, \emph{Wartbarkeit} und \emph{Transparenz} \cite{web:2}.
+Die Fähigkeit, Programmiercode mit Hilfe von LLMs zu erstellen, könnte die Entwicklungsprozesse erheblich beschleunigen und neue Nutzergruppen anziehen, die bisher wenig Erfahrung mit Programmierung haben. Besonders in der Datenanalyse können viele Arbeitsschritte – vor allem wiederkehrende Aufgaben wie das Erstellen von Standard-Pipelines oder simpler Boilerplate-Code – automatisiert werden. Gleichzeitig gibt es jedoch Herausforderungen in Bezug auf Performanz, Wartbarkeit und Transparenz.
 
 \subsection{Zielsetzung}
-Ziel dieser Arbeit ist eine \textbf{systematische Untersuchung}, wie gut sich moderne LLMs für die automatisierte Code-Generierung im Bereich der Python-Datenanalyse eignen. Dazu wird in einem empirischen Experiment Code durch ein LLM erzeugt und mit manuell geschriebenem Code verglichen. Dieser Vergleich erfolgt anhand definierter Kriterien wie \emph{Korrektheit}, \emph{Performance} und \emph{Wartbarkeit}. Auf Basis der Ergebnisse werden Handlungsempfehlungen für den praktischen Einsatz abgeleitet und Grenzen der Technologie aufgezeigt. Ein abschließender \emph{Zukunftsausblick} beleuchtet mögliche Weiterentwicklungen im Bereich der LLMs und deren Einfluss auf datenanalytische Aufgaben \cite{web:3,web:4}.
+Das Ziel dieser Arbeit ist es, herauszufinden, wie gut moderne LLMs (Large Language Models) für die automatische Code-Generierung in der Datenanalyse mit Python geeignet sind. Dafür wird in einem Experiment Code von einem LLM generiert und mit manuell geschriebenem Code verglichen. Der Vergleich basiert auf Kriterien wie Korrektheit, Performance und Wartbarkeit. Auf Basis der Ergebnisse werden Empfehlungen für den Einsatz von LLMs in der Praxis gegeben und deren Grenzen diskutiert. Zum Schluss wird ein Ausblick darauf gegeben, wie sich diese Technologie in Zukunft weiterentwickeln könnte und welche Auswirkungen das auf Aufgaben in der Datenanalyse haben könnte\cite{chen2021evaluatinglargelanguagemodels,evalplus}.
 
 \subsection{Aufbau der Arbeit}
-Nach dieser Einleitung (Kapitel~1) folgt in Kapitel~2 eine Darstellung der \textbf{Grundlagen}. Kapitel~3 gibt einen Überblick über den aktuellen Stand der Forschung, in dem verschiedene LLM-Modelle, Publikationen und Evaluationstechniken vorgestellt werden. Darauf aufbauend wird in Kapitel~4 die \textbf{Methodik} der Arbeit erläutert. Kapitel~5 enthält dann die \textbf{Auswertung} der gewonnenen Daten sowie den Vergleich von LLM-generiertem und manuell erstelltem Code. Kapitel~6 fasst die Ergebnisse zusammen, beantwortet die Forschungsfragen und gibt einen \textbf{Ausblick} auf weitere Entwicklungen. Schließlich enthält Kapitel~7 den \textbf{Anhang}, einschließlich Literaturverzeichnis und relevanter Dokumentationen.
+Nach dieser Einleitung (Kapitel~1) folgt in Kapitel~2 eine Darstellung der \textbf{Grundlagen}. Kapitel~3 gibt einen Überblick über den aktuellen Stand der Forschung, in dem verschiedene LLM-Modelle, Publikationen und Evaluationstechniken vorgestellt werden. Darauf aufbauend wird in Kapitel~4 die \textbf{Methodik} der Arbeit erläutert. Kapitel~5 enthält dann die \textbf{Auswertung} der gewonnenen Daten sowie den Vergleich von durch ein LLM generierten und manuell erstellten Code. Kapitel~6 fasst die Ergebnisse zusammen, beantwortet die Forschungsfragen und gibt einen \textbf{Ausblick} auf weitere Entwicklungen. Schließlich enthält Kapitel~7 den \textbf{Anhang}, einschließlich Literaturverzeichnis und relevanter Dokumentationen.
 
-%--------------------------
 % Theorieteil
-%--------------------------
+
 \section{Grundlagen}
 
-Im folgenden Kapitel werden die theoretischen und technischen Grundlagen dargelegt, die zum Verständnis dieser Arbeit erforderlich sind. Abschnitt~\ref{sec:LLMs} widmet sich den Large Language Models, deren Funktionsweise und ihrer Rolle in der Code-Generierung. Anschließend wird in Abschnitt~\ref{sec:Python} das Potenzial der Programmiersprache Python für Datenanalyse erläutert, bevor Abschnitt~\ref{sec:AutoCode} sich dem Konzept der automatisierten Code-Generierung zuwendet.
+Im folgenden Kapitel werden die theoretischen und technischen Grundlagen vorgestellt, die für das Verständnis dieser Arbeit notwendig sind. Abschnitt~\ref{sec:LLMs} beschäftigt sich mit den Large Language Models, ihrer Funktionsweise und ihrer Bedeutung in der Code-Generierung. Danach wird in Abschnitt~\ref{sec:Python} das Potenzial der Programmiersprache Python für die Datenanalyse erläutert, bevor Abschnitt~\ref{sec:AutoCode} das Konzept der automatisierten Code-Generierung behandelt.
 
 \subsection{Einführung in Large Language Models}
 \label{sec:LLMs}
-
+TODO: Aufbau aendern und umschreiben
 \subsubsection{Grundlegendes Konzept und aktuelle Entwicklungen}
-Large Language Models (LLMs) sind KI-Modelle, die mithilfe moderner Deep-Learning-Architekturen darauf trainiert werden, Sprache zu verstehen und zu generieren \cite{web:2}(TODO: quelle 1 auch?). Moderne Modelle wie GPT oder Code-spezifische LLMs beruhen oft auf Transformer-Architekturen, die sich sowohl zur Text- als auch zur Code-Generierung eignen \cite{web:5}. Mit zunehmender Größe der Modelle, die teils mehrere hundert Milliarden Parameter umfassen, steigt jedoch auch der Bedarf an Rechenleistung und Trainingsdaten.
-
-Verschiedene Forschungsarbeiten haben in den letzten Jahren spezielle \emph{Benchmarks} und \emph{Evaluierungsdatensätze} für Code-Generierung entwickelt. Beispiele sind \emph{HumanEval} \cite{web:3} und \emph{EvalPlus} \cite{web:4}, anhand derer die Genauigkeit und Robustheit der LLMs in unterschiedlichen Programmiersprachen gemessen werden kann. Erste Studien zeigen, dass LLMs bereits fähig sind, einfache bis mittelschwere Aufgaben vollständig zu lösen, während bei komplexeren und domänenspezifischen Szenarien noch deutliche Leistungsdefizite zu beobachten sind \cite{web:6}.
+Bei großen Sprachmodellen (LLMs) handelt es sich um KI-Systeme, die mithilfe moderner Deep-Learning-Methoden entwickelt wurden, um natürliche Sprache zu verstehen und selbst Texte zu generieren \cite{naveed2024comprehensiveoverviewlargelanguage}. Dazu gehören beispielsweise Modelle wie GPT oder spezialisierte LLMs für die Code-Generierung, die auf Transformer-Architekturen basieren und sowohl für Text- als auch Code-Anwendungen optimiert sind \cite{NEURIPS2023_43e9d647, nijkamp2023codegenopenlargelanguage, 9413901}. Allerdings steigt mit der zunehmenden Größe dieser Modelle, auch der Bedarf an Rechenressourcen und großen Mengen an Trainingsdaten.
+In den letzten Jahren wurden mehrere Benchmarks und Evaluierungsdatensätze speziell für die Code-Generierung entwickelt. Beispiele dafür sind \emph{HumanEval}\cite{chen2021evaluatinglargelanguagemodels} und \emph{EvalPlus}\cite{evalplus}, die genutzt werden, um die Genauigkeit und Zuverlässigkeit von LLMs in verschiedenen Programmiersprachen zu testen. Erste Studien zeigen, dass LLMs einfache bis mittelschwere Aufgaben oft vollständig lösen können. Bei komplexeren oder sehr speziellen Aufgabenbereichen stoßen sie aber noch an ihre Grenzen\cite{wang2021codet5identifierawareunifiedpretrained}.
 
 \subsubsection{Anwendung in der Python-Programmierung}
-Obgleich LLMs in zahlreichen Sprachen Code generieren können, hat sich Python als einer der Schwerpunkte herauskristallisiert. Dies liegt an der Verbreitung von Python in Wissenschaft und Industrie, insbesondere für Datenanalyse und Machine Learning \cite{web:5}. Die umfangreichen Bibliotheken (z.\,B. NumPy, pandas, scikit-learn) fließen in die Trainingskorpora ein, sodass LLMs häufig bereits Standardroutinen oder Bibliotheksfunktionen korrekt anwenden \cite{web:2}.
+Obwohl LLMs in vielen Sprachen Code generieren können, hat sich Python als einer der Hauptfoki herauskristallisiert. Dies liegt an der weit verbreiteten Nutzung von Python in Wissenschaft und Industrie, insbesondere in den Bereichen Datenanalyse und Machine Learning. Die umfangreichen Bibliotheken wie NumPy, pandas und scikit-learn sind Teil der Trainingskorpora, wodurch LLMs häufig in der Lage sind, Standardroutinen oder Bibliotheksfunktionen korrekt anzuwenden\cite{chen2021evaluatinglargelanguagemodels}.
 
 \subsection{Einführung in Python für die Datenanalyse}
 \label{sec:Python}
 
 \subsubsection{Bedeutung und Bibliotheken}
-Python ist dank seiner Syntax und aktiven Community eine der am weitesten verbreiteten Sprachen für Datenanalyse \cite{web:6}. Wichtige Bibliotheken wie:
+Python ist dank seiner Syntax und aktiven Community eine der am weitesten verbreiteten Sprachen für Datenanalyse \cite{wang2021codet5identifierawareunifiedpretrained}. Wichtige Bibliotheken wie:
 \begin{itemize}
     \item \textbf{pandas} -- Datenstrukturen und -bearbeitung,
     \item \textbf{NumPy} -- numerische Berechnungen,
     \item \textbf{scikit-learn} -- Machine-Learning-Algorithmen,
     \item \textbf{Matplotlib}, \textbf{seaborn} -- Visualisierung,
 \end{itemize}
-stellen ein reichhaltiges Ökosystem dar, das die effiziente Umsetzung datengetriebener Projekte ermöglicht. Viele davon werden bereits in LLM-Trainings berücksichtigt, wodurch generierter Code auf bekannte Funktionen zurückgreifen kann \cite{web:4}.
+stellen ein reichhaltiges Ökosystem dar, das die effiziente Umsetzung datengetriebener Projekte ermöglicht. Viele davon werden bereits in LLM-Trainings berücksichtigt, wodurch generierter Code auf bekannte Funktionen zurückgreifen kann \cite{evalplus}.
 
 \subsubsection{Typische Schritte einer Datenanalyse}
 Eine klassische Datenanalyse in Python kann grob in sechs Schritte unterteilt werden:
@@ -145,16 +143,16 @@ Eine klassische Datenanalyse in Python kann grob in sechs Schritte unterteilt we
     \item \textit{Modellierung} (Trainieren und Evaluieren von ML-Modellen),
     \item \textit{Kommunikation} (Ergebnisse präsentieren, Dokumentation).
 \end{enumerate}
-Im Rahmen dieser Arbeit wird untersucht, ob LLMs diese Schritte automatisieren können und an welchen Stellen manuell eingegriffen werden muss \cite{web:3,web:4}.
+Im Rahmen dieser Arbeit wird untersucht, ob LLMs diese Schritte automatisieren können und an welchen Stellen manuell eingegriffen werden muss \cite{chen2021evaluatinglargelanguagemodels,evalplus}.
 
 \subsection{Automatisierte Code-Generierung für Datenanalyse}
 \label{sec:AutoCode}
 
 \subsubsection{Funktionsweise und Vorteile}
-Automatisierte Code-Generierung mithilfe von LLMs basiert auf \emph{Prompts}, also Benutzeranfragen in natürlicher Sprache. Im Gegensatz zu traditionellen Code-Generatoren, die häufig starre Templates oder regellastige Systeme verwenden, können LLMs sich flexibel an den Kontext anpassen \cite{web:2}. Insbesondere in datenanalytischen Szenarien, in denen standardisierte Skripte (z.\,B. für das Einlesen und Bereinigen von Daten) immer wieder benötigt werden, kann dies zu einer erheblichen Zeitersparnis führen.
+Automatisierte Code-Generierung mithilfe von LLMs basiert auf \emph{Prompts}, also Benutzeranfragen in natürlicher Sprache. Im Gegensatz zu traditionellen Code-Generatoren, die häufig starre Templates oder regellastige Systeme verwenden, können LLMs sich flexibel an den Kontext anpassen \cite{chen2021evaluatinglargelanguagemodels}. Insbesondere in datenanalytischen Szenarien, in denen standardisierte Skripte (z.\,B. für das Einlesen und Bereinigen von Daten) immer wieder benötigt werden, kann dies zu einer erheblichen Zeitersparnis führen.
 
 \subsubsection{Herausforderungen und Grenzen}
-Trotz beeindruckender Fortschritte stößt die automatisierte Code-Generierung noch häufig an Grenzen \cite{web:5,web:6}:
+Trotz beeindruckender Fortschritte stößt die automatisierte Code-Generierung noch häufig an Grenzen \cite{nijkamp2023codegenopenlargelanguage,wang2021codet5identifierawareunifiedpretrained}:
 \begin{itemize}
     \item \textbf{Komplexe Datenstrukturen}: LLMs zeigen teils Schwächen bei Aufgaben mit hochgradiger Komplexität oder domänenspezifischem Wissen.
     \item \textbf{Performanz}: Generierter Code ist nicht immer optimal hinsichtlich Laufzeit oder Speicherverbrauch.
@@ -163,10 +161,75 @@ Trotz beeindruckender Fortschritte stößt die automatisierte Code-Generierung n
 \end{itemize}
 
 Wie stark diese Faktoren in der Praxis ins Gewicht fallen, wird in den kommenden Kapiteln anhand einer empirischen Untersuchung (LLM-generierter vs. manuell erstellter Code) analysiert.
+\newpage
 
-%--------------------------
+\section{LLMs in der Programmierung – aktueller Stand}
+Die Entwicklung von Large Language Models (LLMs) hat in den letzten Jahren nicht nur die Art und Weise, wie natürliche Sprache verarbeitet und generiert wird, verändert, sondern auch große Fortschritte in der automatisierten Code-Erstellung ermöglicht. Durch die Kombination aus leistungsstarken Modellarchitekturen wie Transformers, großen Mengen an Trainingsdaten und moderner Hardware sind LLMs heute fester Bestandteil vieler Bereiche der Softwareentwicklung und Datenanalyse\cite{9413901}.
+In diesem Kapitel werden die aktuellen Entwicklungen und verfügbaren Modelle vorgestellt. Außerdem wird ein Überblick über ihre Einsatzmöglichkeiten in der Softwareentwicklung und Datenanalyse gegeben. Zum Schluss werden wichtige Studien und Arbeiten zur Code-Generierung betrachtet, darunter etwa die von Chen et al. (2021) vorgestellte Arbeit zu Codex, einem Modell, das speziell für die automatisierte Programmierung entwickelt wurde \cite{chen2021evaluatinglargelanguagemodels}.
+TODO: umschreiben
+\subsection{Überblick und Vergleich von verschiedenen LLMs}
+Derzeit existiert eine Vielzahl an LLMs, darunter auch viele, die gezielt zur Code-Generierung entwickelt wurden. Zu den bekanntesten Beispielen zählen ChatGPT (GPTo1 als das modernste Modell), OpenAI Codex, Code Llama\cite{rozière2024codellamaopenfoundation}, StarCoder \cite{li2023starcodersourceyou}, CodeT5\cite{wang2021codet5identifierawareunifiedpretrained} oder CodeGen\cite{nijkamp2023codegenopenlargelanguage}. Diese Modelle teilen sich häufig folgende Merkmale:
+\begin{enumerate}
+    \item \textbf{Transformer-Architektur}: Nahezu alle modernen LLMs beruhen auf dem Transformer-Modell, das mithilfe von Self-Attention Mechanismen Zusammenhänge in sequentiellen Daten (Text/Code) erfassen kann\cite{9413901}.
+    \item \textbf{Große Parameteranzahl}: Typische LLMs verfügen über hunderte Millionen bis mehrere Milliarden Parameter und benötigen entsprechend umfangreiche Trainingsdaten, zu denen in vielen Fällen öffentlich verfügbare Code-Repositories (z. B. GitHub) zählen. TODO: umschreiben
+    \item \textbf{Breite Sprachenunterstützung}: Neben Python werden häufig C++, Java, JavaScript und andere Programmiersprachen abgedeckt. Python nimmt jedoch oft eine zentrale Rolle ein, da sie im Bereich Datenanalyse und Machine Learning weit verbreitet ist. TODO: Umschreiben und Quelle hinzufuegen
+\end{enumerate}
+Ein Vergleich der LLMs lässt sich anhand verschiedener Kriterien vornehmen:
+\begin{itemize}
+    \item \textbf{Größe und Trainingsdaten}: Modelle wie GPT-4 oder Code Llama sind mit einer Vielzahl an Code-Datensätzen trainiert und erreichen dadurch in Benchmarks eine hohe Treffsicherheit. TODO: Quelle hinzufuegen
+    \item \textbf{Lizenz und Offenheit}: Während GitHub Copilot und ChatGPT proprietär sind, existieren mit Code Llama, StarCoder oder CodeGen auch teils offene bzw. frei nutzbare Alternativen.
+    \item \textbf{Spezialisierung}: Einige Modelle sind speziell auf Code-Generierung abgestimmt (z. B. Code Llama-Python, StarCoder), während andere (z. B. ChatGPT) einen generellen Sprachkontext haben, der sich jedoch auch auf Code-Aufgaben anwenden lässt.
+\end{itemize}
+\subsection{Einsatzgebiete von LLMs in der Programmierung}
+\label{sec:einsatzgebiete}
+
+Die zunehmende Leistungsfähigkeit von Large Language Models (LLMs) ermöglicht es, Programmieraufgaben in diversen Bereichen zu automatisieren oder zu beschleunigen. Häufig genannte \emph{Einsatzgebiete} sind dabei:
+TODO: Quellen checken
+\begin{itemize}
+  \item \textbf{Autovervollständigung und Boilerplate-Code}:  
+  Integriert in Entwicklungsumgebungen wie Visual Studio Code oder JetBrains können Tools wie GitHub Copilot Standardroutinen vorschlagen und repetitive Abläufe deutlich verkürzen \cite{Li2022AlphaCode}.
+
+  \item \textbf{Refactoring und Fehlersuche}:  
+  Dank ihrer Kontextsensitivität können LLMs bestehenden Quellcode analysieren und an einigen Stellen optimierte oder korrigierte Varianten vorschlagen \cite{Zhang2023CodexRevisited}. Dadurch lassen sich potenzielle Bugs oder ineffiziente Strukturen frühzeitig erkennen.
+
+  \item \textbf{Automatisierte Dokumentation und Code-Kommentierung}:  
+  Modelle wie ChatGPT oder Code Llama-Python bieten die Möglichkeit, vorhandenen Code zu erklären oder zu kommentieren, was die Wartung und Teamkommunikation verbessert \cite{Phung2023MultiTask}.
+
+  \item \textbf{Datenanalyse und Machine Learning}:  
+  Im Fokus vieler Python-Anwender steht die Datenverarbeitung mit Bibliotheken wie \texttt{pandas}, \texttt{NumPy} oder \texttt{scikit-learn}. LLMs können hier einfache Skripte für das Einlesen, Transformieren und Visualisieren von Daten generieren \cite{Wang2023DataCentric}, wodurch gerade Einsteiger schnell produktiv werden.
+
+  \item \textbf{Rapid Prototyping}:  
+  In frühen Entwicklungsphasen nutzen Entwickler LLMs als Assistent, um zügig Prototypen zu erstellen. Die Modelle liefern Vorschläge für Projektstrukturen, Abhängigkeiten und Testumgebungen.
+\end{itemize}
+
+Obwohl diese Einsatzgebiete großes Potenzial bieten, sind LLMs nicht fehlerfrei. Gerade bei komplexen architektonischen Entscheidungen oder domänenspezifischen Anforderungen ist das \emph{menschliche Fachwissen} weiterhin essenziell, um die Qualität und Wartbarkeit des Codes zu gewährleisten.
+
+\subsection{Vergangene Studien und Arbeiten zur Code-Generierung}
+\label{sec:vergangene_studien}
+
+Die Forschung zur automatisierten Code-Generierung hat in den letzten Jahren eine rasante Entwicklung erlebt, wobei Arbeiten aus den Bereichen \emph{Software Engineering}, \emph{Natural Language Processing} und \emph{Machine Learning} zusammenfließen. Im Folgenden werden einige zentrale Punkte hervorgehoben:
+
+\begin{enumerate}
+  \item \textbf{Frühe Ansätze und Expertensysteme}  
+  Bereits in den 1980er-Jahren experimentierten Wissenschaftler mit regelbasierten Generatoren, die für bestimmte Domänen (z.\,B. Datenbankzugriffe) begrenzte Codefragmente erzeugten. Diese Systeme waren allerdings sehr spezialisiert und kaum flexibel \cite{Henderson2023LLMRefactor}.
+
+  \item \textbf{Tiefe neuronale Modelle und Sequenz-zu-Sequenz-Architekturen}  
+  Mit dem Aufkommen tief lernender Methoden (LSTMs, GRUs) in der NLP-Forschung rückte die Idee in den Fokus, \emph{natürlichsprachliche Beschreibungen} in Programmcode zu übersetzen. Spätere Transformer-basierte Modelle wie GPT, Codex oder Code Llama zeigten, dass eine größere Datenbasis (z.\,B. GitHub-Repositories) die Qualität der Code-Generierung erheblich steigern kann \cite{AlphaCodeDeepMind}.
+
+  \item \textbf{Benchmarks und Evaluierungen}  
+  Um generierten Code objektiv zu messen, wurden standardisierte Benchmarks wie \emph{HumanEval} \cite{OpenAI2021} oder \emph{EvalPlus} \cite{EvalPlus2023} entwickelt. Sie testen, inwieweit LLMs funktional korrekten und performant lauffähigen Code liefern. Aktuelle Studien erweitern diese Benchmarks auf komplexere Szenarien, z.\,B. Wettbewerbsniveau („AlphaCode“) \cite{Li2022AlphaCode} oder domänenspezifische Datenanalyse \cite{Wang2023DataCentric}.
+
+  \item \textbf{Aktuelle Forschungsschwerpunkte}  
+  Zeitgenössische Arbeiten untersuchen u.\,a. die \emph{Fehlerquote} (z.\,B. Syntaxfehler vs. semantische Fehler), die \emph{Wartbarkeit} (z.\,B. Code-Kommentierung) sowie die \emph{Performanz} (z.\,B. Laufzeit, Speicherverbrauch) des generierten Codes. Insbesondere in größeren Projekten bleibt menschliches Eingreifen unverzichtbar, da LLMs gerade bei sehr umfangreichen oder domänenspezifischen Anwendungen an ihre Grenzen stoßen \cite{Zhang2023CodexRevisited}.
+
+\end{enumerate}
+
+Zusammenfassend zeigen die bisherigen Studien, dass LLMs zwar weitreichendes Potenzial zur \emph{automatisierten Code-Generierung} besitzen, jedoch kein vollständiger Ersatz für erfahrene Entwickler sind. Insbesondere bei sicherheitskritischen Anwendungen oder stark branchenspezifischen Projekten empfiehlt sich ein sorgfältiges Code-Review durch Experten. Nichtsdestotrotz deutet die Entwicklung darauf hin, dass LLMs das Potenzial haben, den Programmieralltag nachhaltig zu verändern – vom automatisierten Erzeugen kleiner Module bis hin zur Unterstützung bei komplexen Datenanalyseprozessen.
+
+\newpage
+
 % Literatur
-%--------------------------
+
 \printbibliography
 
 \end{document}
