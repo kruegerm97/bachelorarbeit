@@ -74,7 +74,7 @@
 
 \section{Einleitung}
 \subsection{Problemstellung und Forschungsfragen}
-
+\label{sec:forschungsfragen}
 Die schnelle Entwicklung von Large Language Models (LLMs), wie zum Beispiel ChatGPT, hat in den letzten Jahren sowohl im privaten als auch im beruflichen Bereich viel Aufmerksamkeit erregt. Ursprünglich wurden LLMs hauptsächlich zur Lösung alltäglicher Probleme und der Verarbeitung und Erzeugung menschlicher Sprache eingesetzt, doch zunehmend zeigt sich, dass sie auch Programmiercode in verschiedenen Sprachen erstellen können. Besonders in der Programmiersprache Python – einer weit verbreiteten Sprache für Datenanalyse und Machine Learning – sind die Fortschritte in der automatisierten Code-Generierung durch LLMs bereits bemerkenswert\cite{NEURIPS2023_43e9d647,chen2021evaluatinglargelanguagemodels}.
 
 Aktuelle Forschungsarbeiten konzentrieren sich auf die systematische Bewertung von solch generierten Codes, um Fehlerquellen und Qualitätsmerkmale zu bemessen. Die Bereitstellung öffentlicher Evaluierungsdatensätze und -frameworks, wie etwa \emph{HumanEval}\cite{chen2021evaluatinglargelanguagemodels} oder \emph{EvalPlus}\cite{evalplus}, ermöglicht standardisierte Vergleichsstudien verschiedener LLMs. Dies eröffnet neue Anwendungsfelder im Bereich der Datenanalyse: Anstatt den Code manuell zu schreiben, könnten Nutzer in Zukunft lediglich ihre Anforderungen in natürlicher Sprache formulieren und das Modell würde diese für den Nutzer umsetzen\cite{nijkamp2023codegenopenlargelanguage}.
@@ -226,8 +226,39 @@ Die Forschung zur automatisierten Code-Generierung hat in den letzten Jahren ein
 
 Zusammenfassend zeigen die bisherigen Studien, dass LLMs zwar weitreichendes Potenzial zur \emph{automatisierten Code-Generierung} besitzen, jedoch kein vollständiger Ersatz für erfahrene Entwickler sind. Insbesondere bei sicherheitskritischen Anwendungen oder stark branchenspezifischen Projekten empfiehlt sich ein sorgfältiges Code-Review durch Experten. Nichtsdestotrotz deutet die Entwicklung darauf hin, dass LLMs das Potenzial haben, den Programmieralltag nachhaltig zu verändern – vom automatisierten Erzeugen kleiner Module bis hin zur Unterstützung bei komplexen Datenanalyseprozessen.
 
-\newpage
+\section{Methodik}
+\label{sec:methodik}
+\subsection{Vorgehensweise der Untersuchung}
+    In der Untersuchung soll geprüft werden, inwieweit Large Language Models in der Lage sind gängige Datenanalyse-Schritte auf Grundlage eines gegebenen Datensatzes durchzuführen. Hierbeui wird ChatGPT als aktueller Marktführer mit dem Sprachmodell GPTo1 verwendet, welches das neueste Modell ist. Ebenso gilt es herauszufinden wie qualitativ und effizient diese Lösung ist. Hierbei bezieht es sich auf die Forschungsfragen aus Kapitel 1~\ref{sec:forschungsfragen}.
+    Die Vorgehensweise hierbei ist wie folgendermaßen: Zuerst wird der verwendete Datensatz von Berlin Open Data an das Modell übergeben und dazu eine Prompt. Diese Prompts können in Kapitel 4.2~\ref{sec:testfaelle} eingesehen werden. Anschließend wird der generierte Code mit HumanEval evaluiert um die generelle Qualität des Codes zu bewerten. Daraufhin wird der Code ausgeführt und die benötigte Laufzeit gemessen. Abschließend werden die Ergebnisse des Ausführung bewertet. (TODO: Tool zur Auswertung der Ergebnisse oder Vergleich mit manuellem Skript)
+    Die Ergebnisse der Auswertung mit \emph{EvalPlus}\cite{evalplus} werden in Kapitel 5~\ref{sec:auswertung} detailliert dargestellt und auch mit den Ergebnissen anderer Arbeiten, wie etwa von Chen et al. (2021)\cite{chen2021evaluatinglargelanguagemodels} und Liu et al. (2023)\cite{NEURIPS2023_43e9d647} verglichen.
 
+\subsection{Testfälle der Datenanalyse}
+\label{sec:testfaelle}
+\subsubsection{Testfall 1}
+    Im ersten Testfall soll der Datensatz nach einer gewissen Spalte sortiert werden. Die Begründung hierfür ist, dass dies eine sehr einfache, aber auch sehr häufig aufkommende Datenanalyse-Aufgabe ist und somit einen guten Einstieg in die Untersuchung darstellt. Die Prompt für diese Aufgabe lautet: \emph{Erstelle mir ein Python Skript, mit welchem der Datensatz nach der Anzahl der Straftaten insgesamt eines Bezirks sortiert wird.}.
+
+\subsubsection{Testfall 2}
+    Aufbauend auf Testfall eins, soll im zweiten Testfall eine simple Visualisierung des Datensatzes stattfinden. Es soll ein Balkendiagramm der Bezirke und wieder der Straftaten insgesamt erstellt werden. Hierbei sollen die Bezirke auf der x-Achse und die Anzahl der Straftaten auf der y-Achse dargestellt und absteigend mit der Anzahl der Bezirke sortiert werden. Die Prompt für diese Aufgabe lautet: \emph{Erstelle mir ein Python Skript, mit welchem ein Balkendiagramm der Anzahl der Straftaten insgesamt pro Bezirk erstellt wird. Hierbei sollen auf der X-Achse die Bezirke und auf der Y-Achse die Anzahl der Straftaten sein.}.
+
+\subsubsection{Testfall 3}
+    Im dritten Testfall soll das Sprachmodell die prozentuale Verteilung der Straftaten in den Bezirken berechnen. Die Prompt für diese Aufgabe lautet: \emph{Erstelle mir ein Python Skript, mit welchem die prozentuale Verteilung der genauen Straftaten anteilig der Straftaten insgesamt pro Bezirk berechnet wird.}.
+
+
+\subsection{Auswertungskriterien}
+\label{sec:auswertungskriterien}
+    Die Auswertung der generiertes Python Skripte erfolgt anhand der in Kapitel 1~\ref{sec:forschungsfragen} definierten Kriterien. Hierfür wird zum einen das Tool \emph{EvalPlus}\cite{evalplus} verwendet, welches eine standardisierte Bewertung zur Korrektheit des generierten Codes ermöglicht. Ebenso werden Laufzeit und Ressourcennutzung des Codes bewertet, um die Effizienz des Skripts zu bemessen.
+    Anschließend wird der Code manuell auf Wartbarkeit und Verständlichkeit geprüft. Hierbei wird insbesondere auf die Strukturierung des Codes, die Kommentierung und die Dokumentation geachtet. Die Ergebnisse der Auswertung werden in Kapitel 5~\ref{sec:auswertung} detailliert dargestellt und bewertet.
+
+\subsection{Verwendete Tools}
+    \begin{enumerate}
+        \item \textbf{Large Language Model}: Als Large Language Model wird ChatGPT mit GPTo1 verwendet, da ChatGPT als aktueller Marktführer gilt und GPTo1 das neueste Modell ist.
+        \item \textbf{Evaluierungsframework}: Zur Bewertung der generierten Python Skripte wird das Evaluierungsframework \emph{EvalPlus}\cite{evalplus} verwendet, welches eine standardisierte Bewertung zur Korrektheit des generierten Codes ermöglicht.
+    \end{enumerate}
+
+
+
+\newpage
 % Literatur
 
 \printbibliography
