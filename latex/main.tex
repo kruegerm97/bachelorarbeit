@@ -61,7 +61,7 @@
 \end{titlepage}
 
 \textbf{
-    Abstract
+    Abstract\\
     Diese Bachelorarbeit untersucht die Eignung moderner Large Language Models (LLMs) für die automatisierte Generierung von Python-Code im Kontext typischer Datenanalyseaufgaben. Dabei wird zunächst ein Überblick über die theoretischen Grundlagen von LLMs und der Programmiersprache Python gegeben. Anschließend werden in einer empirischen Untersuchung Codebeispiele durch den Marktführer ChatGPT mit dem Sprachmodell GPTo1 erzeugt und mit manuell geschriebenen Skripten verglichen. Die Bewertung erfolgt anhand mehrerer Kriterien wie Korrektheit, Performanz sowie Verständlichkeit des generierten Codes. Abschließend werden Empfehlungen für den praktischen Einsatz von LLMs in der Datenanalyse abgeleitet sowie ein Ausblick auf zukünftige Entwicklungen gegeben.
 }
 \newpage
@@ -74,6 +74,7 @@
 % Einleitung
 
 \section{Einleitung}
+\label{sec:einleitung}
 \subsection{Problemstellung und Forschungsfragen}
 \label{sec:forschungsfragen}
 Die schnelle Entwicklung von Large Language Models (LLMs), wie zum Beispiel ChatGPT, hat in den letzten Jahren sowohl im privaten als auch im beruflichen Bereich viel Aufmerksamkeit erregt. Ursprünglich wurden LLMs hauptsächlich zur Lösung alltäglicher Probleme und der Verarbeitung und Erzeugung menschlicher Sprache eingesetzt, doch zunehmend zeigt sich, dass sie auch Programmiercode in verschiedenen Sprachen erstellen können. Besonders in der Programmiersprache Python – einer weit verbreiteten Sprache für Datenanalyse und Machine Learning – sind die Fortschritte in der automatisierten Code-Generierung durch LLMs bereits bemerkenswert\cite{NEURIPS2023_43e9d647,chen2021evaluatinglargelanguagemodels}.
@@ -103,12 +104,12 @@ Die Fähigkeit, Programmiercode mit Hilfe von LLMs zu erstellen, könnte die Ent
 Das Ziel dieser Arbeit ist es, herauszufinden, wie gut moderne LLMs (Large Language Models) für die automatische Code-Generierung in der Datenanalyse mit Python geeignet sind. Dafür wird in einem Experiment Code von einem LLM generiert und mit manuell geschriebenem Code verglichen. Der Vergleich basiert auf Kriterien wie Korrektheit, Performance und Wartbarkeit. Auf Basis der Ergebnisse werden Empfehlungen für den Einsatz von LLMs in der Praxis gegeben und deren Grenzen diskutiert. Zum Schluss wird ein Ausblick darauf gegeben, wie sich diese Technologie in Zukunft weiterentwickeln könnte und welche Auswirkungen das auf Aufgaben in der Datenanalyse haben könnte\cite{chen2021evaluatinglargelanguagemodels,evalplus}.
 
 \subsection{Aufbau der Arbeit}
-Nach dieser Einleitung (Kapitel~1) folgt in Kapitel~2 eine Darstellung der \textbf{Grundlagen}, dazu gehört eine Einführung in Large Language Models, die Programmiersprache Python und die automatisierte Code-Generierung. Kapitel~3 gibt einen Überblick über den aktuellen Stand der Forschung, in dem verschiedene LLM-Modelle, Publikationen und Evaluationstechniken vorgestellt werden. Darauf aufbauend wird in Kapitel~4 die \textbf{Methodik} der Arbeit erläutert. Kapitel~5 enthält dann die \textbf{Auswertung} der gewonnenen Daten sowie den Vergleich von durch ein LLM generierten und manuell geschriebenen Code. Kapitel~6 fasst die Ergebnisse zusammen, beantwortet die Forschungsfragen und gibt einen \textbf{Ausblick} auf weitere Entwicklungen. Schließlich enthält Kapitel~7 den \textbf{Anhang}, einschließlich Literaturverzeichnis und relevanter Dokumentationen.
+Nach dieser Einleitung (Kapitel \ref{sec:einleitung}) folgt in Kapitel \ref{sec:grundlagen} eine Darstellung der \textbf{Grundlagen}, dazu gehört eine Einführung in Large Language Models, die Programmiersprache Python und die automatisierte Code-Generierung. Kapitel \ref{sec:llms_programmierung} gibt einen Überblick über den aktuellen Stand der Forschung, in dem verschiedene LLM-Modelle, Publikationen und Evaluationstechniken vorgestellt werden. Darauf aufbauend wird in Kapitel \ref{sec:methodik} die \textbf{Methodik} der Arbeit erläutert. Kapitel \ref{sec:auswertung} enthält dann die \textbf{Auswertung} der gewonnenen Daten sowie den Vergleich von durch ein LLM generierten und manuell geschriebenen Code. Kapitel \ref{sec:fazit} fasst die Ergebnisse zusammen, beantwortet die Forschungsfragen und gibt einen \textbf{Ausblick} auf weitere Entwicklungen. Schließlich enthält Kapitel \ref{sec:anhang} den \textbf{Anhang}, einschließlich Literaturverzeichnis und relevanter Dokumentationen.
 
 % Theorieteil
 
 \section{Grundlagen}
-
+\label{sec:grundlagen}
 Im folgenden Kapitel werden die theoretischen und technischen Grundlagen vorgestellt, die für das Verständnis dieser Arbeit notwendig sind. Abschnitt~\ref{sec:LLMs} beschäftigt sich mit den Large Language Models, ihrer Funktionsweise und ihrer Bedeutung in der Code-Generierung. Danach wird in Abschnitt~\ref{sec:Python} das Potenzial der Programmiersprache Python für die Datenanalyse erläutert, bevor Abschnitt~\ref{sec:AutoCode} das Konzept der automatisierten Code-Generierung behandelt.
 
 \subsection{Einführung Large Language Models}
@@ -162,6 +163,7 @@ Trotz beeindruckender Fortschritte stößt die automatisierte Code-Generierung n
 Wir präsent diese Herausforderungen in datenanalytischen Aufgaben sind, soll in den folgenden Kapiteln untersucht werden. Vor allem durch den Vergleich von generiertem und manuell geschriebenem Code lassen sich die Stärken und Schwächen von LLMs in der Datenanalyse besser einschätzen.
 
 \section{LLMs in der Programmierung – aktueller Stand}
+\label{sec:llms_programmierung}
 Die Entwicklung von Large Language Models (LLMs) hat in den letzten Jahren nicht nur die Art und Weise, wie natürliche Sprache verarbeitet und generiert wird, verändert, sondern auch große Fortschritte in der automatisierten Code-Erstellung ermöglicht. Durch die Kombination aus leistungsstarken Modellarchitekturen wie Transformers, großen Mengen an Trainingsdaten und moderner Hardware haben LLMs heute eine große Präsemz in vielen Bereichen der Softwareentwicklung und Datenanalyse.
 In diesem Kapitel werden die aktuellen Entwicklungen und verfügbaren Modelle vorgestellt. Außerdem wird ein Überblick über ihre Einsatzmöglichkeiten in der Softwareentwicklung und Datenanalyse gegeben. Zum Schluss werden wichtige Studien und Arbeiten zur Code-Generierung betrachtet, darunter etwa die von Chen et al. (2021) vorgestellte Arbeit zu Codex, einem Modell, das speziell für die automatisierte Programmierung entwickelt wurde\cite{chen2021evaluatinglargelanguagemodels} und die von Liu et al. (2023) veröffentlichte Arbeit zur Evaluation von generiertem Code mithilfe von \emph{EvalPlus}\cite{NEURIPS2023_43e9d647}.
 
@@ -189,9 +191,7 @@ Ein Vergleich der LLMs lässt sich anhand verschiedener Kriterien vornehmen:
 
 \subsection{Einsatzgebiete von LLMs in der Programmierung}
 \label{sec:einsatzgebiete}
-TODO: umschreiben
 Die zunehmende Leistungsfähigkeit von Large Language Models (LLMs) ermöglicht es, Programmieraufgaben in diversen Bereichen zu automatisieren oder zu beschleunigen. Häufig genannte \emph{Einsatzgebiete} sind dabei:
-TODO: Quellen checken
 \begin{itemize}
     \item \textbf{Code-Generierung}:
     Ermöglicht die Code-Generierung auf Grundlage von Beschreibungen aus natürlicher Sprache\cite{chen2021evaluatinglargelanguagemodels}. Ebenso bieten manche Modelle die Möglichkeit zu fertigen Funktionen Tests zu generieren, um dessen Funktionalität zu überprüfen.
@@ -266,9 +266,13 @@ TODO: noch mehr ausschreiben
 \section{Auswertung der Python-Code-Generiung zur Datenanalyse durch LLMs}
 \label{sec:auswertung}
 
+\section{Fazit und Ausblick}
+\label{sec:fazit}
+
 \newpage
 % Literatur
-
+\section{Literaturverzeichnis}
+\label{sec:anhang}
 \printbibliography
 TODO: Abbildungsverzeichnis einfügen
 \end{document}
