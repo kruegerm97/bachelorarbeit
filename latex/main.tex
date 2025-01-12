@@ -193,52 +193,51 @@ TODO: umschreiben
 Die zunehmende Leistungsfähigkeit von Large Language Models (LLMs) ermöglicht es, Programmieraufgaben in diversen Bereichen zu automatisieren oder zu beschleunigen. Häufig genannte \emph{Einsatzgebiete} sind dabei:
 TODO: Quellen checken
 \begin{itemize}
-  \item \textbf{Autovervollständigung}:  
-  Integriert in Entwicklungsumgebungen wie Visual Studio Code oder JetBrains können Tools wie GitHub Copilot Standardroutinen vorschlagen und repetitive Abläufe deutlich verkürzen \cite{Li2022AlphaCode}.
-
-  \item \textbf{Refactoring und Fehlersuche}:  
-  Dank ihrer Kontextsensitivität können LLMs bestehenden Quellcode analysieren und an einigen Stellen optimierte oder korrigierte Varianten vorschlagen \cite{Zhang2023CodexRevisited}. Dadurch lassen sich potenzielle Bugs oder ineffiziente Strukturen frühzeitig erkennen.
-
-  \item \textbf{Automatisierte Dokumentation und Code-Kommentierung}:  
-  Modelle wie ChatGPT oder Code Llama-Python bieten die Möglichkeit, vorhandenen Code zu erklären oder zu kommentieren, was die Wartung und Teamkommunikation verbessert \cite{Phung2023MultiTask}.
-
-  \item \textbf{Datenanalyse und Machine Learning}:  
-  Im Fokus vieler Python-Anwender steht die Datenverarbeitung mit Bibliotheken wie \texttt{pandas}, \texttt{NumPy} oder \texttt{scikit-learn}. LLMs können hier einfache Skripte für das Einlesen, Transformieren und Visualisieren von Daten generieren \cite{Wang2023DataCentric}, wodurch gerade Einsteiger schnell produktiv werden.
-
-  \item \textbf{Rapid Prototyping}:  
-  In frühen Entwicklungsphasen nutzen Entwickler LLMs als Assistent, um zügig Prototypen zu erstellen. Die Modelle liefern Vorschläge für Projektstrukturen, Abhängigkeiten und Testumgebungen.
+    \item \textbf{Code-Generierung}:
+    Ermöglicht die Code-Generierung auf Grundlage von Beschreibungen aus natürlicher Sprache\cite{chen2021evaluatinglargelanguagemodels}. Ebenso bieten manche Modelle die Möglichkeit zu fertigen Funktionen Tests zu generieren, um dessen Funktionalität zu überprüfen.
+    \item \textbf{Autovervollständigung}:  
+    Integriert in Entwicklungsumgebungen wie Visual Studio Code können Tools wie GitHub Copilot repetitive Abläufe direkt im Code vervollständigen oder Vorschläge zur Vervollständigung von neu begonnenem Code liefern\cite{chen2021evaluatinglargelanguagemodels}.
+    \item \textbf{Refactoring und Fehlersuche}:  
+    Dank ihrer Kontextsensitivität können LLMs bestehenden Code analysieren und an einigen Stellen Möglichkeiten zur Optimierung oder Korrektur vorschlagen\cite{chen2021evaluatinglargelanguagemodels,wang2021codet5identifierawareunifiedpretrained}. Dadurch lassen sich Bugs, Redundanz und ineffiziente Code-Strukturen frühzeitig identifizieren und beheben.
+    \item \textbf{Automatisierte Dokumentation und Code-Kommentierung}:  
+    Viele Modelle bieten die Möglichkeit vorhandenen Code zu analysieren und dazu Kommentarblöcke oder gar ganze Dokumentationen zu erstellen\cite{wang2021codet5identifierawareunifiedpretrained,jiang2024surveylargelanguagemodels}.
 \end{itemize}
-
-Obwohl diese Einsatzgebiete großes Potenzial bieten, sind LLMs nicht fehlerfrei. Gerade bei komplexen architektonischen Entscheidungen oder domänenspezifischen Anforderungen ist das \emph{menschliche Fachwissen} weiterhin essenziell, um die Qualität und Wartbarkeit des Codes zu gewährleisten.
+Obwohl diese Einsatzgebiete großes Potenzial bieten, sind LLMs nicht frei von Fehlern. Gerade bei komplexen Entscheidungen zur Programm- und Codearchitektur können diese oft mit dem Level durch das menschliche Fachwissen nicht mithalten \cite{dhar2024llmsgeneratearchitecturaldesign}.
 
 \subsection{Vergangene Studien und Arbeiten zur Code-Generierung}
 \label{sec:vergangene_studien}
 
-Die Forschung zur automatisierten Code-Generierung hat in den letzten Jahren eine rasante Entwicklung erlebt, wobei Arbeiten aus den Bereichen \emph{Software Engineering}, \emph{Natural Language Processing} und \emph{Machine Learning} zusammenfließen. Im Folgenden werden einige zentrale Punkte hervorgehoben:
+Die Forschung zur automatisierten Code-Generierung hat in den letzten Jahren eine rasante Entwicklung erlebt, wobei Arbeiten aus den Bereichen \emph{Software Engineering}, \emph{Large Language Models} und \emph{Machine Learning} zusammenfließen. Jiang et al. (2024) haben in ihrer Arbeit "A Survey on Large Language Models for Code Generation" eine Übersicht über die Entwicklung der veröffentlichten Arbeiten zu LLMs und Software Engineering erstellt, welche in Abbildung \ref{fig:entwicklung_paper} dargestellt ist.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{./bilder/entwicklung_paper.png}
+    \caption{Übersicht der Verteilung von veröffentlichten Arbeiten zu LLMs und Software Engineering der letzten Jahren (nach Jiang et al. (2024), basierend auf 'A Survey on Large Language Models for Code Generation').}
+    \label{fig:entwicklung_paper}
+\end{figure}
 
+Im Folgenden werden einige vergangene Studien/Arbeiten zur Code Generierung mit LLMs vorgestellt:
 \begin{enumerate}
-  \item \textbf{Frühe Ansätze und Expertensysteme}  
-  Bereits in den 1980er-Jahren experimentierten Wissenschaftler mit regelbasierten Generatoren, die für bestimmte Domänen (z.\,B. Datenbankzugriffe) begrenzte Codefragmente erzeugten. Diese Systeme waren allerdings sehr spezialisiert und kaum flexibel \cite{Henderson2023LLMRefactor}.
+    \item \textbf{"Is Your Code Generated by ChatGPT Really Correct? Rigorous Evaluation of Large Language Models for Code Generation"} von Liu et al. (2023) \cite{NEURIPS2023_43e9d647}:\\
+    In diesem Paper wird untersucht, wie korrekt der von LLMs wie ChatGPT, Code Llama etc. generierte Code ist. Dafür wird \emph{EvalPlus} eingeführt. Dies ist ein neues Evaluierungsframework, das bestehende Testdatensätze wie \emph{HumanEval} durch weitere automatisierte Testfälle erweitert. Hier kommen Liu et al. zu dem Ergebnis, dass bisher viele Fehler in generiertem Code nicht erkannt wurden, wodurch die Modelle in ihrer Leistung überschätzt wurden. Die Autoren weisen darauf hin, wie wichtig umfassendene Tests sind, um die tatsächliche Funktionalität der LLMs für die Codegenerierung zu bewerten.
+TODO: Vielleicht Grafik der Ergebnisse einfügen
+    \item \textbf{Evaluating Large Language Models Trained on Code} von Chen et al. (2021) \cite{chen2021evaluatinglargelanguagemodels}:\\
+    In diesem Paper wird Codex vorgestellt. Dies ist ein LLM, das speziell auf öffentlich verfügbarem Code von Github trainiert wurde, um dessen Fähigkeiten Python Code zu schreiben zu analysieren. Dies wird mithilfe des HumanEval-Datensatzes untersucht. Hierbei soll im genauen Python-Code aus Docstrings generiert und dieser dann bewertet werden. Die Ergebnisse zeigen, dass Codex im Vergleich zu anderen Modellen wie GPT-3 deutlich besser abschneidet, jedoch bei komplexeren Aufgaben seine Grenzen erreicht. Eine mehrfach wiederholte Lösungsgenerierung verbessert die Erfolgsrate, was das Potenzial ihres Ansatzes verdeutlicht.
 
-  \item \textbf{Tiefe neuronale Modelle und Sequenz-zu-Sequenz-Architekturen}  
-  Mit dem Aufkommen tief lernender Methoden (LSTMs, GRUs) in der NLP-Forschung rückte die Idee in den Fokus, \emph{natürlichsprachliche Beschreibungen} in Programmcode zu übersetzen. Spätere Transformer-basierte Modelle wie GPT, Codex oder Code Llama zeigten, dass eine größere Datenbasis (z.\,B. GitHub-Repositories) die Qualität der Code-Generierung erheblich steigern kann \cite{AlphaCodeDeepMind}.
+    \item \textbf{A Survey on Large Language Models for Code Generation} von Jiang et al. (2024) \cite{jiang2024surveylargelanguagemodels}:\\
+    Dieses Paper gibt einen allgemeinen und umfassenden Überblick über den aktuellen Forschungsstand zu LLMs für die Codegenerierung. Es greift Themen wie Datenaufbereitung, Modellarchitekturen und Benchmarks auf. Zudem werden Herausforderungen, wie die praktische Einführung und ethische Fragen diskutiert. Die Autoren leiten sich wichtige Forschungsfragen ab und verdeutlichen, dass LLMs in der Codegenerierung große Fortschritte gemacht haben, aber es weiterhin Potenzial zur Optimierung gibt.
 
-  \item \textbf{Benchmarks und Evaluierungen}  
-  Um generierten Code objektiv zu messen, wurden standardisierte Benchmarks wie \emph{HumanEval} \cite{OpenAI2021} oder \emph{EvalPlus} \cite{EvalPlus2023} entwickelt. Sie testen, inwieweit LLMs funktional korrekten und performant lauffähigen Code liefern. Aktuelle Studien erweitern diese Benchmarks auf komplexere Szenarien, z.\,B. Wettbewerbsniveau („AlphaCode“) \cite{Li2022AlphaCode} oder domänenspezifische Datenanalyse \cite{Wang2023DataCentric}.
-
-  \item \textbf{Aktuelle Forschungsschwerpunkte}  
-  Zeitgenössische Arbeiten untersuchen u.\,a. die \emph{Fehlerquote} (z.\,B. Syntaxfehler vs. semantische Fehler), die \emph{Wartbarkeit} (z.\,B. Code-Kommentierung) sowie die \emph{Performanz} (z.\,B. Laufzeit, Speicherverbrauch) des generierten Codes. Insbesondere in größeren Projekten bleibt menschliches Eingreifen unverzichtbar, da LLMs gerade bei sehr umfangreichen oder domänenspezifischen Anwendungen an ihre Grenzen stoßen \cite{Zhang2023CodexRevisited}.
-
+    \item \textbf{Evaluating Language Models for Efficient Code Generation} von Liu et al. (2024) \cite{liu2024evaluating}
+    Auch in dieser Arbeit von Jiawei Liu wird die Effizienz von Code untersucht, welcher von LLMs generiert wird. Hierbei mit Fokus auf Performance und Ressourcennutzung. Dafür wird \emph{Differential Performance Evaluation (DPE)} entwickelt und der \emph{EvalPerf}-Benchmark eingeführt. Dieser enthält komplexere Programmieraufgaben als der zuvor eingeführt \emph{EvalPlus}. Hier kommt man zu dem Entschluss, dass größere Modelle nicht automatisch auch effizienteren Code erzeugen. Stattdessen werden Effizienz und Korrektheit des Codes durch \emph{Instruction Tuning}(gezieltes Trainieren des Modells, um besser auf Anweisungen in natürlicher Sprache zu reagieren) verbessert.
 \end{enumerate}
+Zusammenfassend zeigen die genannten Studien, dass LLMs zwar großes Potenzial zur automatisierten Code Generierung besitzen, sie aber immer noch Probleme aufweisen und menschliche Entwickler nicht komplett ersetzen können. Besonders bei komplexeren Aufgaben, spezifischen Anforderungen oder Fragen zur Softwarearchitektur stoßen sie an ihre Grenzen.
 
-Zusammenfassend zeigen die bisherigen Studien, dass LLMs zwar weitreichendes Potenzial zur \emph{automatisierten Code-Generierung} besitzen, jedoch kein vollständiger Ersatz für erfahrene Entwickler sind. Insbesondere bei sicherheitskritischen Anwendungen oder stark branchenspezifischen Projekten empfiehlt sich ein sorgfältiges Code-Review durch Experten. Nichtsdestotrotz deutet die Entwicklung darauf hin, dass LLMs das Potenzial haben, den Programmieralltag nachhaltig zu verändern – vom automatisierten Erzeugen kleiner Module bis hin zur Unterstützung bei komplexen Datenanalyseprozessen.
 \section{Methodik}
 \label{sec:methodik}
 TODO: noch mehr ausschreiben
 
 \subsection{Vorgehensweise der Untersuchung}
     In der Untersuchung soll geprüft werden, inwieweit Large Language Models in der Lage sind gängige Datenanalyse-Schritte auf Grundlage eines gegebenen Datensatzes durchzuführen. Hierbeui wird ChatGPT als aktueller Marktführer mit dem Sprachmodell GPTo1 verwendet, welches das neueste Modell ist. Ebenso gilt es herauszufinden wie qualitativ und effizient diese Lösung ist. Hierbei bezieht es sich auf die Forschungsfragen aus Kapitel \ref{sec:forschungsfragen}.
-    Die Vorgehensweise hierbei ist wie folgendermaßen: Zuerst wird der verwendete Datensatz von Berlin Open Data an das Modell übergeben und dazu eine Prompt. Diese Prompts können in Kapitel \ref{sec:testfaelle} eingesehen werden. Anschließend wird der generierte Code mit HumanEval evaluiert um die generelle Qualität des Codes zu bewerten. Daraufhin wird der Code ausgeführt und die benötigte Laufzeit gemessen. Abschließend werden die Ergebnisse des Ausführung bewertet. (TODO: Tool zur Auswertung der Ergebnisse oder Vergleich mit manuellem Skript)
+    Die Vorgehensweise hierbei ist wie folgendermaßen: Zuerst wird der verwendete Datensatz von Berlin Open Data an das Modell übergeben und dazu eine Prompt. Diese Prompts können in Kapitel \ref{sec:testfaelle} eingesehen werden. Anschließend wird der generierte Code mit HumanEval evaluiert um die generelle Qualität des Codes zu bewerten. Daraufhin wird der Code ausgeführt und die benötigte Laufzeit gemessen. Abschließend werden die Ergebnisse der Ausführung bewertet. (TODO: Tool zur Auswertung der Ergebnisse oder Vergleich mit manuellem Skript)
     Die Ergebnisse der Auswertung mit \emph{EvalPlus}\cite{evalplus} werden in Kapitel \ref{sec:auswertung} detailliert dargestellt und auch mit den Ergebnissen anderer Arbeiten, wie etwa von Chen et al. (2021)\cite{chen2021evaluatinglargelanguagemodels} und Liu et al. (2023)\cite{NEURIPS2023_43e9d647} verglichen.
 
 \subsection{Testfälle der Datenanalyse}
@@ -255,8 +254,8 @@ TODO: noch mehr ausschreiben
 
 \subsection{Auswertungskriterien}
 \label{sec:auswertungskriterien}
-    Die Auswertung der generiertes Python Skripte erfolgt anhand der in Kapitel 1~\ref{sec:forschungsfragen} definierten Kriterien. Hierfür wird zum einen das Tool \emph{EvalPlus}\cite{evalplus} verwendet, welches eine standardisierte Bewertung zur Korrektheit des generierten Codes ermöglicht. Ebenso werden Laufzeit und Ressourcennutzung des Codes bewertet, um die Effizienz des Skripts zu bemessen.
-    Anschließend wird der Code manuell auf Wartbarkeit und Verständlichkeit geprüft. Hierbei wird insbesondere auf die Strukturierung des Codes, die Kommentierung und die Dokumentation geachtet. Die Ergebnisse der Auswertung werden in Kapitel 5~\ref{sec:auswertung} detailliert dargestellt und bewertet.
+    Die Auswertung der generiertes Python Skripte erfolgt anhand der in Kapitel \ref{sec:forschungsfragen} definierten Kriterien. Hierfür wird zum einen das Tool \emph{EvalPlus}\cite{evalplus} verwendet, welches eine standardisierte Bewertung zur Korrektheit des generierten Codes ermöglicht. Ebenso werden Laufzeit und Ressourcennutzung des Codes bewertet, um die Effizienz des Skripts zu bemessen.
+    Anschließend wird der Code manuell auf Wartbarkeit und Verständlichkeit geprüft. Hierbei wird insbesondere auf die Strukturierung des Codes, die Kommentierung und die Dokumentation geachtet. Die Ergebnisse der Auswertung werden in Kapitel \ref{sec:auswertung} detailliert dargestellt und bewertet.
 
 \subsection{Verwendete Tools}
     \begin{enumerate}
@@ -271,5 +270,5 @@ TODO: noch mehr ausschreiben
 % Literatur
 
 \printbibliography
-
+TODO: Abbildungsverzeichnis einfügen
 \end{document}
