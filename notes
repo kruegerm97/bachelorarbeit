@@ -1,9 +1,4 @@
-paper wie laesst man code generieren
-wie validiert man code und daten
-
 Plan:
-Theorieteil ueber fruehere/aehnliche Tests, z.B. EvalPlus paper
-LLMs: GPTo1, Code Llama, Github Copilot (CodeX), Starcoder
 Nur ein LLM gpto1
 mehrere testfaelle: spezifischer, visuelle darstellung etc.
 berlin data 
@@ -13,3 +8,22 @@ Wie genau Quellen einbinden? github links und ist web:1 okay?
 Muss Deckblatt Vorlage 1:1 verwendet werden?
 Sollen Daten auch visuell angezeigt werden nach Analyse oder soll die Fragestellung nach einem gezielten Wert stattfinden, z.B. wie viele ... im Jahr ...?
 Kein Zugriff auf alte Arbeiten trotz VPN Zugang.
+
+Korrektheit des Codes und der Ergebnisse (Spaltenanzahl und Reihenfolge richtig?), Performance des Codes im Bezug
+auf Laufzeit und Ressourcennutzung, Qualität des Codes (Struktur des
+Codes, Kommentare/Dokumentation, verwendete Libraries), Wartbarkeit und
+ist der Code erweiterbar.
+Pro Test case mehrere Generierungen und dann tests dafuer schreiben und bewerten, wie viele loesungen alle tests erfuellen.
+Bspw 10 Generierungen -> Pass@10 wie viel % sind erfolgreich, bei erfolgreichen Ausfuehrungen Code manuell bewerten
+welcher pandas dataframe wird benutzt. fuer visualisierung einen vorgeben und schauen ob er richtig benutzt wird.
+Selbst Plot generieren und mit generierten Plot vergleichen
+Aggregationen, Joins einnehmen, Filterung, Zeitreihe, Sortierung
+Bei visualisierung pandas dataframe vorgeben
+
+Zur Methodik: Pro Testcase eine offene unspezifische Prompt und eine Prompt mit genauen Vorgaben (Z.B. welchen Pandas Dataframe fuer Visualisierung; Join basierend auf LOR Schluessel, etc.).
+
+1. Testcase: Wiedergabe Bezirk eines Jahres mit den meisten Straftaten insgesamt.
+2. Testcase: Join, Wiedergabe Bezirk mit den meisten Straftaten ueber mehrere Jahre hinweg.
+3. Testcase: Filterung Bezirke mit mehr als 1000 Straftaten.
+4. Testcase: Balkendiagramm X-Achse Bezirke, Y-Achse Anzahl der einzelnen Straftaten verteil.
+5. Testcase: Zeitreihe Kriminalitaetstrends ueber die Jahre hinweg.
