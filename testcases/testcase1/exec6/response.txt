@@ -1,0 +1,137 @@
+Um die gegebenen Daten der Polizeilichen Kriminalstatistik (PKS) für das Jahr 2023 zu analysieren und die Bezirke nach der Gesamtzahl der Straftaten zu sortieren, können wir ein Python-Skript verwenden. Hierbei nutzen wir die Bibliothek `pandas`, die sich hervorragend für Datenmanipulation und -analyse eignet.
+
+### Schritt-für-Schritt Anleitung:
+
+1. **Installation der notwendigen Bibliotheken:**
+   
+   Stellen Sie sicher, dass die Bibliothek `pandas` installiert ist. Falls nicht, können Sie sie mit folgendem Befehl installieren:
+
+   ```bash
+   pip install pandas
+   ```
+
+2. **Vorbereitung der CSV-Datei:**
+
+   - Speichern Sie den Inhalt des Sheets `FZ_2023.csv` in einer CSV-Datei namens `FZ_2023.csv`.
+   - Platzieren Sie diese Datei im selben Verzeichnis wie das Python-Skript oder geben Sie den vollständigen Pfad zur Datei an.
+
+3. **Erstellung des Python-Skripts:**
+
+   Das folgende Skript liest die CSV-Datei, bereinigt die Daten, filtert ungültige Einträge heraus und sortiert die Bezirke nach der Gesamtzahl der Straftaten.
+
+   ```python
+   import pandas as pd
+
+   def main():
+       # Pfad zur CSV-Datei
+       csv_file = 'FZ_2023.csv'
+
+       try:
+           # Einlesen der CSV-Datei, Überspringen der ersten 4 Zeilen, die keine relevanten Daten enthalten
+           df = pd.read_csv(
+               csv_file,
+               sep=',',
+               skiprows=4,
+               encoding='utf-8',
+               dtype=str
+           )
+
+           # Umbenennen der Spalten für einfacheren Zugriff (falls notwendig)
+           df.columns = [
+               'LOR-Schlüssel',
+               'Bezeichnung',
+               'Straftaten_insgesamt',
+               'Raub',
+               'Strassenraub_Handtaschenraub',
+               'Koerperverletzungen_insgesamt',
+               'Gefaehrliche_schwere_Koerperverletzung',
+               'Freiheitsberaubung_Noetigung_Bedrohnung_Nachstellung',
+               'Diebstahl_insgesamt',
+               'Diebstahl_von_Kraftwagen',
+               'Diebstahl_an_aus_Kfz',
+               'Fahrraddiebstahl',
+               'Wohnraumeinbruch',
+               'Branddelikte_insgesamt',
+               'Brandstiftung',
+               'Sachbeschadigung_insgesamt',
+               'Sachbeschadigung_durch_Graffiti',
+               'Rauschgiftdelikte',
+               'Kieztaten'
+           ]
+
+           # Funktion zur Umwandlung von Zahlenstrings in Integer
+           def convert_to_int(x):
+               if isinstance(x, str):
+                   # Entfernen von Anführungszeichen und Kommas
+                   return int(x.replace('"', '').replace(',', ''))
+               return 0  # Standardwert, falls der Eintrag kein String ist
+
+           # Anwenden der Umwandlungsfunktion auf die relevante Spalte
+           df['Straftaten_insgesamt'] = df['Straftaten_insgesamt'].apply(convert_to_int)
+
+           # Filterung der Bezirke: Ausschluss der Einträge, die nicht zugeordnet sind (z.B. LOR-Schlüssel endet mit '900' oder '999')
+           df_filtered = df[~df['LOR-Schlüssel'].str.endswith(('900', '999'))].copy()
+
+           # Sortierung der Bezirke nach der Gesamtzahl der Straftaten absteigend
+           df_sorted = df_filtered.sort_values(by='Straftaten_insgesamt', ascending=False)
+
+           # Anzeige der sortierten Bezirke
+           print(df_sorted[['Bezeichnung', 'Straftaten_insgesamt']])
+
+           # Optional: Speichern der sortierten Daten in einer neuen CSV-Datei
+           df_sorted[['Bezeichnung', 'Straftaten_insgesamt']].to_csv('sortierte_straftaten.csv', index=False, encoding='utf-8')
+           print("\nDie sortierten Daten wurden in 'sortierte_straftaten.csv' gespeichert.")
+
+       except FileNotFoundError:
+           print(f"Die Datei '{csv_file}' wurde nicht gefunden. Bitte überprüfen Sie den Pfad.")
+       except Exception as e:
+           print(f"Es ist ein Fehler aufgetreten: {e}")
+
+   if __name__ == "__main__":
+       main()
+   ```
+
+4. **Erläuterungen zum Skript:**
+
+   - **Einlesen der CSV-Datei:** Die ersten 4 Zeilen der CSV-Datei werden übersprungen, da sie keine relevanten Daten enthalten.
+   
+   - **Spaltenumbenennung:** Um den Zugriff auf die Spalten zu erleichtern, werden die Spaltennamen in verständlichere Namen geändert. Passen Sie die Spaltennamen ggf. entsprechend der tatsächlichen CSV-Struktur an.
+   
+   - **Datenbereinigung:** Die Anzahl der Straftaten in der Spalte `Straftaten_insgesamt` werden von String zu Integer konvertiert, indem Anführungszeichen und Kommas entfernt werden.
+   
+   - **Filterung:** Bezirke, die nicht eindeutig zugeordnet werden können (mit LOR-Schlüssel, die auf '900' oder '999' enden), werden ausgeschlossen.
+   
+   - **Sortierung:** Die Daten werden absteigend nach der Gesamtzahl der Straftaten sortiert.
+   
+   - **Ausgabe:** Die sortierten Bezirke werden in der Konsole angezeigt und zusätzlich in einer neuen CSV-Datei `sortierte_straftaten.csv` gespeichert.
+
+5. **Ausführung des Skripts:**
+
+   Speichern Sie das obige Skript in einer Datei, z.B. `analyse_straftaten.py`, und führen Sie es über die Kommandozeile aus:
+
+   ```bash
+   python analyse_straftaten.py
+   ```
+
+6. **Beispielhafte Ausgabe:**
+
+   Nach der Ausführung des Skripts erhalten Sie eine sortierte Liste der Bezirke nach der Gesamtzahl der Straftaten. Ein Ausschnitt der Ausgabe könnte wie folgt aussehen:
+
+   ```
+                   Bezeichnung  Straftaten_insgesamt
+   41          Friedrichshain-Kreuzberg                55823
+   10                   Mitte                     83611
+   ...                      ...                  ...
+   ```
+
+   Zudem wird die sortierte Liste in der Datei `sortierte_straftaten.csv` gespeichert, die Sie mit Excel oder einem anderen Tabellenkalkulationsprogramm öffnen können.
+
+### Hinweise:
+
+- **Fehlerbehandlung:** Das Skript enthält grundlegende Fehlerbehandlungen, z.B. für den Fall, dass die CSV-Datei nicht gefunden wird.
+
+- **Anpassungen:** Je nach genauer Struktur Ihrer CSV-Datei kann es notwendig sein, die Spaltennamen oder die Anzahl der zu überspringenden Zeilen anzupassen.
+
+- **Weitere Analysen:** Sie können das Skript erweitern, um weitere Analysen durchzuführen, z.B. die Visualisierung der Daten mit `matplotlib` oder `seaborn`.
+
+Ich hoffe, dieses Skript hilft Ihnen bei der Analyse der Kriminalitätsdaten für Berlin 2023. Bei weiteren Fragen stehe ich gerne zur Verfügung!

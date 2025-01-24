@@ -1,0 +1,146 @@
+Certainly! Ich helfe Ihnen gerne dabei, ein Python-Skript zu erstellen, das Ihre CSV-Daten analysiert und die Bezirke nach der Gesamtanzahl der Straftaten im Jahr 2023 sortiert.
+
+### Schritt-für-Schritt-Erklärung
+
+1. **Bibliotheken installieren und importieren:**
+   - Wir verwenden die `pandas`-Bibliothek zur Datenverarbeitung.
+   - Sie müssen sicherstellen, dass `pandas` installiert ist. Falls nicht, können Sie es mit `pip` installieren.
+
+2. **CSV-Datei Laden:**
+   - Die CSV-Datei enthält einige zusätzliche Zeilen vor den tatsächlichen Daten. Wir überspringen diese Zeilen beim Einlesen.
+   - Die Spaltennamen enthalten möglicherweise Zeilenumbrüche und Sonderzeichen, daher passen wir die Spaltennamen nach dem Laden an.
+
+3. **Datenbereinigung:**
+   - Entfernen Sie Tausendertrennzeichen (Kommas) und konvertieren Sie die Zahlen in Ganzzahlen.
+   - Stellen Sie sicher, dass alle relevanten Spalten korrekt formatiert sind.
+
+4. **Sortierung und Ausgabe:**
+   - Sortieren Sie die Bezirke nach der Gesamtanzahl der Straftaten in absteigender Reihenfolge.
+   - Geben Sie die sortierte Liste aus oder speichern Sie sie in einer neuen CSV-Datei.
+
+### Python-Skript
+
+```python
+import pandas as pd
+
+def load_and_clean_data(csv_file):
+    """
+    Lädt die CSV-Datei, bereinigt die Daten und gibt einen bereinigten DataFrame zurück.
+    """
+    try:
+        # Überspringe die ersten 4 Zeilen, die keine relevanten Daten enthalten
+        df = pd.read_csv(csv_file, skiprows=4, sep=',', encoding='utf-8')
+        
+        # Identifiziere die relevanten Spalten
+        # Da die Spaltennamen Zeilenumbrüche enthalten können, benennen wir sie um
+        # Basierend auf den bereitgestellten Daten:
+        # Index 0: LOR-Schlüssel
+        # Index 1: Bezeichnung
+        # Index 2: Straftaten insgesamt
+        df = df.rename(columns={
+            df.columns[0]: 'LOR_Schluessel',
+            df.columns[1]: 'Bezirksname',
+            df.columns[2]: 'Straftaten_insgesamt'
+        })
+        
+        # Entferne alle Zeilen, die keine LOR_Schluessel enthalten (z.B. leere Zeilen)
+        df = df.dropna(subset=['LOR_Schluessel'])
+        
+        # Entferne Anführungszeichen und Leerzeichen
+        df['Straftaten_insgesamt'] = df['Straftaten_insgesamt'].astype(str).str.replace('"', '').str.replace(' ', '')
+        
+        # Entferne Tausendertrennzeichen und konvertiere in Ganzzahlen
+        df['Straftaten_insgesamt'] = df['Straftaten_insgesamt'].str.replace(',', '').astype(int)
+        
+        return df
+    except Exception as e:
+        print(f"Fehler beim Laden oder Bereinigen der Daten: {e}")
+        return None
+
+def sort_districts_by_crime(df):
+    """
+    Sortiert die Bezirke nach der Gesamtanzahl der Straftaten in absteigender Reihenfolge.
+    """
+    try:
+        sorted_df = df.sort_values(by='Straftaten_insgesamt', ascending=False)
+        return sorted_df
+    except Exception as e:
+        print(f"Fehler beim Sortieren der Daten: {e}")
+        return None
+
+def main():
+    # Pfad zur CSV-Datei
+    csv_file = 'FZ_2023.csv'
+    
+    # Lade und bereinige die Daten
+    df = load_and_clean_data(csv_file)
+    
+    if df is not None:
+        # Sortiere die Bezirke nach Straftaten insgesamt
+        sorted_df = sort_districts_by_crime(df)
+        
+        if sorted_df is not None:
+            # Zeige die sortierten Ergebnisse
+            print("Bezirke sortiert nach Gesamtzahl der Straftaten (2023):\n")
+            print(sorted_df[['Bezirksname', 'Straftaten_insgesamt']].to_string(index=False))
+            
+            # Optional: Speichere die sortierten Daten in einer neuen CSV-Datei
+            sorted_df.to_csv('Sortierte_FZ_2023.csv', columns=['Bezirksname', 'Straftaten_insgesamt'], index=False)
+            print("\nDie sortierten Daten wurden in 'Sortierte_FZ_2023.csv' gespeichert.")
+    else:
+        print("Daten konnten nicht geladen werden.")
+
+if __name__ == "__main__":
+    main()
+```
+
+### Erklärung des Skripts
+
+1. **Funktion `load_and_clean_data`:**
+   - **`skiprows=4`**: Überspringt die ersten 4 Zeilen, die keine relevanten Daten enthalten.
+   - **Umbenennen der Spalten**: Macht die weiteren Schritte einfacher, indem wir die relevanten Spalten verständlicher benennen.
+   - **Datenbereinigung**: Entfernt Anführungszeichen, Leerzeichen und Tausendertrennzeichen, um die Zahlen korrekt als Ganzzahlen zu importieren.
+
+2. **Funktion `sort_districts_by_crime`:**
+   - Sortiert den DataFrame basierend auf der Spalte `Straftaten_insgesamt` in absteigender Reihenfolge.
+
+3. **`main`-Funktion:**
+   - Führt die Datenlade- und Sortierschritte aus.
+   - Druckt die sortierten Ergebnisse aus.
+   - Speichert die sortierten Daten in einer neuen CSV-Datei namens `Sortierte_FZ_2023.csv` (optional).
+
+### Ausführung des Skripts
+
+1. **Stellen Sie sicher, dass Sie die erforderlichen Bibliotheken installiert haben. Wenn nicht, installieren Sie `pandas` mit dem folgenden Befehl:**
+
+   ```bash
+   pip install pandas
+   ```
+
+2. **Speichern Sie das obige Skript in einer Python-Datei, z.B. `sort_crime_data.py`.**
+
+3. **Platzieren Sie die CSV-Datei `FZ_2023.csv` im gleichen Verzeichnis wie das Skript oder passen Sie den Pfad im Skript entsprechend an.**
+
+4. **Führen Sie das Skript aus:**
+
+   ```bash
+   python sort_crime_data.py
+   ```
+
+Nach der Ausführung sollten Sie eine Ausgabe sehen, die die Bezirke nach der Gesamtzahl der Straftaten sortiert anzeigt. Zusätzlich wird eine neue CSV-Datei `Sortierte_FZ_2023.csv` erstellt, die diese sortierten Daten enthält.
+
+### Beispielausgabe
+
+```
+Bezirke sortiert nach Gesamtzahl der Straftaten (2023):
+
+   Bezirksname  Straftaten_insgesamt
+          Mitte               83611
+Friedrichshain-Kreuzberg             55838
+      Neukölln             45313
+...
+```
+
+Diese Liste zeigt die Bezirke von Berlin, sortiert nach der Gesamtzahl der Straftaten im Jahr 2023, beginnend mit dem Bezirk Mitte als der mit den meisten Straftaten.
+
+Ich hoffe, dieses Skript hilft Ihnen weiter! Wenn Sie weitere Anpassungen oder Fragen haben, lassen Sie es mich bitte wissen.

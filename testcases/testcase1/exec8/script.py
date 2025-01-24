@@ -1,58 +1,51 @@
 import pandas as pd
-import matplotlib.pyplot as plt
 
-# Dateiname der CSV-Datei
-csv_datei = 'FZ_2023.csv'
+# Pfad zur CSV-Datei
+csv_datei = 'Fallzahlen&HZ2014-2023/FZ_2023.csv'  # Passe den Pfad entsprechend an
 
-# Anzahl der Zeilen, die zu Beginn übersprungen werden müssen
-# Basierend auf den bereitgestellten Daten, scheint es 4 initiale Zeilen zu geben
-skip_rows = 4
-
+# Da die ersten 4 Zeilen Metadaten enthalten, überspringen wir diese
 try:
-    # Lesen der CSV-Datei mit pandas
-    df = pd.read_csv(csv_datei, delimiter=',', encoding='utf-8', skiprows=skip_rows)
+    df = pd.read_csv(csv_datei, skiprows=4, delimiter=',', encoding='utf-8')
 except FileNotFoundError:
-    print(f"Die Datei {csv_datei} wurde nicht gefunden. Bitte stellen Sie sicher, dass sich die Datei im selben Verzeichnis wie dieses Skript befindet.")
+    print(f"Die Datei {csv_datei} wurde nicht gefunden.")
     exit(1)
-except pd.errors.ParserError as e:
-    print(f"Fehler beim Parsen der CSV-Datei: {e}")
+except Exception as e:
+    print(f"Beim Lesen der Datei ist ein Fehler aufgetreten: {e}")
     exit(1)
 
-# Anzeigen der Spalten zur Überprüfung
-print("Spalten in der CSV-Datei:")
-print(df.columns)
+# Anzeige der ersten paar Zeilen, um die Struktur zu verstehen
+print("Erste fünf Zeilen der CSV-Datei:")
+print(df.head())
 
-# Überprüfen, ob die notwendigen Spalten vorhanden sind
-benoetigte_spalten = ['Bezeichnung (Bezirksregion)', 'Straftaten \n    -insgesamt-']
-for spalte in benoetigte_spalten:
-    if spalte not in df.columns:
-        print(f"Die benötigte Spalte '{spalte}' wurde nicht gefunden. Bitte überprüfen Sie die CSV-Datei.")
-        exit(1)
+# Überprüfen der Spaltennamen
+print("\nSpaltennamen:")
+print(df.columns.tolist())
 
-# Umbenennen der Spalten für einfacheren Zugriff
-df.rename(columns={
-    'Bezeichnung (Bezirksregion)': 'Bezirk',
-    'Straftaten \n    -insgesamt-': 'Straftaten_insgesamt'
-}, inplace=True)
+# Annahme: Die Spalte "Straftaten -insgesamt-" ist die dritte Spalte
+# Wegen Zeilenumbrüchen im Spaltennamen könnte der tatsächliche Name variieren
+# Daher suchen wir die Spalte, die "Straftaten" und "insgesamt" enthält
+spalte_straftaten = None
+for spalte in df.columns:
+    if 'Straftaten' in spalte and 'insgesamt' in spalte:
+        spalte_straftaten = spalte
+        break
 
-# Entfernen von Anführungszeichen und Kommas, Umwandlung in Ganzzahlen
-df['Straftaten_insgesamt'] = df['Straftaten_insgesamt'].astype(str).str.replace('"', '').str.replace(',', '').astype(int)
+if spalte_straftaten is None:
+    print("Die Spalte für 'Straftaten insgesamt' wurde nicht gefunden.")
+    exit(1)
 
-# Sortieren der Bezirke nach der Anzahl der Straftaten (absteigend)
-df_sortiert = df.sort_values(by='Straftaten_insgesamt', ascending=False)
+# Entfernen von Tausender-Trennzeichen und Konvertieren zu Integer
+df[spalte_straftaten] = df[spalte_straftaten].astype(str).str.replace(',', '').astype(int)
 
-# Zur besseren Übersicht nur relevante Spalten anzeigen
-df_sortiert_relevant = df_sortiert[['Bezirk', 'Straftaten_insgesamt']]
+# Optional: Entfernen von überschüssigen Leerzeichen in den Bezirksnamen
+df['Bezeichnung (Bezirksregion)'] = df['Bezeichnung (Bezirksregion)'].str.strip()
 
-# Ausgabe der sortierten Tabelle
-print("\nBezirke sortiert nach der Anzahl der insgesamt begangenen Straftaten (absteigend):")
-print(df_sortiert_relevant.to_string(index=False))
+# Sortieren nach der Anzahl der Straftaten insgesamt in absteigender Reihenfolge
+df_sortiert = df.sort_values(by=spalte_straftaten, ascending=False)
 
-# Optional: Visualisierung der Daten
-plt.figure(figsize=(12, 8))
-plt.barh(df_sortiert_relevant['Bezirk'], df_sortiert_relevant['Straftaten_insgesamt'], color='skyblue')
-plt.xlabel('Anzahl der Straftaten insgesamt')
-plt.title('Straftaten nach Bezirken in Berlin (2023)')
-plt.gca().invert_yaxis()  # Bezirke mit den meisten Straftaten oben anzeigen
-plt.tight_layout()
-plt.show()
+# Auswahl der relevanten Spalten für die Ausgabe
+ergebnis = df_sortiert[['Bezeichnung (Bezirksregion)', spalte_straftaten]]
+
+# Anzeige der sortierten Ergebnisse
+print("\nBezirke sortiert nach insgesamt registrierten Straftaten im Jahr 2023:")
+print(ergebnis.to_string(index=False))

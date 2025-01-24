@@ -1,60 +1,59 @@
 import pandas as pd
 
-def parse_number(number_str):
-    """
-    Konvertiert eine Zahl im deutschen Format (z.B. "83,611") in einen Integer.
-    Entfernt Punkte als Tausendertrennzeichen und ersetzt Kommas durch nichts.
-    """
-    if pd.isna(number_str):
-        return 0
-    # Entferne Punkte und ersetze Kommas
-    return int(number_str.replace('.', '').replace(',', ''))
+# Pfad zur CSV-Datei
+csv_datei = 'FZ_2023.csv'
 
-def main():
-    # Pfad zur CSV-Datei
-    csv_file = 'FZ_2023.csv'
+try:
+    # Einlesen der CSV-Datei, Überspringen der ersten 4 Zeilen
+    df = pd.read_csv(
+        csv_datei,
+        sep=',',
+        skiprows=4,
+        encoding='utf-8-sig'  # Unterstützt Umlaute und Sonderzeichen
+    )
+except FileNotFoundError:
+    print(f"Die Datei {csv_datei} wurde nicht gefunden.")
+    exit(1)
 
-    # Lese die CSV-Datei
-    # Überspringe die ersten 4 Zeilen, die keine relevanten Daten enthalten
-    df = pd.read_csv(csv_file, skiprows=4, sep=',', encoding='utf-8')
+# Anzeige der ersten paar Zeilen zur Überprüfung
+print("Erste 5 Zeilen der eingelesenen Daten:")
+print(df.head())
 
-    # Um benutzerfreundliche Spaltennamen zu haben, benenne sie um
-    df = df.rename(columns=lambda x: x.strip().replace('\n', ' ') if isinstance(x, str) else x)
+# Benennung der relevanten Spalten
+bezeichnung_col = 'Bezeichnung (Bezirksregion)'
+straftaten_col = 'Straftaten insgesamt-'
 
-    # Anzeige der Spaltennamen zur Überprüfung
-    # print(df.columns)
+# Überprüfen, ob die benötigten Spalten existieren
+if bezeichnung_col not in df.columns or straftaten_col not in df.columns:
+    print("Die erwarteten Spalten wurden in der CSV-Datei nicht gefunden.")
+    exit(1)
 
-    # Wähle die relevanten Spalten aus
-    # Annahme: 'Bezeichnung (Bezirksregion)' ist der Name des Bezirks
-    # und die dritte Spalte 'Straftaten - insgesamt-' ist die Gesamtzahl der Straftaten
-    district_col = 'Bezeichnung (Bezirksregion)'
-    
-    # Identifiziere die Spalte für Gesamtstraftaten
-    # Da der Spaltenname möglicherweise Zeilenumbrüche enthält, finde ihn mit einem Teilstring
-    total_crimes_col = [col for col in df.columns if 'Straftaten' in col and 'insgesamt' in col]
-    if not total_crimes_col:
-        print("Die Spalte für Gesamtstraftaten wurde nicht gefunden.")
-        return
-    total_crimes_col = total_crimes_col[0]
+# Bereinigen der 'Straftaten insgesamt-' Spalte
+# Entfernen von Anführungszeichen und Tausendertrennungen
+df[straftaten_col] = df[straftaten_col].astype(str).str.replace('"', '').str.replace(',', '').astype(int)
 
-    # Extrahiere die relevanten Daten
-    data = df[[district_col, total_crimes_col]].copy()
-    
-    # Entferne eventuelle Anführungszeichen und konvertiere die Zahlen
-    data[total_crimes_col] = data[total_crimes_col].apply(parse_number)
+# Filtern der Bezirke:
+# Ausschließen von Zeilen, die 'nicht zuzuordnen' oder Gesamtwerte enthalten
+# Annahme: Bezirke mit bestimmten LOR-Schlüssel (z.B. '999999') sind Gesamt oder nicht zuzuordnen
+# Alternativ kann nach dem Namen gefiltert werden
+df_gefiltert = df[
+    ~df[bezeichnung_col].str.contains('nicht zuzuordnen', case=False, na=False) &
+    ~df[bezeichnung_col].str.contains('gesamt', case=False, na=False) &
+    ~df[bezeichnung_col].str.contains('PKS gesamt', case=False, na=False)
+]
 
-    # Sortiere die Daten nach der Gesamtzahl der Straftaten in absteigender Reihenfolge
-    sorted_data = data.sort_values(by=total_crimes_col, ascending=False)
+# Sortieren nach 'Straftaten insgesamt-' in absteigender Reihenfolge
+df_sortiert = df_gefiltert.sort_values(by=straftaten_col, ascending=False)
 
-    # Optional: Entferne Bezirke, die nicht zugeordnet sind (falls gewünscht)
-    # sorted_data = sorted_data[~sorted_data[district_col].str.contains("nicht zuzuordnen")]
+# Auswahl der gewünschten Spalten zur Anzeige
+ergebnis = df_sortiert[[bezeichnung_col, straftaten_col]]
 
-    # Anzeige der sortierten Daten
-    print("Bezirke sortiert nach der Gesamtzahl der Straftaten (absteigend):\n")
-    print(sorted_data.to_string(index=False))
+# Umbenennen der Spalten für bessere Lesbarkeit
+ergebnis = ergebnis.rename(columns={
+    bezeichnung_col: 'Bezirk',
+    straftaten_col: 'Straftaten Insgesamt 2023'
+})
 
-    # Optional: Speichere die sortierten Daten in eine neue CSV-Datei
-    sorted_data.to_csv('FZ_2023_sortiert.csv', index=False)
-
-if __name__ == "__main__":
-    main()
+# Anzeige des sortierten Ergebnisses
+print("\nBezirke nach Gesamtzahl der Straftaten im Jahr 2023 (absteigend):")
+print(ergebnis.to_string(index=False))

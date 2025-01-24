@@ -1,0 +1,125 @@
+Natürlich! Hier ist ein Python-Skript, das die gelieferten Daten aus der Datei `'FZ_2023.csv'` liest, die Gesamtanzahl der Straftaten pro Bezirk bereinigt, sortiert und anzeigt. Das Skript verwendet die Bibliothek `pandas`, die sich hervorragend für Datenmanipulation und -analyse eignet.
+
+### Voraussetzungen
+
+Stellen Sie sicher, dass Sie die benötigten Bibliotheken installiert haben. Wenn nicht, können Sie sie mit `pip` installieren:
+
+```bash
+pip install pandas
+```
+
+### Python-Skript
+
+```python
+import pandas as pd
+
+# Pfad zur CSV-Datei
+csv_datei = 'FZ_2023.csv'
+
+# Schritt 1: Lesen der CSV-Datei und Überspringen der irrelevanten ersten Zeilen
+# Wir lesen die Datei ohne Header und durchsuchen dann nach der Zeile, die die Spaltenüberschriften enthält
+with open(csv_datei, 'r', encoding='utf-8') as file:
+    for i, zeile in enumerate(file):
+        if zeile.startswith('LOR-Schlüssel (Bezirksregion)'):
+            header_zeile = i
+            break
+
+# Schritt 2: Laden der Daten mit den korrekten Headern
+df = pd.read_csv(
+    csv_datei,
+    skiprows=header_zeile,
+    sep=',',
+    encoding='utf-8',
+    quotechar='"',
+    engine='python'  # Verwenden des Python-Engines für bessere Handhabung von Anführungszeichen
+)
+
+# Schritt 3: Bereinigung der Daten
+
+# Entfernen von führenden und nachfolgenden Leerzeichen in den Spaltennamen
+df.columns = df.columns.str.strip()
+
+# Entfernen von Zeilen, die keinen gültigen LOR-Schlüssel haben (z.B. leere Zeilen)
+df = df.dropna(subset=['LOR-Schlüssel (Bezirksregion)'])
+
+# Optional: Entfernen der Gesamtsumme-Zeile, falls nicht benötigt
+df = df[df['LOR-Schlüssel (Bezirksregion)'] != '999999']
+
+# Schritt 4: Konvertieren der "Straftaten - insgesamt -" Spalte in numerische Werte
+# Entfernen von Punkten und Kommata, die als Tausendertrennzeichen dienen
+# In diesem Datensatz scheinen die Kommata als Tausendertrennzeichen zu fungieren
+
+# Definieren der Spaltennamen basierend auf den gelieferten Daten
+# Es ist wichtig, den genauen Spaltennamen zu verwenden. Hier nehmen wir an, dass die dritte Spalte "Straftaten - insgesamt -" heißt
+# Falls der Name anders ist, passen Sie ihn entsprechend an.
+spalte_straftaten = 'Straftaten - insgesamt-'
+
+# Entfernen von Kommas und Konvertieren in Integer
+df[spalte_straftaten] = df[spalte_straftaten].astype(str).str.replace(',', '').astype(int)
+
+# Schritt 5: Sortieren der Bezirke nach der Anzahl der Straftaten insgesamt in absteigender Reihenfolge
+df_sortiert = df.sort_values(by=spalte_straftaten, ascending=False)
+
+# Schritt 6: Auswahl der relevanten Spalten für die Ausgabe
+# Zum Beispiel: Bezirksregion und Anzahl der Straftaten
+df_sortiert = df_sortiert[['Bezeichnung (Bezirksregion)', spalte_straftaten]]
+
+# Schritt 7: Anzeigen des sortierten DataFrames
+print(df_sortiert.to_string(index=False))
+```
+
+### Erklärung der Schritte
+
+1. **Datei lesen und Header identifizieren**:
+   - Das Skript öffnet die CSV-Datei und durchsucht Zeile für Zeile nach der Zeile, die mit `'LOR-Schlüssel (Bezirksregion)'` beginnt, da diese die Spaltenüberschriften enthält.
+   - Diese Zeilennummer (`header_zeile`) wird verwendet, um die Datei ab der richtigen Stelle zu laden.
+
+2. **Daten laden**:
+   - Mit `pd.read_csv` wird die CSV-Datei gelesen, wobei irrelevante Zeilen übersprungen werden.
+   - Der `quotechar` wird auf `"` gesetzt, um korrekt mit Zellen umzugehen, die Kommata enthalten.
+
+3. **Datenbereinigung**:
+   - Entfernt leere oder nicht relevante Zeilen.
+   - Optional wird die Gesamtsumme-Zeile (`'999999,Berlin (PKS gesamt)'`) entfernt, falls nur die einzelnen Bezirke betrachtet werden sollen.
+
+4. **Datenkonvertierung**:
+   - Die Spalte `'Straftaten - insgesamt-'` wird bereinigt, indem Kommas entfernt und in ganzzahlige Werte umgewandelt werden.
+
+5. **Sortierung**:
+   - Der DataFrame wird basierend auf der Anzahl der Straftaten insgesamt in absteigender Reihenfolge sortiert.
+
+6. **Auswahl relevanter Spalten**:
+   - Für die Ausgabe werden nur die Bezirksbezeichnung und die Anzahl der Straftaten angezeigt.
+
+7. **Anzeige**:
+   - Der sortierte DataFrame wird ohne Index angezeigt.
+
+### Beispielhafte Ausgabe
+
+Die Ausgabe könnte wie folgt aussehen (nur ein Auszug zur Veranschaulichung):
+
+```
+   Bezeichnung (Bezirksregion)  Straftaten - insgesamt-
+               Mitte                      83611
+        Friedrichshain-Kreuzberg            55738
+                Tempelhof-Schöneberg         41776
+                  Neukölln                  45313
+                  Lichtenberg               31563
+                   Reinickendorf            27344
+                Marzahn-Hellersdorf          26649
+                  Charlottenburg-Wilmersdorf 53630
+               Treptow-Köpenick              26099
+                        ...                    ...
+```
+
+### Hinweise
+
+- **Dateipfad**: Stellen Sie sicher, dass der Pfad zur `'FZ_2023.csv'` korrekt ist. Wenn sich die Datei in einem anderen Verzeichnis befindet, passen Sie den `csv_datei` Pfad entsprechend an.
+  
+- **Spaltennamen**: Überprüfen Sie die genauen Spaltennamen in Ihrer CSV-Datei. In diesem Skript wird angenommen, dass die Spalte für die Gesamtanzahl der Straftaten `'Straftaten - insgesamt-'` heißt. Sollte der Name leicht abweichen, passen Sie den `spalte_straftaten` Variablenwert entsprechend an.
+
+- **Zeichencodierung**: Das Skript verwendet `'utf-8'` als Zeichencodierung. Falls Ihre Datei eine andere Codierung verwendet (z.B. `'latin1'`), passen Sie den Parameter `encoding` im `read_csv` entsprechend an.
+
+- **Zusätzliche Analysen**: Dieses Skript sortiert lediglich die Bezirke nach der Gesamtzahl der Straftaten. Sie können es erweitern, um weitere Analysen durchzuführen, wie z.B. Durchschnittswerte, Visualisierungen oder das Filtern nach bestimmten Straftaten.
+
+Ich hoffe, dieses Skript hilft Ihnen weiter! Wenn Sie weitere Anpassungen oder Analysen benötigen, lassen Sie es mich bitte wissen.

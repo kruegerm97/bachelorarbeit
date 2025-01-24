@@ -1,0 +1,117 @@
+Gerne helfe ich Ihnen dabei, Ihre Daten zu analysieren und ein Python-Skript zu erstellen, das die Bezirke nach der Anzahl der insgesamt gemeldeten Straftaten im Jahr 2023 sortiert. Wir werden hierfür die **pandas** Bibliothek verwenden, die hervorragend für Datenmanipulation und -analyse geeignet ist.
+
+### Schritt 1: Voraussetzungen sichern
+
+Stellen Sie sicher, dass Python auf Ihrem Computer installiert ist. Außerdem benötigen Sie die **pandas** Bibliothek. Falls diese noch nicht installiert ist, können Sie sie mit dem folgenden Befehl installieren:
+
+```bash
+pip install pandas
+```
+
+### Schritt 2: Python-Skript erstellen
+
+Erstellen Sie eine neue Python-Datei, beispielsweise `sortiere_straftaten.py`, und fügen Sie den folgenden Code ein:
+
+```python
+import pandas as pd
+
+# Pfad zur CSV-Datei (passen Sie den Pfad entsprechend an)
+csv_datei = 'FZ_2023.csv'
+
+# Lesen der CSV-Datei
+# Überspringt die ersten 4 Zeilen, da diese keine relevanten Daten enthalten
+df = pd.read_csv(csv_datei, skiprows=4, delimiter=',', encoding='utf-8')
+
+# Anzeigen der Spaltennamen, um sicherzustellen, dass die Daten korrekt eingelesen wurden
+#print(df.columns.tolist())
+
+# Entfernen von Tausender-Trennzeichen und Konvertieren der numerischen Spalten in Zahlen
+# Annahme: Alle Spalten ab der dritten sind numerische Werte
+# Erste zwei Spalten sind 'LOR-Schlüssel (Bezirksregion)' und 'Bezeichnung (Bezirksregion)'
+numerische_spalten = df.columns[2:]
+
+for spalte in numerische_spalten:
+    # Entfernen von Kommas und Punkten als Tausender-Trennzeichen
+    df[spalte] = df[spalte].astype(str).str.replace('.', '').str.replace(',', '')
+    # Konvertieren in numerische Typen
+    df[spalte] = pd.to_numeric(df[spalte], errors='coerce')
+
+# Überprüfen, ob die Konvertierung funktioniert hat
+#print(df.head())
+
+# Sortieren der Bezirke nach 'Straftaten -insgesamt-' in absteigender Reihenfolge
+df_sortiert = df.sort_values(by='Straftaten -insgesamt-', ascending=False)
+
+# Auswahl der relevanten Spalten für die Ausgabe
+ergebnis = df_sortiert[['Bezeichnung (Bezirksregion)', 'Straftaten -insgesamt-']]
+
+# Anzeigen des sortierten Ergebnisses
+print(ergebnis)
+
+# Optional: Speichern des sortierten Ergebnisses in einer neuen CSV-Datei
+df_sortiert.to_csv('FZ_2023_sortiert.csv', index=False, encoding='utf-8')
+```
+
+### Schritt 3: Erklärung des Skripts
+
+1. **Importieren der pandas-Bibliothek:**
+   ```python
+   import pandas as pd
+   ```
+
+2. **Lesen der CSV-Datei:**
+   - **`skiprows=4`**: Überspringt die ersten vier Zeilen, die keine strukturierten Daten enthalten.
+   - **`delimiter=','`**: Gibt an, dass das Trennzeichen ein Komma ist.
+   - **`encoding='utf-8'`**: Stellt sicher, dass die Datei mit UTF-8-Encoding gelesen wird.
+   ```python
+   df = pd.read_csv(csv_datei, skiprows=4, delimiter=',', encoding='utf-8')
+   ```
+
+3. **Bereinigung der numerischen Daten:**
+   - Entfernt alle Punkte und Kommas aus den Zahlen, um sie in numerische Werte umzuwandeln.
+   - **`pd.to_numeric`** konvertiert die bereinigten Strings in numerische Typen. Fehlerhafte Umwandlungen werden zu `NaN`.
+   ```python
+   for spalte in numerische_spalten:
+       df[spalte] = df[spalte].astype(str).str.replace('.', '').str.replace(',', '')
+       df[spalte] = pd.to_numeric(df[spalte], errors='coerce')
+   ```
+
+4. **Sortieren der Daten:**
+   - Sortiert die Bezirke basierend auf der Spalte **'Straftaten -insgesamt-'** in absteigender Reihenfolge.
+   ```python
+   df_sortiert = df.sort_values(by='Straftaten -insgesamt-', ascending=False)
+   ```
+
+5. **Auswahl und Anzeige der relevanten Spalten:**
+   - Wählt die Spalten **'Bezeichnung (Bezirksregion)'** und **'Straftaten -insgesamt-'** für die Ausgabe aus.
+   - Zeigt das sortierte Ergebnis an.
+   ```python
+   ergebnis = df_sortiert[['Bezeichnung (Bezirksregion)', 'Straftaten -insgesamt-']]
+   print(ergebnis)
+   ```
+
+6. **Optional: Speichern des Ergebnisses:**
+   - Speichert das sortierte DataFrame in einer neuen CSV-Datei namens **'FZ_2023_sortiert.csv'**.
+   ```python
+   df_sortiert.to_csv('FZ_2023_sortiert.csv', index=False, encoding='utf-8')
+   ```
+
+### Schritt 4: Ausführen des Skripts
+
+Navigieren Sie im Terminal oder der Eingabeaufforderung zu dem Verzeichnis, in dem sich Ihre `FZ_2023.csv` und das Python-Skript befinden, und führen Sie das Skript aus:
+
+```bash
+python sortiere_straftaten.py
+```
+
+Nach der Ausführung sollten die Bezirke nach der Gesamtzahl der Straftaten im Jahr 2023 sortiert auf Ihrem Bildschirm angezeigt werden. Zudem wird eine neue Datei namens **'FZ_2023_sortiert.csv'** erstellt, die das sortierte Ergebnis enthält.
+
+### Zusätzliche Hinweise
+
+- **Spaltennamen überprüfen:** Stellen Sie sicher, dass die Spaltennamen in Ihrem CSV mit denen im Skript übereinstimmen. Falls es Abweichungen gibt, passen Sie die Namen im Skript entsprechend an.
+  
+- **Fehlerbehandlung:** Das Skript wandelt nicht konvertierbare Einträge in `NaN` um. Überprüfen Sie das endgültige DataFrame auf fehlende oder fehlerhafte Daten und bereinigen Sie diese gegebenenfalls weiter.
+
+- **Weitere Analysen:** Sie können das Skript erweitern, um weitere Analysen durchzuführen, z.B. Visualisierungen erstellen oder zusätzliche Filter anwenden.
+
+Ich hoffe, dieses Skript hilft Ihnen bei der Analyse Ihrer Kriminalitätsdaten. Falls Sie weitere Anpassungen oder Unterstützung benötigen, stehe ich Ihnen gerne zur Verfügung!

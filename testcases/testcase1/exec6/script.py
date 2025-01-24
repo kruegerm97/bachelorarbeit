@@ -1,61 +1,69 @@
 import pandas as pd
 
-# Datei einlesen
-# Da die Zahlen mit Kommas als Tausendertrennzeichen formatiert sind, müssen wir das beim Einlesen berücksichtigen.
-# Außerdem gibt es mehrzeilige Header, die wir überspringen müssen.
+def main():
+    # Pfad zur CSV-Datei
+    csv_file = 'FZ_2023.csv'
 
-# Definiere die Anzahl der zu überspringenden Header-Zeilen
-skiprows = 4  # Anpassen, falls mehr oder weniger Zeilen übersprungen werden müssen
+    try:
+        # Einlesen der CSV-Datei, Überspringen der ersten 4 Zeilen, die keine relevanten Daten enthalten
+        df = pd.read_csv(
+            csv_file,
+            sep=',',
+            skiprows=4,
+            encoding='utf-8',
+            dtype=str
+        )
 
-# Lese die CSV-Datei ein
-df = pd.read_csv(
-    'FZ_2023.csv',
-    sep=',',
-    skiprows=skiprows,
-    encoding='utf-8',
-    dtype=str  # Zunächst alle Daten als String einlesen
-)
+        # Umbenennen der Spalten für einfacheren Zugriff (falls notwendig)
+        df.columns = [
+            'LOR-Schlüssel',
+            'Bezeichnung',
+            'Straftaten_insgesamt',
+            'Raub',
+            'Strassenraub_Handtaschenraub',
+            'Koerperverletzungen_insgesamt',
+            'Gefaehrliche_schwere_Koerperverletzung',
+            'Freiheitsberaubung_Noetigung_Bedrohnung_Nachstellung',
+            'Diebstahl_insgesamt',
+            'Diebstahl_von_Kraftwagen',
+            'Diebstahl_an_aus_Kfz',
+            'Fahrraddiebstahl',
+            'Wohnraumeinbruch',
+            'Branddelikte_insgesamt',
+            'Brandstiftung',
+            'Sachbeschadigung_insgesamt',
+            'Sachbeschadigung_durch_Graffiti',
+            'Rauschgiftdelikte',
+            'Kieztaten'
+        ]
 
-# Anzeigen der ersten Zeilen zur Überprüfung
-#print(df.head())
+        # Funktion zur Umwandlung von Zahlenstrings in Integer
+        def convert_to_int(x):
+            if isinstance(x, str):
+                # Entfernen von Anführungszeichen und Kommas
+                return int(x.replace('"', '').replace(',', ''))
+            return 0  # Standardwert, falls der Eintrag kein String ist
 
-# Benenne die Spalten um, um leichter darauf zugreifen zu können
-df.columns = [
-    'LOR-Schlüssel (Bezirksregion)',
-    'Bezeichnung (Bezirksregion)',
-    'Straftaten - insgesamt-',
-    'Raub',
-    'Straßenraub, Handtaschen-raub',
-    'Körper-verletzungen - insgesamt-',
-    'Gefährl. und schwere Körper-verletzung',
-    'Freiheits-beraubung, Nötigung, Bedrohung, Nachstellung',
-    'Diebstahl - insgesamt-',
-    'Diebstahl von Kraftwagen',
-    'Diebstahl an/aus Kfz',
-    'Fahrrad-diebstahl',
-    'Wohnraum-einbruch',
-    'Branddelikte - insgesamt-',
-    'Brand-stiftung',
-    'Sach-beschädigung - insgesamt-',
-    'Sach-beschädigung durch Graffiti',
-    'Rauschgift-delikte',
-    'Kieztaten'
-]
+        # Anwenden der Umwandlungsfunktion auf die relevante Spalte
+        df['Straftaten_insgesamt'] = df['Straftaten_insgesamt'].apply(convert_to_int)
 
-# Entferne eventuell zusätzliche Leerzeilen oder nicht relevante Zeilen
-df = df.dropna(subset=['Bezeichnung (Bezirksregion)'])
+        # Filterung der Bezirke: Ausschluss der Einträge, die nicht zugeordnet sind (z.B. LOR-Schlüssel endet mit '900' oder '999')
+        df_filtered = df[~df['LOR-Schlüssel'].str.endswith(('900', '999'))].copy()
 
-# Entferne Anführungszeichen und Punkte, falls vorhanden, und ersetze Kommas in Zahlen
-numeric_columns = ['Straftaten - insgesamt-']
+        # Sortierung der Bezirke nach der Gesamtzahl der Straftaten absteigend
+        df_sorted = df_filtered.sort_values(by='Straftaten_insgesamt', ascending=False)
 
-for col in numeric_columns:
-    df[col] = df[col].str.replace('"', '').str.replace('.', '').str.replace(',', '').astype(int)
+        # Anzeige der sortierten Bezirke
+        print(df_sorted[['Bezeichnung', 'Straftaten_insgesamt']])
 
-# Sortiere die Bezirke nach der Anzahl der Straftaten insgesamt in absteigender Reihenfolge
-df_sorted = df.sort_values(by='Straftaten - insgesamt-', ascending=False)
+        # Optional: Speichern der sortierten Daten in einer neuen CSV-Datei
+        df_sorted[['Bezeichnung', 'Straftaten_insgesamt']].to_csv('sortierte_straftaten.csv', index=False, encoding='utf-8')
+        print("\nDie sortierten Daten wurden in 'sortierte_straftaten.csv' gespeichert.")
 
-# Wähle relevante Spalten für die Ausgabe
-output_df = df_sorted[['Bezeichnung (Bezirksregion)', 'Straftaten - insgesamt-']]
+    except FileNotFoundError:
+        print(f"Die Datei '{csv_file}' wurde nicht gefunden. Bitte überprüfen Sie den Pfad.")
+    except Exception as e:
+        print(f"Es ist ein Fehler aufgetreten: {e}")
 
-# Zeige die sortierte Liste an
-print(output_df.to_string(index=False))
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,130 @@
+Gerne helfe ich Ihnen dabei, ein Python-Skript zu erstellen, das Ihre CSV-Daten analysiert und die Bezirke nach der Anzahl der insgesamt erfassten Straftaten im Jahr 2023 sortiert. Wir werden hierfür die Bibliothek `pandas` verwenden, die sich hervorragend für Datenanalyseaufgaben eignet.
+
+### Schritte des Skripts:
+
+1. **CSV-Datei einlesen**: Wir werden die CSV-Datei einlesen und die nicht relevanten oberen Zeilen überspringen.
+2. **Daten bereinigen**: Entfernen von Tausendertrennungen (Kommas) und Umwandeln der Zahlen in Ganzzahlen.
+3. **Daten filtern**: Ausschließen von Zeilen, die nicht zugeordnet oder Gesamtwerte enthalten.
+4. **Sortieren**: Sortieren der Bezirke basierend auf der Gesamtanzahl der Straftaten.
+5. **Ergebnis anzeigen**: Ausgabe der sortierten Liste.
+
+### Benötigte Bibliotheken
+
+Stellen Sie sicher, dass Sie `pandas` installiert haben. Sie können es mit folgendem Befehl installieren:
+
+```bash
+pip install pandas
+```
+
+### Python-Skript
+
+```python
+import pandas as pd
+
+# Pfad zur CSV-Datei
+csv_datei = 'FZ_2023.csv'
+
+try:
+    # Einlesen der CSV-Datei, Überspringen der ersten 4 Zeilen
+    df = pd.read_csv(
+        csv_datei,
+        sep=',',
+        skiprows=4,
+        encoding='utf-8-sig'  # Unterstützt Umlaute und Sonderzeichen
+    )
+except FileNotFoundError:
+    print(f"Die Datei {csv_datei} wurde nicht gefunden.")
+    exit(1)
+
+# Anzeige der ersten paar Zeilen zur Überprüfung
+print("Erste 5 Zeilen der eingelesenen Daten:")
+print(df.head())
+
+# Benennung der relevanten Spalten
+bezeichnung_col = 'Bezeichnung (Bezirksregion)'
+straftaten_col = 'Straftaten insgesamt-'
+
+# Überprüfen, ob die benötigten Spalten existieren
+if bezeichnung_col not in df.columns or straftaten_col not in df.columns:
+    print("Die erwarteten Spalten wurden in der CSV-Datei nicht gefunden.")
+    exit(1)
+
+# Bereinigen der 'Straftaten insgesamt-' Spalte
+# Entfernen von Anführungszeichen und Tausendertrennungen
+df[straftaten_col] = df[straftaten_col].astype(str).str.replace('"', '').str.replace(',', '').astype(int)
+
+# Filtern der Bezirke:
+# Ausschließen von Zeilen, die 'nicht zuzuordnen' oder Gesamtwerte enthalten
+# Annahme: Bezirke mit bestimmten LOR-Schlüssel (z.B. '999999') sind Gesamt oder nicht zuzuordnen
+# Alternativ kann nach dem Namen gefiltert werden
+df_gefiltert = df[
+    ~df[bezeichnung_col].str.contains('nicht zuzuordnen', case=False, na=False) &
+    ~df[bezeichnung_col].str.contains('gesamt', case=False, na=False) &
+    ~df[bezeichnung_col].str.contains('PKS gesamt', case=False, na=False)
+]
+
+# Sortieren nach 'Straftaten insgesamt-' in absteigender Reihenfolge
+df_sortiert = df_gefiltert.sort_values(by=straftaten_col, ascending=False)
+
+# Auswahl der gewünschten Spalten zur Anzeige
+ergebnis = df_sortiert[[bezeichnung_col, straftaten_col]]
+
+# Umbenennen der Spalten für bessere Lesbarkeit
+ergebnis = ergebnis.rename(columns={
+    bezeichnung_col: 'Bezirk',
+    straftaten_col: 'Straftaten Insgesamt 2023'
+})
+
+# Anzeige des sortierten Ergebnisses
+print("\nBezirke nach Gesamtzahl der Straftaten im Jahr 2023 (absteigend):")
+print(ergebnis.to_string(index=False))
+```
+
+### Erklärung des Skripts
+
+1. **Einlesen der CSV-Datei**:
+   - Wir verwenden `pd.read_csv` mit `skiprows=4`, um die ersten vier Zeilen zu überspringen, die keine relevanten Daten enthalten.
+   - `encoding='utf-8-sig'` stellt sicher, dass Umlaute und Sonderzeichen korrekt gelesen werden.
+
+2. **Datenbereinigung**:
+   - Entfernen von Anführungszeichen und Tausendertrennungen in der Spalte `'Straftaten insgesamt-'`.
+   - Umwandeln der bereinigten Daten in Ganzzahlen (`int`), sodass sie numerisch sortiert werden können.
+
+3. **Filtern der Daten**:
+   - Ausschluss von Zeilen, die nicht zugeordnet werden können oder Gesamtwerte darstellen. Dies geschieht durch das Filtern von Bezirken, deren Name bestimmte Schlüsselwörter enthält.
+
+4. **Sortieren und Anzeigen**:
+   - Die Daten werden nach der bereinigten `'Straftaten insgesamt-'`-Spalte in absteigender Reihenfolge sortiert.
+   - Das Ergebnis wird übersichtlich mit den Bezirksnamen und den entsprechenden Straftaten angezeigt.
+
+### Ausführen des Skripts
+
+1. **Speichern**: Speichern Sie das obige Skript in einer Datei, zum Beispiel `analyse_fallzahlen.py`.
+2. **Ausführen**: Führen Sie das Skript in Ihrer Kommandozeile oder Ihrem Terminal aus:
+
+```bash
+python analyse_fallzahlen.py
+```
+
+### Beispielausgabe
+
+Die Ausgabe wird in etwa wie folgt aussehen (abhängig von den tatsächlichen Daten):
+
+```
+Bezirke nach Gesamtzahl der Straftaten im Jahr 2023 (absteigend):
+             Bezirk  Straftaten Insgesamt 2023
+               Mitte                  83611
+     Friedrichshain-Kreuzberg                 55838
+              Neukölln                  45313
+       Tempelhof-Schöneberg                 41776
+      Steglitz-Zehlendorf                 23719
+                 ...                        ...
+```
+
+### Hinweise
+
+- **Dateipfad**: Stellen Sie sicher, dass sich die Datei `FZ_2023.csv` im selben Verzeichnis wie das Skript befindet oder passen Sie den Pfad entsprechend an.
+- **Fehlermeldungen**: Das Skript enthält einfache Fehlerbehandlungen, die Sie bei Problemen mit dem Dateipfad oder fehlenden Spalten unterstützen.
+- **Anpassungen**: Je nach genauen Anforderungen können Sie das Skript erweitern, beispielsweise um zusätzliche Analysen oder Visualisierungen.
+
+Ich hoffe, dieses Skript hilft Ihnen weiter! Bei weiteren Fragen stehe ich Ihnen gerne zur Verfügung.

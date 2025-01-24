@@ -1,0 +1,144 @@
+Um die Daten aus der CSV-Datei `FZ_2023.csv` zu analysieren und die Bezirke nach der Anzahl der insgesamt registrierten Straftaten im Jahr 2023 zu sortieren, kannst du das folgende Python-Skript verwenden. Dieses Skript nutzt die Bibliothek `pandas`, die sich hervorragend für die Datenanalyse eignet.
+
+### Schritt-für-Schritt Anleitung:
+
+1. **Installation von Pandas**:
+   
+   Stelle sicher, dass die `pandas`-Bibliothek installiert ist. Falls nicht, kannst du sie mit folgendem Befehl installieren:
+
+   ```bash
+   pip install pandas
+   ```
+
+2. **Erstellung des Python-Skripts**:
+
+   Erstelle eine neue Python-Datei, beispielsweise `analyse_straftaten.py`, und füge den folgenden Code ein:
+
+   ```python
+   import pandas as pd
+
+   # Pfad zur CSV-Datei
+   csv_datei = 'Fallzahlen&HZ2014-2023/FZ_2023.csv'  # Passe den Pfad entsprechend an
+
+   # Da die ersten 4 Zeilen Metadaten enthalten, überspringen wir diese
+   try:
+       df = pd.read_csv(csv_datei, skiprows=4, delimiter=',', encoding='utf-8')
+   except FileNotFoundError:
+       print(f"Die Datei {csv_datei} wurde nicht gefunden.")
+       exit(1)
+   except Exception as e:
+       print(f"Beim Lesen der Datei ist ein Fehler aufgetreten: {e}")
+       exit(1)
+
+   # Anzeige der ersten paar Zeilen, um die Struktur zu verstehen
+   print("Erste fünf Zeilen der CSV-Datei:")
+   print(df.head())
+
+   # Überprüfen der Spaltennamen
+   print("\nSpaltennamen:")
+   print(df.columns.tolist())
+
+   # Annahme: Die Spalte "Straftaten -insgesamt-" ist die dritte Spalte
+   # Wegen Zeilenumbrüchen im Spaltennamen könnte der tatsächliche Name variieren
+   # Daher suchen wir die Spalte, die "Straftaten" und "insgesamt" enthält
+   spalte_straftaten = None
+   for spalte in df.columns:
+       if 'Straftaten' in spalte and 'insgesamt' in spalte:
+           spalte_straftaten = spalte
+           break
+
+   if spalte_straftaten is None:
+       print("Die Spalte für 'Straftaten insgesamt' wurde nicht gefunden.")
+       exit(1)
+
+   # Entfernen von Tausender-Trennzeichen und Konvertieren zu Integer
+   df[spalte_straftaten] = df[spalte_straftaten].astype(str).str.replace(',', '').astype(int)
+
+   # Optional: Entfernen von überschüssigen Leerzeichen in den Bezirksnamen
+   df['Bezeichnung (Bezirksregion)'] = df['Bezeichnung (Bezirksregion)'].str.strip()
+
+   # Sortieren nach der Anzahl der Straftaten insgesamt in absteigender Reihenfolge
+   df_sortiert = df.sort_values(by=spalte_straftaten, ascending=False)
+
+   # Auswahl der relevanten Spalten für die Ausgabe
+   ergebnis = df_sortiert[['Bezeichnung (Bezirksregion)', spalte_straftaten]]
+
+   # Anzeige der sortierten Ergebnisse
+   print("\nBezirke sortiert nach insgesamt registrierten Straftaten im Jahr 2023:")
+   print(ergebnis.to_string(index=False))
+   ```
+
+3. **Erklärung des Skripts**:
+
+   - **Dateipfad anpassen**: Stelle sicher, dass der Pfad zur CSV-Datei korrekt ist. Im obenstehenden Beispiel befindet sich die Datei im Ordner `Fallzahlen&HZ2014-2023`. Passe dies entsprechend an, falls die Datei anderswo liegt.
+   
+   - **Überprüfung der Struktur**: Das Skript liest die ersten fünf Zeilen und die Spaltennamen, um sicherzustellen, dass die richtigen Spalten identifiziert werden.
+
+   - **Spalte identifizieren**: Da der Spaltenname aufgrund von Zeilenumbrüchen variieren kann, durchsucht das Skript die Spalten nach einem Namen, der sowohl "Straftaten" als auch "insgesamt" enthält.
+
+   - **Datenbereinigung**: Entfernt Tausender-Trennzeichen (Kommas) und konvertiert die Werte in Ganzzahlen, um eine korrekte Sortierung zu ermöglichen.
+
+   - **Sortierung und Anzeige**: Sortiert die Bezirke basierend auf der Anzahl der insgesamt registrierten Straftaten in absteigender Reihenfolge und zeigt die Ergebnisse an.
+
+4. **Ausführung des Skripts**:
+
+   Navigiere in deinem Terminal oder deiner Kommandozeile zum Verzeichnis, das das Skript enthält, und führe es aus:
+
+   ```bash
+   python analyse_straftaten.py
+   ```
+
+   **Beispielhafte Ausgabe**:
+
+   ```
+   Erste fünf Zeilen der CSV-Datei:
+      LOR-Schlüssel (Bezirksregion) Bezeichnung (Bezirksregion)  Straftaten 
+    insgesamt-  Raub  ...
+
+   Spaltennamen:
+   ['LOR-Schlüssel (Bezirksregion)', 'Bezeichnung (Bezirksregion)', 'Straftaten \n-insgesamt-', 'Raub', ...]
+
+   Bezirke sortiert nach insgesamt registrierten Straftaten im Jahr 2023:
+    Bezirksregion             Straftaten -insgesamt-
+        Reinickendorf                       27371
+            Neukölln                       45313
+    Friedrichshain-Kreuzberg                       55738
+                ...                               ...
+   ```
+
+   *Hinweis*: Die tatsächlichen Ergebnisse hängen von den Daten in deiner CSV-Datei ab.
+
+5. **Anpassungen und Erweiterungen**:
+
+   - **Speichern der Ergebnisse**: Du kannst das Skript erweitern, um die sortierten Ergebnisse in eine neue CSV-Datei zu speichern:
+
+     ```python
+     # Speichern als CSV
+     ergebnis.to_csv('sortierte_straftaten_2023.csv', index=False)
+     print("\nDie sortierten Ergebnisse wurden in 'sortierte_straftaten_2023.csv' gespeichert.")
+     ```
+
+   - **Visualisierung**: Für eine bessere Übersicht kannst du Diagramme erstellen, z.B. mit `matplotlib`:
+
+     ```python
+     import matplotlib.pyplot as plt
+
+     # Top 10 Bezirke
+     top_10 = ergebnis.head(10)
+     plt.figure(figsize=(10,6))
+     plt.bar(top_10['Bezeichnung (Bezirksregion)'], top_10[spalte_straftaten], color='skyblue')
+     plt.xlabel('Bezirksregion')
+     plt.ylabel('Anzahl Straftaten insgesamt')
+     plt.title('Top 10 Bezirke in Berlin nach Straftaten insgesamt (2023)')
+     plt.xticks(rotation=45, ha='right')
+     plt.tight_layout()
+     plt.show()
+     ```
+
+     Vergiss nicht, `matplotlib` zu installieren, falls du es verwenden möchtest:
+
+     ```bash
+     pip install matplotlib
+     ```
+
+Dieses Skript bietet eine grundlegende Analyse der Straftaten in den Berliner Bezirken für das Jahr 2023. Du kannst es weiter anpassen und erweitern, um spezifischere Analysen oder zusätzliche Visualisierungen durchzuführen.

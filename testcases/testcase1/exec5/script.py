@@ -3,61 +3,46 @@ import pandas as pd
 # Pfad zur CSV-Datei
 csv_file = 'FZ_2023.csv'
 
-# Lesen der CSV-Datei
-# - Überspringen der ersten 4 Zeilen, die Metadaten enthalten
-# - Festlegen des Trennzeichens auf Komma
-# - Festlegen von Anführungszeichen auf "
-# - Umgang mit Tausendertrennzeichen (,)
-try:
-    df = pd.read_csv(
-        csv_file,
-        skiprows=4,
-        sep=',',
-        quotechar='"',
-        thousands=',',
-        encoding='utf-8'
-    )
-except FileNotFoundError:
-    print(f"Die Datei '{csv_file}' wurde nicht gefunden.")
-    exit(1)
-except Exception as e:
-    print(f"Beim Lesen der Datei ist ein Fehler aufgetreten: {e}")
-    exit(1)
+# CSV-Datei einlesen
+# Annahme: Die tatsächlichen Daten beginnen ab der 5. Zeile (Index 4)
+df = pd.read_csv(
+    csv_file,
+    skiprows=4,               # Überspringt die ersten 4 Zeilen (Metadaten)
+    delimiter=',',            # Trennzeichen ist ein Komma
+    thousands=',',            # Tausendertrennzeichen ist ein Komma
+    encoding='utf-8'          # Stellen Sie sicher, dass die Codierung stimmt
+)
 
-# Anzeigen der ersten paar Zeilen, um die Struktur zu verstehen
+# Anzeigen der ersten Zeilen zur Überprüfung
 print("Erste Zeilen des DataFrames:")
 print(df.head())
 
-# Bereinigen der Spaltennamen (Entfernen von Zeilenumbrüchen und überflüssigen Leerzeichen)
-df.columns = df.columns.str.replace('\n', ' ').str.strip()
+# Spaltennamen überprüfen
+print("\nSpaltennamen:")
+print(df.columns.tolist())
 
-# Überprüfen, ob die relevante Spalte vorhanden ist
-total_crimes_column = 'Straftaten - insgesamt-'
-if total_crimes_column not in df.columns:
-    print(f"Die Spalte '{total_crimes_column}' wurde in den Daten nicht gefunden.")
-    exit(1)
+# Definieren der relevanten Spalten
+district_col = 'Bezeichnung (Bezirksregion)'
+total_crimes_col = 'Straftaten -insgesamt-'
 
-# Entfernen von möglichen Leerzeichen in den Bezirksnamen
-df['Bezeichnung (Bezirksregion)'] = df['Bezeichnung (Bezirksregion)'].str.strip()
+# Überprüfen, ob die Spalten existieren
+if district_col not in df.columns or total_crimes_col not in df.columns:
+    raise ValueError(f"Überprüfen Sie die Spaltennamen. Erwartet '{district_col}' und '{total_crimes_col}'.")
 
-# Sortieren des DataFrames basierend auf der Gesamtzahl der Straftaten in absteigender Reihenfolge
-df_sorted = df.sort_values(by=total_crimes_column, ascending=False)
+# Bereinigen der Daten: Entfernen von Anführungszeichen und Umwandeln in numerische Werte
+df[total_crimes_col] = df[total_crimes_col].replace({',': ''}, regex=True).astype(int)
 
-# Zur besseren Lesbarkeit die Index zurücksetzen
-df_sorted.reset_index(drop=True, inplace=True)
+# Sortieren nach der Gesamtzahl der Straftaten in absteigender Reihenfolge
+sorted_df = df.sort_values(by=total_crimes_col, ascending=False)
 
-# Ausgabe der sortierten Bezirke mit deren Gesamtzahl der Straftaten
-print("\nBezirke sortiert nach der Gesamtzahl der Straftaten (absteigend):")
-print(df_sorted[['Bezeichnung (Bezirksregion)', total_crimes_column]])
+# Auswahl der relevanten Spalten
+result_df = sorted_df[[district_col, total_crimes_col]].reset_index(drop=True)
 
-# Optional: Speichern des sortierten DataFrames in eine neue CSV-Datei
-output_file = 'FZ_2023_sorted.csv'
-try:
-    df_sorted[['Bezeichnung (Bezirksregion)', total_crimes_column]].to_csv(
-        output_file,
-        index=False,
-        encoding='utf-8'
-    )
-    print(f"\nDie sortierten Daten wurden erfolgreich in '{output_file}' gespeichert.")
-except Exception as e:
-    print(f"Beim Speichern der Datei ist ein Fehler aufgetreten: {e}")
+# Anzeigen der sortierten Daten
+print("\nBezirke sortiert nach der Gesamtzahl der Straftaten (2023):")
+print(result_df)
+
+# Optional: Speichern der sortierten Daten in eine neue CSV-Datei
+output_file = 'Sortierte_Fallzahlen_2023.csv'
+result_df.to_csv(output_file, index=False, encoding='utf-8')
+print(f"\nDie sortierten Daten wurden in '{output_file}' gespeichert.")

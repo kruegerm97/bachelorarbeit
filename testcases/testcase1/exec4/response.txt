@@ -1,0 +1,130 @@
+Um die Anzahl der Straftaten pro Bezirk in Berlin für das Jahr 2023 zu analysieren und die Bezirke nach der Gesamtanzahl der Straftaten absteigend zu sortieren, können Sie das Python-Paket `pandas` verwenden. Dieses Paket erleichtert das Lesen, Bereinigen und Analysieren von Daten erheblich.
+
+Hier ist ein vollständiges Python-Skript, das genau dies tut:
+
+```python
+import pandas as pd
+
+# Pfad zur CSV-Datei
+csv_datei = 'FZ_2023.csv'
+
+# Lesen der CSV-Datei, Überspringen der ersten vier Zeilen, die keine relevanten Daten enthalten
+df = pd.read_csv(csv_datei, skiprows=4, sep=',', encoding='utf-8')
+
+# Anzeigen der ersten paar Zeilen, um sicherzustellen, dass die Daten korrekt gelesen wurden
+# print(df.head())
+
+# Bereinigen der Spalte 'Straftaten -insgesamt-'
+# Entfernen der Anführungszeichen und Kommata, Umwandeln in Ganzzahlen
+df['Straftaten -insgesamt-'] = (
+    df['Straftaten -insgesamt-']
+    .astype(str)  # Sicherstellen, dass die Werte als Strings behandelt werden
+    .str.replace('"', '')  # Entfernen von Anführungszeichen
+    .str.replace(',', '')  # Entfernen von Tausendertrennzeichen
+    .astype(int)  # Umwandeln in Integer
+)
+
+# Optional: Entfernen von nicht zuordenbaren Bezirken, falls gewünscht
+# df = df[~df['LOR-Schlüssel (Bezirksregion)'].str.contains('99')]
+
+# Sortieren der Bezirke nach der Gesamtanzahl der Straftaten absteigend
+sortierte_df = df.sort_values(by='Straftaten -insgesamt-', ascending=False)
+
+# Zur besseren Lesbarkeit können Sie die Spaltennamen umbenennen
+sortierte_df = sortierte_df.rename(columns={
+    'Bezeichnung (Bezirksregion)': 'Bezirk',
+    'Straftaten -insgesamt-': 'Straftaten_Gesamt'
+})
+
+# Anzeigen der sortierten Liste
+print(sortierte_df[['Bezirk', 'Straftaten_Gesamt']].to_string(index=False))
+```
+
+### Erklärung der Schritte:
+
+1. **Importieren der Bibliothek:**
+   ```python
+   import pandas as pd
+   ```
+   `pandas` ist eine leistungsstarke Bibliothek zur Datenanalyse in Python.
+
+2. **Lesen der CSV-Datei:**
+   ```python
+   df = pd.read_csv(csv_datei, skiprows=4, sep=',', encoding='utf-8')
+   ```
+   - `skiprows=4`: Überspringt die ersten vier Zeilen, die keine relevanten Daten enthalten.
+   - `sep=','`: Definiert das Trennzeichen als Komma.
+   - `encoding='utf-8'`: Stellt sicher, dass die Datei korrekt gelesen wird, insbesondere bei deutschen Umlauten.
+
+3. **Bereinigen der Daten:**
+   ```python
+   df['Straftaten -insgesamt-'] = (
+       df['Straftaten -insgesamt-']
+       .astype(str)
+       .str.replace('"', '')
+       .str.replace(',', '')
+       .astype(int)
+   )
+   ```
+   - Entfernt Anführungszeichen und Tausendertrennzeichen.
+   - Wandelt die bereinigten Strings in Ganzzahlen (`int`) um.
+
+4. **Sortieren der Daten:**
+   ```python
+   sortierte_df = df.sort_values(by='Straftaten -insgesamt-', ascending=False)
+   ```
+   Sortiert die Bezirke basierend auf der Gesamtanzahl der Straftaten in absteigender Reihenfolge.
+
+5. **Umbenennen der Spalten (optional):**
+   ```python
+   sortierte_df = sortierte_df.rename(columns={
+       'Bezeichnung (Bezirksregion)': 'Bezirk',
+       'Straftaten -insgesamt-': 'Straftaten_Gesamt'
+   })
+   ```
+   Dies verbessert die Lesbarkeit der Ausgabe.
+
+6. **Anzeigen der Ergebnisse:**
+   ```python
+   print(sortierte_df[['Bezirk', 'Straftaten_Gesamt']].to_string(index=False))
+   ```
+   Gibt eine Tabelle der Bezirke und ihrer Gesamtanzahl an Straftaten aus, sortiert von den meisten zu den wenigsten Straftaten.
+
+### Zusätzliche Hinweise:
+
+- **Installation von pandas:**
+  Stellen Sie sicher, dass `pandas` installiert ist. Wenn nicht, können Sie es mit folgendem Befehl installieren:
+  ```bash
+  pip install pandas
+  ```
+
+- **Umgang mit fehlenden Daten:**
+  Sollte Ihre CSV-Datei fehlende Werte enthalten, können Sie diese vor der Konvertierung in `int` behandeln, beispielsweise durch Auffüllen mit `0` oder Entfernen entsprechender Zeilen:
+  ```python
+  df['Straftaten -insgesamt-'] = df['Straftaten -insgesamt-'].fillna(0).astype(int)
+  ```
+
+- **Export der sortierten Daten:**
+  Falls Sie die sortierten Daten in eine neue CSV-Datei speichern möchten, können Sie dies tun:
+  ```python
+  sortierte_df.to_csv('sortierte_fallzahlen_2023.csv', columns=['Bezirk', 'Straftaten_Gesamt'], index=False)
+  ```
+
+### Beispielausgabe:
+
+Nach dem Ausführen des Skripts erhalten Sie eine sortierte Liste der Bezirke mit der jeweiligen Gesamtanzahl der Straftaten. Die genaue Ausgabe hängt von den Daten in Ihrer CSV-Datei ab.
+
+```plaintext
+      Bezirk  Straftaten_Gesamt
+       Mitte              83611
+Friedrichshain-Kreuzberg       55824
+      Neukölln              45213
+  Tempelhof-Schöneberg       41776
+      Reinickendorf          27344
+          Pankow              39164
+  Marzahn-Hellersdorf         26649
+   Charlottenburg-Wilmersdorf 53630
+          etc.
+```
+
+Dieses Skript bietet eine solide Grundlage für die Analyse der Straftaten in Berlin im Jahr 2023. Sie können es weiter anpassen, um zusätzliche Analysen durchzuführen oder detailliertere Berichte zu erstellen.

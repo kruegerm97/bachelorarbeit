@@ -1,60 +1,71 @@
 import pandas as pd
 
+def load_and_clean_data(csv_file):
+    """
+    Lädt die CSV-Datei, bereinigt die Daten und gibt einen bereinigten DataFrame zurück.
+    """
+    try:
+        # Überspringe die ersten 4 Zeilen, die keine relevanten Daten enthalten
+        df = pd.read_csv(csv_file, skiprows=4, sep=',', encoding='utf-8')
+        
+        # Identifiziere die relevanten Spalten
+        # Da die Spaltennamen Zeilenumbrüche enthalten können, benennen wir sie um
+        # Basierend auf den bereitgestellten Daten:
+        # Index 0: LOR-Schlüssel
+        # Index 1: Bezeichnung
+        # Index 2: Straftaten insgesamt
+        df = df.rename(columns={
+            df.columns[0]: 'LOR_Schluessel',
+            df.columns[1]: 'Bezirksname',
+            df.columns[2]: 'Straftaten_insgesamt'
+        })
+        
+        # Entferne alle Zeilen, die keine LOR_Schluessel enthalten (z.B. leere Zeilen)
+        df = df.dropna(subset=['LOR_Schluessel'])
+        
+        # Entferne Anführungszeichen und Leerzeichen
+        df['Straftaten_insgesamt'] = df['Straftaten_insgesamt'].astype(str).str.replace('"', '').str.replace(' ', '')
+        
+        # Entferne Tausendertrennzeichen und konvertiere in Ganzzahlen
+        df['Straftaten_insgesamt'] = df['Straftaten_insgesamt'].str.replace(',', '').astype(int)
+        
+        return df
+    except Exception as e:
+        print(f"Fehler beim Laden oder Bereinigen der Daten: {e}")
+        return None
+
+def sort_districts_by_crime(df):
+    """
+    Sortiert die Bezirke nach der Gesamtanzahl der Straftaten in absteigender Reihenfolge.
+    """
+    try:
+        sorted_df = df.sort_values(by='Straftaten_insgesamt', ascending=False)
+        return sorted_df
+    except Exception as e:
+        print(f"Fehler beim Sortieren der Daten: {e}")
+        return None
+
 def main():
     # Pfad zur CSV-Datei
-    csv_datei = 'FZ_2023.csv'
+    csv_file = 'FZ_2023.csv'
     
-    try:
-        # Schritt 1: CSV-Datei einlesen und die ersten 4 Zeilen überspringen
-        # Diese Zeilen enthalten Metadaten und leere Zeilen
-        df = pd.read_csv(
-            csv_datei,
-            skiprows=4,                # Überspringt die ersten 4 Zeilen
-            sep=',',                   # Komma als Trennzeichen
-            encoding='utf-8',          # UTF-8 Encoding
-            thousands=',',             # Komma als Tausendertrennzeichen
-            engine='python'            # Verwenden des Python-Engines für flexiblere Parser-Optionen
-        )
-        
-        # Schritt 2: Spaltennamen bereinigen (Entfernen von Zeilenumbrüchen und Leerzeichen)
-        df.columns = df.columns.str.replace('\n', ' ', regex=True).str.strip()
-        
-        # Optional: Überprüfen der Spaltennamen
-        # print(df.columns)
-        
-        # Schritt 3: Identifizieren der relevanten Spalten
-        # Angenommen, die Spalte für 'Straftaten insgesamt' enthält 'Straftaten' und 'insgesamt' im Namen
-        straffaten_col = [col for col in df.columns if 'Straftaten' in col and 'insgesamt' in col.lower()]
-        if not straffaten_col:
-            raise ValueError("Die Spalte für 'Straftaten insgesamt' wurde nicht gefunden.")
-        straffaten_col = straffaten_col[0]
-        
-        # Identifizieren der Spalte für die Bezirksbezeichnung
-        bezirk_col = 'Bezeichnung (Bezirksregion)'
-        
-        # Schritt 4: Daten bereinigen und sicherstellen, dass die relevanten Spalten numerisch sind
-        df[straffaten_col] = pd.to_numeric(df[straffaten_col], errors='coerce')
-        
-        # Entfernen von Zeilen mit fehlenden Werten in den relevanten Spalten
-        df = df.dropna(subset=[bezirk_col, straffaten_col])
-        
-        # Schritt 5: Sortieren der Bezirke nach der Gesamtanzahl der Straftaten (absteigend)
-        df_sorted = df.sort_values(by=straffaten_col, ascending=False)
-        
-        # Schritt 6: Auswahl der relevanten Spalten für die Ausgabe
-        ergebnis_df = df_sorted[[bezirk_col, straffaten_col]].reset_index(drop=True)
-        
-        # Optional: Anzeigen der sortierten Tabelle
-        print(ergebnis_df)
-        
-        # Schritt 7: Speichern des Ergebnisses in einer neuen CSV-Datei
-        ergebnis_df.to_csv('sortierte_straftaten_2023.csv', index=False, encoding='utf-8')
-        print("\nDie sortierte Liste wurde in 'sortierte_straftaten_2023.csv' gespeichert.")
+    # Lade und bereinige die Daten
+    df = load_and_clean_data(csv_file)
     
-    except FileNotFoundError:
-        print(f"Die Datei '{csv_datei}' wurde nicht gefunden. Bitte überprüfe den Dateipfad.")
-    except Exception as e:
-        print(f"Ein Fehler ist aufgetreten: {e}")
+    if df is not None:
+        # Sortiere die Bezirke nach Straftaten insgesamt
+        sorted_df = sort_districts_by_crime(df)
+        
+        if sorted_df is not None:
+            # Zeige die sortierten Ergebnisse
+            print("Bezirke sortiert nach Gesamtzahl der Straftaten (2023):\n")
+            print(sorted_df[['Bezirksname', 'Straftaten_insgesamt']].to_string(index=False))
+            
+            # Optional: Speichere die sortierten Daten in einer neuen CSV-Datei
+            sorted_df.to_csv('Sortierte_FZ_2023.csv', columns=['Bezirksname', 'Straftaten_insgesamt'], index=False)
+            print("\nDie sortierten Daten wurden in 'Sortierte_FZ_2023.csv' gespeichert.")
+    else:
+        print("Daten konnten nicht geladen werden.")
 
 if __name__ == "__main__":
     main()

@@ -10,7 +10,7 @@ with open(csv_file, "r", encoding="utf-8") as file:
 
 # Prompt erstellen: CSV-Daten einbetten + Anweisung
 prompt = f"""
-Hier ist meine CSV-Datei mit dem Namen 'FZ_2023.csv': {csv_content}, bitte analysiere diese Daten und erstelle mir ein Python Skript, das nach der Anzahl der Straftaten insgesamt eines Bezirks in 2023 sortiert.
+Ich habe eine Excel Datei mit dem Namen 'Fallzahlen&HZ2014-2023', mit mehreren Sheets. Hier ist der Inhalt des Sheets 'FZ_2023.csv': {csv_content}, bitte analysiere diese Daten und erstelle mir ein Python Skript, das nach der Anzahl der Straftaten insgesamt eines Bezirks in 2023 sortiert.
 """
 
 # Anfrage an die OpenAI Chat-API

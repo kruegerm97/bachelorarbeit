@@ -1,79 +1,55 @@
 import pandas as pd
 
-def clean_number(value):
-    """
-    Entfernt Anführungszeichen und Tausender-Trennzeichen,
-    und konvertiert den Wert in einen Integer.
-    """
-    if pd.isna(value):
-        return 0
-    return int(str(value).replace('"', '').replace(',', '').strip())
+# Pfad zur CSV-Datei
+csv_datei = 'FZ_2023.csv'
 
-def main():
-    # Pfad zur CSV-Datei
-    csv_file = 'FZ_2023.csv'
-
-    # Öffnen der CSV-Datei und Finden der Header-Zeile
-    with open(csv_file, 'r', encoding='utf-8') as f:
-        lines = f.readlines()
-
-    # Suche nach der Header-Zeile, die mit 'LOR-Schlüssel (Bezirksregion)' beginnt
-    header_line_idx = None
-    for idx, line in enumerate(lines):
-        if line.startswith('LOR-Schlüssel (Bezirksregion)'):
-            header_line_idx = idx
+# Schritt 1: Lesen der CSV-Datei und Überspringen der irrelevanten ersten Zeilen
+# Wir lesen die Datei ohne Header und durchsuchen dann nach der Zeile, die die Spaltenüberschriften enthält
+with open(csv_datei, 'r', encoding='utf-8') as file:
+    for i, zeile in enumerate(file):
+        if zeile.startswith('LOR-Schlüssel (Bezirksregion)'):
+            header_zeile = i
             break
 
-    if header_line_idx is None:
-        print("Header-Zeile nicht gefunden.")
-        return
+# Schritt 2: Laden der Daten mit den korrekten Headern
+df = pd.read_csv(
+    csv_datei,
+    skiprows=header_zeile,
+    sep=',',
+    encoding='utf-8',
+    quotechar='"',
+    engine='python'  # Verwenden des Python-Engines für bessere Handhabung von Anführungszeichen
+)
 
-    # Laden der Daten mit pandas, überspringen der vorherigen Zeilen
-    df = pd.read_csv(
-        csv_file,
-        delimiter=',',
-        skiprows=header_line_idx,
-        encoding='utf-8'
-    )
+# Schritt 3: Bereinigung der Daten
 
-    # Anzeigen der ersten Zeilen zur Überprüfung
-    # print(df.head())
+# Entfernen von führenden und nachfolgenden Leerzeichen in den Spaltennamen
+df.columns = df.columns.str.strip()
 
-    # Benennung der relevanten Spalten
-    # Angenommen, die Spalten sind wie folgt:
-    # 'LOR-Schlüssel (Bezirksregion)', 'Bezeichnung (Bezirksregion)', 'Straftaten - insgesamt-', ...
-    bezeichnung_col = 'Bezeichnung (Bezirksregion)'
-    strftaten_col = 'Straftaten - insgesamt-'
+# Entfernen von Zeilen, die keinen gültigen LOR-Schlüssel haben (z.B. leere Zeilen)
+df = df.dropna(subset=['LOR-Schlüssel (Bezirksregion)'])
 
-    # Einige Spaltennamen könnten Leerzeichen oder Zeilenumbrüche enthalten, daher:
-    df.columns = df.columns.str.strip().str.replace('\n', ' ')
+# Optional: Entfernen der Gesamtsumme-Zeile, falls nicht benötigt
+df = df[df['LOR-Schlüssel (Bezirksregion)'] != '999999']
 
-    # Überprüfen, ob die benötigten Spalten vorhanden sind
-    if bezeichnung_col not in df.columns or strftaten_col not in df.columns:
-        print(f"Benötigte Spalten '{bezeichnung_col}' oder '{strftaten_col}' nicht gefunden.")
-        return
+# Schritt 4: Konvertieren der "Straftaten - insgesamt -" Spalte in numerische Werte
+# Entfernen von Punkten und Kommata, die als Tausendertrennzeichen dienen
+# In diesem Datensatz scheinen die Kommata als Tausendertrennzeichen zu fungieren
 
-    # Bereinigen der 'Straftaten - insgesamt-' Spalte
-    df['Straftaten_insgesamt'] = df[strftaten_col].apply(clean_number)
+# Definieren der Spaltennamen basierend auf den gelieferten Daten
+# Es ist wichtig, den genauen Spaltennamen zu verwenden. Hier nehmen wir an, dass die dritte Spalte "Straftaten - insgesamt -" heißt
+# Falls der Name anders ist, passen Sie ihn entsprechend an.
+spalte_straftaten = 'Straftaten - insgesamt-'
 
-    # Entfernen von aggregierten oder nicht zugeordnete Bezirke, falls gewünscht
-    # Hier behalten wir alle Bezirke, Sie können dies nach Bedarf anpassen
+# Entfernen von Kommas und Konvertieren in Integer
+df[spalte_straftaten] = df[spalte_straftaten].astype(str).str.replace(',', '').astype(int)
 
-    # Sortieren des DataFrames nach 'Straftaten_insgesamt' absteigend
-    df_sorted = df.sort_values(by='Straftaten_insgesamt', ascending=False)
+# Schritt 5: Sortieren der Bezirke nach der Anzahl der Straftaten insgesamt in absteigender Reihenfolge
+df_sortiert = df.sort_values(by=spalte_straftaten, ascending=False)
 
-    # Auswählen der relevanten Spalten für die Ausgabe
-    output_df = df_sorted[[bezeichnung_col, 'Straftaten_insgesamt']]
+# Schritt 6: Auswahl der relevanten Spalten für die Ausgabe
+# Zum Beispiel: Bezirksregion und Anzahl der Straftaten
+df_sortiert = df_sortiert[['Bezeichnung (Bezirksregion)', spalte_straftaten]]
 
-    # Zur besseren Lesbarkeit die Zahlen mit Tausender-Trennzeichen formatieren
-    output_df['Straftaten_insgesamt'] = output_df['Straftaten_insgesamt'].apply(lambda x: f"{x:,}".replace(',', '.'))
-
-    # Anzeigen der sortierten Bezirke
-    print("Bezirke sortiert nach der Anzahl der Straftaten insgesamt (2023):\n")
-    print(output_df.to_string(index=False))
-
-    # Optional: Speichern der sortierten Liste in eine neue CSV-Datei
-    output_df.to_csv('Sortierte_Bezirge_Straftaten_2023.csv', index=False, encoding='utf-8')
-
-if __name__ == "__main__":
-    main()
+# Schritt 7: Anzeigen des sortierten DataFrames
+print(df_sortiert.to_string(index=False))

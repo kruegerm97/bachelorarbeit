@@ -1,3 +1,13 @@
+Um die von dir bereitgestellten Kriminalitätsdaten zu analysieren und die Bezirke nach der Gesamtzahl der Straftaten im Jahr 2023 zu sortieren, können wir ein Python-Skript erstellen, das die folgenden Schritte durchführt:
+
+1. **Daten einlesen:** Verwenden von `pandas`, um die CSV-Datei zu laden und die relevanten Daten zu extrahieren.
+2. **Daten bereinigen:** Entfernen von Tausendertrennzeichen, Konvertieren der Zahlenwerte in Integer.
+3. **Sortieren:** Bezirke basierend auf der Gesamtzahl der Straftaten sortieren.
+4. **Ergebnis anzeigen oder speichern:** Die sortierten Daten anzeigen oder in eine neue CSV-Datei exportieren.
+
+Hier ist ein vollständiges Python-Skript, das diese Schritte ausführt:
+
+```python
 import pandas as pd
 
 def load_and_process_data(csv_file):
@@ -90,3 +100,64 @@ def main():
 
 if __name__ == "__main__":
     main()
+```
+
+### Erklärung des Skripts
+
+1. **Importieren der Bibliothek:**
+   - `pandas` wird für die Datenmanipulation verwendet.
+
+2. **Funktion `load_and_process_data`:**
+   - Liest die CSV-Datei ein und überspringt die irrelevanten Kopfzeilen.
+   - Benennt die Spalten verständlicher um.
+   - Bereinigt die numerischen Daten, indem Anführungszeichen und Tausendertrennzeichen entfernt werden, und konvertiert die Daten in Integer.
+   - Sortiert die DataFrame nach der Spalte `'Straftaten insgesamt'` in absteigender Reihenfolge.
+
+3. **Funktion `main`:**
+   - Definiert den Pfad zur CSV-Datei.
+   - Ruft die `load_and_process_data`-Funktion auf, um die Daten zu laden und zu sortieren.
+   - Gibt die sortierten Bezirke mit der jeweiligen Gesamtzahl der Straftaten aus.
+   - Exportiert die sortierten Daten optional in eine neue CSV-Datei namens `'FZ_2023_sorted.csv'`.
+
+### Voraussetzungen
+
+- **Python installieren:** Stelle sicher, dass Python auf deinem System installiert ist. Du kannst es von der offiziellen [Python-Website](https://www.python.org/downloads/) herunterladen und installieren.
+  
+- **Pandas installieren:** Installiere die `pandas`-Bibliothek, falls noch nicht geschehen, indem du den folgenden Befehl in der Kommandozeile ausführst:
+  ```bash
+  pip install pandas
+  ```
+
+### Verwendung
+
+1. **Speichere das Skript:**
+   - Kopiere das obige Skript und speichere es in einer Datei, z.B. `crime_analysis.py`.
+
+2. **Platziere die CSV-Datei:**
+   - Stelle sicher, dass sich die Datei `FZ_2023.csv` im gleichen Verzeichnis wie das Skript befindet. Andernfalls passe den Pfad in der Variable `csv_file` entsprechend an.
+
+3. **Führe das Skript aus:**
+   - Öffne die Kommandozeile oder das Terminal, navigiere zum Verzeichnis des Skripts und führe folgenden Befehl aus:
+     ```bash
+     python crime_analysis.py
+     ```
+
+4. **Ergebnis:**
+   - Das Skript gibt eine sortierte Liste der Bezirke mit der entsprechenden Gesamtzahl der Straftaten aus.
+   - Zusätzlich wird eine neue CSV-Datei namens `FZ_2023_sorted.csv` erstellt, die die sortierten Daten enthält.
+
+### Beispielausgabe
+
+```
+Bezirke sortiert nach der Gesamtzahl der Straftaten (2023):
+
+Mitte: 83611
+Friedrichshain-Kreuzberg: 55838
+Neukölln: 45313
+Tempelhof-Schöneberg: 41776
+...
+
+Die sortierten Daten wurden in 'FZ_2023_sorted.csv' gespeichert.
+```
+
+Dieses Skript bietet eine einfache und effiziente Möglichkeit, die Kriminalitätsdaten nach Bezirken zu analysieren und die Bezirke basierend auf der Gesamtzahl der Straftaten zu sortieren. Du kannst das Skript weiter anpassen, um zusätzliche Analysen durchzuführen oder weitere Visualisierungen zu erstellen.
