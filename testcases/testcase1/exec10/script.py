@@ -1,59 +1,29 @@
 import pandas as pd
 
-# Pfad zur CSV-Datei
-csv_datei = 'FZ_2023.csv'
+# Datei- und Sheetnamen festlegen
+file_name = 'Fallzahlen&HZ2014-2023.xlsx'
+sheet_name = 'Fallzahlen_2023'
 
-try:
-    # Einlesen der CSV-Datei, Überspringen der ersten 4 Zeilen
-    df = pd.read_csv(
-        csv_datei,
-        sep=',',
-        skiprows=4,
-        encoding='utf-8-sig'  # Unterstützt Umlaute und Sonderzeichen
-    )
-except FileNotFoundError:
-    print(f"Die Datei {csv_datei} wurde nicht gefunden.")
-    exit(1)
+# Excel-Sheet lesen, die ersten 4 Zeilen überspringen
+df = pd.read_excel(file_name, sheet_name=sheet_name, header=4, thousands=',')
 
-# Anzeige der ersten paar Zeilen zur Überprüfung
-print("Erste 5 Zeilen der eingelesenen Daten:")
-print(df.head())
+# OPTIONAL: Überprüfe die Spaltenüberschriften
+#print(df.columns)
 
-# Benennung der relevanten Spalten
-bezeichnung_col = 'Bezeichnung (Bezirksregion)'
-straftaten_col = 'Straftaten insgesamt-'
+# Überprüfen, ob die Spalten 'Bezeichnung (Bezirksregion)' und 'Straftaten -insgesamt-' existieren
+required_columns = ['Bezeichnung (Bezirksregion)', 'Straftaten -insgesamt-']
+for col in required_columns:
+    if col not in df.columns:
+        raise ValueError(f"Spalte '{col}' nicht gefunden. Überprüfe die Spaltennamen.")
 
-# Überprüfen, ob die benötigten Spalten existieren
-if bezeichnung_col not in df.columns or straftaten_col not in df.columns:
-    print("Die erwarteten Spalten wurden in der CSV-Datei nicht gefunden.")
-    exit(1)
+# Sortieren nach der Gesamtzahl der Straftaten in absteigender Reihenfolge
+df_sorted = df.sort_values(by='Straftaten -insgesamt-', ascending=False)
 
-# Bereinigen der 'Straftaten insgesamt-' Spalte
-# Entfernen von Anführungszeichen und Tausendertrennungen
-df[straftaten_col] = df[straftaten_col].astype(str).str.replace('"', '').str.replace(',', '').astype(int)
+# Ergebnis anzeigen (Top 10 Bezirke)
+print(df_sorted[['Bezeichnung (Bezirksregion)', 'Straftaten -insgesamt-']].head(10))
 
-# Filtern der Bezirke:
-# Ausschließen von Zeilen, die 'nicht zuzuordnen' oder Gesamtwerte enthalten
-# Annahme: Bezirke mit bestimmten LOR-Schlüssel (z.B. '999999') sind Gesamt oder nicht zuzuordnen
-# Alternativ kann nach dem Namen gefiltert werden
-df_gefiltert = df[
-    ~df[bezeichnung_col].str.contains('nicht zuzuordnen', case=False, na=False) &
-    ~df[bezeichnung_col].str.contains('gesamt', case=False, na=False) &
-    ~df[bezeichnung_col].str.contains('PKS gesamt', case=False, na=False)
-]
+# Ergebnis in eine neue Excel-Datei speichern
+df_sorted.to_excel('sorted_fallzahlen_2023.xlsx', index=False)
 
-# Sortieren nach 'Straftaten insgesamt-' in absteigender Reihenfolge
-df_sortiert = df_gefiltert.sort_values(by=straftaten_col, ascending=False)
-
-# Auswahl der gewünschten Spalten zur Anzeige
-ergebnis = df_sortiert[[bezeichnung_col, straftaten_col]]
-
-# Umbenennen der Spalten für bessere Lesbarkeit
-ergebnis = ergebnis.rename(columns={
-    bezeichnung_col: 'Bezirk',
-    straftaten_col: 'Straftaten Insgesamt 2023'
-})
-
-# Anzeige des sortierten Ergebnisses
-print("\nBezirke nach Gesamtzahl der Straftaten im Jahr 2023 (absteigend):")
-print(ergebnis.to_string(index=False))
+# OPTIONAL: Ergebnis als CSV speichern
+# df_sorted.to_csv('sorted_fallzahlen_2023.csv', index=False)

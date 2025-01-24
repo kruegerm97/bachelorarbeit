@@ -1,55 +1,69 @@
 import pandas as pd
 
-# Pfad zur CSV-Datei
-csv_datei = 'FZ_2023.csv'
+# Dateiname und Sheetname definieren
+excel_file = 'Fallzahlen&HZ2014-2023.xlsx'
+sheet_name = 'Fallzahlen_2023'
 
-# Schritt 1: Lesen der CSV-Datei und Überspringen der irrelevanten ersten Zeilen
-# Wir lesen die Datei ohne Header und durchsuchen dann nach der Zeile, die die Spaltenüberschriften enthält
-with open(csv_datei, 'r', encoding='utf-8') as file:
-    for i, zeile in enumerate(file):
-        if zeile.startswith('LOR-Schlüssel (Bezirksregion)'):
-            header_zeile = i
-            break
+# Anzahl der zu überspringenden Zeilen vor den Daten (hier die ersten 4 Zeilen)
+skip_rows = 4
 
-# Schritt 2: Laden der Daten mit den korrekten Headern
-df = pd.read_csv(
-    csv_datei,
-    skiprows=header_zeile,
-    sep=',',
-    encoding='utf-8',
-    quotechar='"',
-    engine='python'  # Verwenden des Python-Engines für bessere Handhabung von Anführungszeichen
+# Lese das Excel-Sheet
+df = pd.read_excel(
+    excel_file,
+    sheet_name=sheet_name,
+    skiprows=skip_rows,  # Überspringe die ersten 4 Zeilen
+    dtype=str  # Lese alle Daten als Strings, um die Formatierung zu kontrollieren
 )
 
-# Schritt 3: Bereinigung der Daten
+# Optional: Anzeigen der ersten Zeilen, um die Struktur zu prüfen
+# print(df.head())
 
-# Entfernen von führenden und nachfolgenden Leerzeichen in den Spaltennamen
-df.columns = df.columns.str.strip()
+# Benenne die Spalten um, falls notwendig (abhängig von der tatsächlichen Header-Zeile)
+# Hier nehme ich an, dass die Spalte "Straftaten -insgesamt-" genau so heißt
+# Falls es Leerzeichen oder andere Zeichen gibt, passe den Namen entsprechend an
 
-# Entfernen von Zeilen, die keinen gültigen LOR-Schlüssel haben (z.B. leere Zeilen)
-df = df.dropna(subset=['LOR-Schlüssel (Bezirksregion)'])
+# Überprüfe die exakten Spaltennamen
+print("Spaltennamen:", df.columns.tolist())
 
-# Optional: Entfernen der Gesamtsumme-Zeile, falls nicht benötigt
-df = df[df['LOR-Schlüssel (Bezirksregion)'] != '999999']
+# Angenommen, die richtige Spalte heißt "Straftaten \n -insgesamt-"
+# Passen wir den Namen an, falls er Zeilenumbrüche oder zusätzliche Leerzeichen enthält
+df.columns = [col.strip().replace('\n', ' ') for col in df.columns]
 
-# Schritt 4: Konvertieren der "Straftaten - insgesamt -" Spalte in numerische Werte
-# Entfernen von Punkten und Kommata, die als Tausendertrennzeichen dienen
-# In diesem Datensatz scheinen die Kommata als Tausendertrennzeichen zu fungieren
+# Identifiziere die genaue Spalte für "Straftaten insgesamt"
+strftaten_col = None
+for col in df.columns:
+    if 'Straftaten' in col and 'insgesamt' in col:
+        strftaten_col = col
+        break
 
-# Definieren der Spaltennamen basierend auf den gelieferten Daten
-# Es ist wichtig, den genauen Spaltennamen zu verwenden. Hier nehmen wir an, dass die dritte Spalte "Straftaten - insgesamt -" heißt
-# Falls der Name anders ist, passen Sie ihn entsprechend an.
-spalte_straftaten = 'Straftaten - insgesamt-'
+if not strftaten_col:
+    raise ValueError("Die Spalte für 'Straftaten insgesamt' wurde nicht gefunden.")
 
-# Entfernen von Kommas und Konvertieren in Integer
-df[spalte_straftaten] = df[spalte_straftaten].astype(str).str.replace(',', '').astype(int)
+print(f"Verwende die Spalte: '{strftaten_col}' für die Sortierung.")
 
-# Schritt 5: Sortieren der Bezirke nach der Anzahl der Straftaten insgesamt in absteigender Reihenfolge
-df_sortiert = df.sort_values(by=spalte_straftaten, ascending=False)
+# Entferne Tausendertrennzeichen und konvertiere die Spalte in numerische Werte
+# Ersetze eventuelle nicht-numerische Einträge mit NaN
+df['Straftaten_gesamt_numeric'] = pd.to_numeric(
+    df[strftaten_col].str.replace(',', '').str.strip(),
+    errors='coerce'
+)
 
-# Schritt 6: Auswahl der relevanten Spalten für die Ausgabe
-# Zum Beispiel: Bezirksregion und Anzahl der Straftaten
-df_sortiert = df_sortiert[['Bezeichnung (Bezirksregion)', spalte_straftaten]]
+# Überprüfe, ob es fehlgeschlagene Konvertierungen gibt
+if df['Straftaten_gesamt_numeric'].isnull().any():
+    print("Warnung: Einige Einträge konnten nicht konvertiert werden und werden als NaN behandelt.")
 
-# Schritt 7: Anzeigen des sortierten DataFrames
-print(df_sortiert.to_string(index=False))
+# Sortiere das DataFrame nach der neuen numerischen Spalte in absteigender Reihenfolge
+sorted_df = df.sort_values(by='Straftaten_gesamt_numeric', ascending=False)
+
+# Optional: Entferne Einträge, die nicht zu einem Bezirk gehören (z.B. "nicht zuzuordnen")
+# Angenommen, Bezirke haben einen LOR-Schlüssel, der nicht mit "99" oder "0" beginnt
+# Passe dies nach Bedarf an
+
+# Zum Beispiel:
+# sorted_df = sorted_df[~sorted_df['LOR-Schlüssel (Bezirksregion)'].str.startswith(('99', '0'))]
+
+# Zeige die sortierten Daten an
+print(sorted_df[['LOR-Schlüssel (Bezirksregion)', 'Bezeichnung (Bezirksregion)', 'Straftaten_gesamt_numeric']])
+
+# Optional: Speichere die sortierten Daten in eine neue Excel-Datei
+sorted_df.to_excel('Fallzahlen_2023_sortiert.xlsx', index=False)

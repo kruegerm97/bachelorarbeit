@@ -1,48 +1,49 @@
 import pandas as pd
 
-# Pfad zur CSV-Datei
-csv_file = 'FZ_2023.csv'
+# Pfad zur Excel-Datei
+excel_datei = 'Fallzahlen&HZ2014-2023.xlsx'
 
-# CSV-Datei einlesen
-# Annahme: Die tatsächlichen Daten beginnen ab der 5. Zeile (Index 4)
-df = pd.read_csv(
-    csv_file,
-    skiprows=4,               # Überspringt die ersten 4 Zeilen (Metadaten)
-    delimiter=',',            # Trennzeichen ist ein Komma
-    thousands=',',            # Tausendertrennzeichen ist ein Komma
-    encoding='utf-8'          # Stellen Sie sicher, dass die Codierung stimmt
-)
+# Name des Sheets
+sheet_name = 'Fallzahlen_2023'
 
-# Anzeigen der ersten Zeilen zur Überprüfung
-print("Erste Zeilen des DataFrames:")
-print(df.head())
+# Einlesen des Excel-Sheets
+df = pd.read_excel(excel_datei, sheet_name=sheet_name, skiprows=4)
 
-# Spaltennamen überprüfen
-print("\nSpaltennamen:")
-print(df.columns.tolist())
+# Anzeige der ersten Zeilen zur Überprüfung
+#print(df.head())
 
-# Definieren der relevanten Spalten
-district_col = 'Bezeichnung (Bezirksregion)'
-total_crimes_col = 'Straftaten -insgesamt-'
+# Benennung der Spalten basierend auf den gegebenen Daten
+spalten = [
+    'LOR-Schlüssel (Bezirksregion)', 'Bezeichnung (Bezirksregion)',
+    'Straftaten insgesamt', 'Raub', 'Straßenraub, Handtaschenraub',
+    'Körperverletzungen insgesamt', 'Gefährliche und schwere Körperverletzung',
+    'Freiheitsberaubung, Nötigung, Bedrohung, Nachstellung',
+    'Diebstahl insgesamt', 'Diebstahl von Kraftwagen', 'Diebstahl an/aus Kfz',
+    'Fahrraddiebstahl', 'Wohnraumeinbruch', 'Branddelikte insgesamt',
+    'Brandstiftung', 'Sachbeschädigung insgesamt', 'Sachbeschädigung durch Graffiti',
+    'Rauschgiftdelikte', 'Kieztaten'
+]
 
-# Überprüfen, ob die Spalten existieren
-if district_col not in df.columns or total_crimes_col not in df.columns:
-    raise ValueError(f"Überprüfen Sie die Spaltennamen. Erwartet '{district_col}' und '{total_crimes_col}'.")
+# Setzen der Spaltennamen
+df.columns = spalten
 
-# Bereinigen der Daten: Entfernen von Anführungszeichen und Umwandeln in numerische Werte
-df[total_crimes_col] = df[total_crimes_col].replace({',': ''}, regex=True).astype(int)
+# Entfernen von Zeilen, die keine gültigen Bezirke sind (z.B. leere Zeilen oder Zusammenfassungen)
+# Hier nehmen wir an, dass gültige Bezirke eine numerische LOR-Schlüssel haben
+df = df[df['LOR-Schlüssel (Bezirksregion)'].astype(str).str.match(r'^\d+')].copy()
 
-# Sortieren nach der Gesamtzahl der Straftaten in absteigender Reihenfolge
-sorted_df = df.sort_values(by=total_crimes_col, ascending=False)
+# Bereinigung der 'Straftaten insgesamt' Spalte
+# Entfernen von Punkt als Tausendertrennzeichen und Ersetzen von Komma durch nichts
+# Falls Ihre Daten Dezimalstellen hätten, müssten Sie entsprechend anpassen
+df['Straftaten insgesamt'] = df['Straftaten insgesamt'].astype(str).str.replace('.', '', regex=False).str.replace(',', '').astype(int)
 
-# Auswahl der relevanten Spalten
-result_df = sorted_df[[district_col, total_crimes_col]].reset_index(drop=True)
+# Sortieren des DataFrames nach 'Straftaten insgesamt' in absteigender Reihenfolge
+df_sortiert = df.sort_values(by='Straftaten insgesamt', ascending=False)
 
-# Anzeigen der sortierten Daten
-print("\nBezirke sortiert nach der Gesamtzahl der Straftaten (2023):")
-print(result_df)
+# Zurücksetzen des Indexes nach dem Sortieren
+df_sortiert.reset_index(drop=True, inplace=True)
 
-# Optional: Speichern der sortierten Daten in eine neue CSV-Datei
-output_file = 'Sortierte_Fallzahlen_2023.csv'
-result_df.to_csv(output_file, index=False, encoding='utf-8')
-print(f"\nDie sortierten Daten wurden in '{output_file}' gespeichert.")
+# Anzeige des sortierten DataFrames
+print(df_sortiert[['Bezeichnung (Bezirksregion)', 'Straftaten insgesamt']])
+
+# Optional: Speichern des sortierten DataFrames in eine neue Excel-Datei
+df_sortiert.to_excel('Fallzahlen_2023_sortiert.xlsx', sheet_name='Sortiert', index=False)

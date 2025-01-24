@@ -1,69 +1,46 @@
 import pandas as pd
 
-def main():
-    # Pfad zur CSV-Datei
-    csv_file = 'FZ_2023.csv'
+# Pfad zur Excel-Datei und Name des Sheets
+excel_file = 'Fallzahlen&HZ2014-2023.xlsx'
+sheet_name = 'Fallzahlen_2023'
 
-    try:
-        # CSV-Datei lesen, die ersten 4 Zeilen überspringen
-        df = pd.read_csv(
-            csv_file,
-            sep=',',
-            quotechar='"',
-            thousands=',',
-            skiprows=4,
-            encoding='utf-8'
-        )
-    except FileNotFoundError:
-        print(f"Die Datei {csv_file} wurde nicht gefunden. Bitte überprüfe den Pfad.")
-        return
-    except Exception as e:
-        print(f"Ein Fehler ist beim Lesen der Datei aufgetreten: {e}")
-        return
+# Lesen des Excel-Sheets
+# Annahme: Die tatsächlichen Spaltenüberschriften beginnen ab der 5. Zeile (Index 4)
+# Passen Sie 'skiprows' entsprechend an, falls die Struktur der Excel-Datei abweicht
+df = pd.read_excel(excel_file, sheet_name=sheet_name, skiprows=4, dtype=str)
 
-    # Säubere die Spaltennamen (entferne führende/trailende Leerzeichen und Zeilenumbrüche)
-    df.columns = df.columns.str.strip().str.replace('\n', ' ').str.replace('\r', ' ')
+# Entfernen von Leerzeilen oder Zeilen ohne Bezirksschlüssel
+df = df.dropna(subset=['LOR-Schlüssel (Bezirksregion)'])
 
-    # Überprüfen, welche Spalten vorhanden sind
-    print("Verfügbare Spalten:")
-    for col in df.columns:
-        print(f"- {col}")
+# Funktion zur Bereinigung und Konvertierung der Zahlen
+def clean_number(x):
+    if isinstance(x, str):
+        # Entfernen von Punkten und Kommas als Tausendertrennzeichen
+        return int(x.replace('.', '').replace(',', ''))
+    else:
+        return x
 
-    # Angenommen, die Spalte für insgesamt Straftaten heißt 'Straftaten -insgesamt-'
-    # Möglicherweise musst du den genauen Spaltennamen anpassen
-    total_crime_col = 'Straftaten -insgesamt-'
+# Bereinigung der 'Straftaten insgesamt' Spalte
+df['Straftaten insgesamt'] = df['Straftaten insgesamt'].apply(clean_number)
 
-    if total_crime_col not in df.columns:
-        print(f"Die erwartete Spalte '{total_crime_col}' wurde nicht gefunden.")
-        return
+# Optional: Bereinigung weiterer relevanter Spalten (falls benötigt)
+# Beispiel für 'Raub' Spalte
+# df['Raub'] = df['Raub'].apply(clean_number)
 
-    # Entferne Zeilen, die 'nicht zuzuordnen' enthalten
-    df = df[~df['Bezeichnung (Bezirksregion)'].str.contains('nicht zuzuordnen', na=False)]
+# Sortieren des DataFrames nach 'Straftaten insgesamt' in absteigender Reihenfolge
+df_sorted = df.sort_values(by='Straftaten insgesamt', ascending=False)
 
-    # Konvertiere die Spalte für insgesamt Straftaten in numerische Werte
-    df[total_crime_col] = pd.to_numeric(df[total_crime_col], errors='coerce')
+# Zurücksetzen des Indexes nach dem Sortieren
+df_sorted = df_sorted.reset_index(drop=True)
 
-    # Entferne Zeilen mit fehlenden Werten in der Strafaten-Spalte
-    df = df.dropna(subset=[total_crime_col])
+# Auswahl relevanter Spalten zur Anzeige
+# Sie können weitere Spalten hinzufügen oder entfernen, je nach Bedarf
+result = df_sorted[['Bezeichnung (Bezirksregion)', 'Straftaten insgesamt']]
 
-    # Sortiere die Daten nach der Anzahl der Straftaten insgesamt in absteigender Reihenfolge
-    df_sorted = df.sort_values(by=total_crime_col, ascending=False)
+# Anzeige der sortierten Ergebnisse
+print(result)
 
-    # Setze den Index zurück für eine saubere Ausgabe
-    df_sorted = df_sorted.reset_index(drop=True)
-
-    # Ausgabe der sortierten Daten
-    print("\nBezirke sortiert nach der Anzahl der insgesamt gemeldeten Straftaten (2023):\n")
-    print(df_sorted[['Bezeichnung (Bezirksregion)', total_crime_col]])
-
-    # Optional: Speichere das Ergebnis in eine neue CSV-Datei
-    output_file = 'sorted_crime_data_2023.csv'
-    df_sorted[['Bezeichnung (Bezirksregion)', total_crime_col]].to_csv(
-        output_file,
-        index=False,
-        encoding='utf-8'
-    )
-    print(f"\nDie sortierten Daten wurden in '{output_file}' gespeichert.")
-
-if __name__ == "__main__":
-    main()
+# Optional: Speichern der sortierten Daten in eine neue Excel-Datei
+output_file = 'Sortierte_Fallzahlen_2023.xlsx'
+df_sorted.to_excel(output_file, sheet_name='Sortiert', index=False)
+print(f"\nDie sortierten Daten wurden in '{output_file}' gespeichert.")

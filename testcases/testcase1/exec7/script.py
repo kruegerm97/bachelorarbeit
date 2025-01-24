@@ -1,37 +1,73 @@
 import pandas as pd
 
-# Pfad zur CSV-Datei (passen Sie den Pfad entsprechend an)
-csv_datei = 'FZ_2023.csv'
+# Pfad zur Excel-Datei
+excel_file = 'Fallzahlen&HZ2014-2023.xlsx'
 
-# Lesen der CSV-Datei
-# Überspringt die ersten 4 Zeilen, da diese keine relevanten Daten enthalten
-df = pd.read_csv(csv_datei, skiprows=4, delimiter=',', encoding='utf-8')
+# Name des Sheets
+sheet_name = 'Fallzahlen_2023'
 
-# Anzeigen der Spaltennamen, um sicherzustellen, dass die Daten korrekt eingelesen wurden
-#print(df.columns.tolist())
+# Anzahl der Zeilen, die übersprungen werden müssen, bevor die Header-Zeile kommt
+# Basierend auf deinen Daten nehme ich an, dass die Header in der 5. Zeile (index=4) beginnen
+skip_rows = 4
 
-# Entfernen von Tausender-Trennzeichen und Konvertieren der numerischen Spalten in Zahlen
-# Annahme: Alle Spalten ab der dritten sind numerische Werte
-# Erste zwei Spalten sind 'LOR-Schlüssel (Bezirksregion)' und 'Bezeichnung (Bezirksregion)'
-numerische_spalten = df.columns[2:]
+# Lesen des Excel-Sheets
+try:
+    df = pd.read_excel(
+        excel_file,
+        sheet_name=sheet_name,
+        skiprows=skip_rows,
+        thousands=',',  # Entfernt Tausender-Trennzeichen
+        engine='openpyxl'
+    )
+except FileNotFoundError:
+    print(f"Die Datei '{excel_file}' wurde nicht gefunden.")
+    exit(1)
+except Exception as e:
+    print(f"Beim Lesen der Excel-Datei ist ein Fehler aufgetreten: {e}")
+    exit(1)
 
-for spalte in numerische_spalten:
-    # Entfernen von Kommas und Punkten als Tausender-Trennzeichen
-    df[spalte] = df[spalte].astype(str).str.replace('.', '').str.replace(',', '')
-    # Konvertieren in numerische Typen
-    df[spalte] = pd.to_numeric(df[spalte], errors='coerce')
+# Anzeigen der ersten paar Zeilen, um die Struktur zu verstehen (optional)
+# print(df.head())
 
-# Überprüfen, ob die Konvertierung funktioniert hat
-#print(df.head())
+# Bereinigen der Spaltennamen: Entfernen von Leerzeichen und Zeilenumbrüchen
+df.columns = [col.strip().replace('\n', ' ') for col in df.columns]
 
-# Sortieren der Bezirke nach 'Straftaten -insgesamt-' in absteigender Reihenfolge
-df_sortiert = df.sort_values(by='Straftaten -insgesamt-', ascending=False)
+# Identifizieren der relevanten Spalten
+# Angenommen, die Spalte heißt "Straftaten - insgesamt -", passe den Namen ggf. an
+straftaten_col = 'Straftaten -insgesamt-'
 
-# Auswahl der relevanten Spalten für die Ausgabe
-ergebnis = df_sortiert[['Bezeichnung (Bezirksregion)', 'Straftaten -insgesamt-']]
+if straftaten_col not in df.columns:
+    print(f"Die Spalte '{straftaten_col}' wurde nicht gefunden. Verfügbare Spalten: {df.columns.tolist()}")
+    exit(1)
 
-# Anzeigen des sortierten Ergebnisses
-print(ergebnis)
+# Optional: Entfernen von aggregierten oder nicht zugeordneten Bezirken
+# Falls du nur tatsächliche Bezirke möchtest, kannst du Zeilen filtern, die bestimmte Schlüssel enthalten
+# Beispiel:
+# df = df[~df['LOR-Schlüssel (Bezirksregion)'].str.contains('900|999')]
 
-# Optional: Speichern des sortierten Ergebnisses in einer neuen CSV-Datei
-df_sortiert.to_csv('FZ_2023_sortiert.csv', index=False, encoding='utf-8')
+# Entfernen von Bezirken, die nicht zugeordnet sind
+df = df[~df['Bezeichnung (Bezirksregion)'].str.contains('nicht zuzuordnen', case=False, na=False)]
+
+# Entfernen von Gesamtwerten, z.B. "Berlin (PKS gesamt)"
+df = df[~df['Bezeichnung (Bezirksregion)'].str.contains('gesamt', case=False, na=False)]
+
+# Konvertieren der "Straftaten insgesamt" Spalte zu numerisch
+# Fehlerhafte Einträge werden als NaN gesetzt
+df[straftaten_col] = pd.to_numeric(df[straftaten_col], errors='coerce')
+
+# Entfernen von Zeilen mit fehlenden "Straftaten insgesamt" Werten
+df = df.dropna(subset=[straftaten_col])
+
+# Sortieren nach "Straftaten insgesamt" absteigend
+sorted_df = df.sort_values(by=straftaten_col, ascending=False)
+
+# Optional: Zurücksetzen des Indexes
+sorted_df = sorted_df.reset_index(drop=True)
+
+# Anzeigen der sortierten Daten
+print(sorted_df[['Bezeichnung (Bezirksregion)', straftaten_col]])
+
+# Optional: Speichern der sortierten Daten in eine neue Excel- oder CSV-Datei
+# sorted_df.to_excel('Sortierte_Fallzahlen_2023.xlsx', index=False)
+# oder
+# sorted_df.to_csv('Sortierte_Fallzahlen_2023.csv', index=False, sep=';')  # Mit Semikolon-Trennzeichen für deutsche Excel-Versionen

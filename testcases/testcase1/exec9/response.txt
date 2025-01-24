@@ -1,146 +1,107 @@
-Certainly! Ich helfe Ihnen gerne dabei, ein Python-Skript zu erstellen, das Ihre CSV-Daten analysiert und die Bezirke nach der Gesamtanzahl der Straftaten im Jahr 2023 sortiert.
+Gerne helfe ich dir dabei, ein Python-Skript zu erstellen, das das Sheet `'Fallzahlen_2023'` deiner Excel-Datei `'Fallzahlen&HZ2014-2023.xlsx'` liest, die Daten bereinigt und nach der Anzahl der Straftaten insgesamt pro Bezirk für das Jahr 2023 sortiert.
 
-### Schritt-für-Schritt-Erklärung
+Hier ist ein Schritt-für-Schritt-Leitfaden sowie ein entsprechendes Python-Skript:
 
-1. **Bibliotheken installieren und importieren:**
-   - Wir verwenden die `pandas`-Bibliothek zur Datenverarbeitung.
-   - Sie müssen sicherstellen, dass `pandas` installiert ist. Falls nicht, können Sie es mit `pip` installieren.
+## Voraussetzungen
 
-2. **CSV-Datei Laden:**
-   - Die CSV-Datei enthält einige zusätzliche Zeilen vor den tatsächlichen Daten. Wir überspringen diese Zeilen beim Einlesen.
-   - Die Spaltennamen enthalten möglicherweise Zeilenumbrüche und Sonderzeichen, daher passen wir die Spaltennamen nach dem Laden an.
+1. **Python installieren**: Stelle sicher, dass Python auf deinem Computer installiert ist. Du kannst es [hier herunterladen](https://www.python.org/downloads/).
 
-3. **Datenbereinigung:**
-   - Entfernen Sie Tausendertrennzeichen (Kommas) und konvertieren Sie die Zahlen in Ganzzahlen.
-   - Stellen Sie sicher, dass alle relevanten Spalten korrekt formatiert sind.
+2. **Benötigte Bibliotheken installieren**: Wir verwenden `pandas` und `openpyxl`. Installiere sie mit pip:
 
-4. **Sortierung und Ausgabe:**
-   - Sortieren Sie die Bezirke nach der Gesamtanzahl der Straftaten in absteigender Reihenfolge.
-   - Geben Sie die sortierte Liste aus oder speichern Sie sie in einer neuen CSV-Datei.
+   ```bash
+   pip install pandas openpyxl
+   ```
 
-### Python-Skript
+## Python-Skript
 
 ```python
 import pandas as pd
 
-def load_and_clean_data(csv_file):
-    """
-    Lädt die CSV-Datei, bereinigt die Daten und gibt einen bereinigten DataFrame zurück.
-    """
-    try:
-        # Überspringe die ersten 4 Zeilen, die keine relevanten Daten enthalten
-        df = pd.read_csv(csv_file, skiprows=4, sep=',', encoding='utf-8')
-        
-        # Identifiziere die relevanten Spalten
-        # Da die Spaltennamen Zeilenumbrüche enthalten können, benennen wir sie um
-        # Basierend auf den bereitgestellten Daten:
-        # Index 0: LOR-Schlüssel
-        # Index 1: Bezeichnung
-        # Index 2: Straftaten insgesamt
-        df = df.rename(columns={
-            df.columns[0]: 'LOR_Schluessel',
-            df.columns[1]: 'Bezirksname',
-            df.columns[2]: 'Straftaten_insgesamt'
-        })
-        
-        # Entferne alle Zeilen, die keine LOR_Schluessel enthalten (z.B. leere Zeilen)
-        df = df.dropna(subset=['LOR_Schluessel'])
-        
-        # Entferne Anführungszeichen und Leerzeichen
-        df['Straftaten_insgesamt'] = df['Straftaten_insgesamt'].astype(str).str.replace('"', '').str.replace(' ', '')
-        
-        # Entferne Tausendertrennzeichen und konvertiere in Ganzzahlen
-        df['Straftaten_insgesamt'] = df['Straftaten_insgesamt'].str.replace(',', '').astype(int)
-        
-        return df
-    except Exception as e:
-        print(f"Fehler beim Laden oder Bereinigen der Daten: {e}")
-        return None
+# Pfad zur Excel-Datei
+excel_datei = 'Fallzahlen&HZ2014-2023.xlsx'
 
-def sort_districts_by_crime(df):
-    """
-    Sortiert die Bezirke nach der Gesamtanzahl der Straftaten in absteigender Reihenfolge.
-    """
-    try:
-        sorted_df = df.sort_values(by='Straftaten_insgesamt', ascending=False)
-        return sorted_df
-    except Exception as e:
-        print(f"Fehler beim Sortieren der Daten: {e}")
-        return None
+# Name des Sheets
+sheet_name = 'Fallzahlen_2023'
 
-def main():
-    # Pfad zur CSV-Datei
-    csv_file = 'FZ_2023.csv'
-    
-    # Lade und bereinige die Daten
-    df = load_and_clean_data(csv_file)
-    
-    if df is not None:
-        # Sortiere die Bezirke nach Straftaten insgesamt
-        sorted_df = sort_districts_by_crime(df)
-        
-        if sorted_df is not None:
-            # Zeige die sortierten Ergebnisse
-            print("Bezirke sortiert nach Gesamtzahl der Straftaten (2023):\n")
-            print(sorted_df[['Bezirksname', 'Straftaten_insgesamt']].to_string(index=False))
-            
-            # Optional: Speichere die sortierten Daten in einer neuen CSV-Datei
-            sorted_df.to_csv('Sortierte_FZ_2023.csv', columns=['Bezirksname', 'Straftaten_insgesamt'], index=False)
-            print("\nDie sortierten Daten wurden in 'Sortierte_FZ_2023.csv' gespeichert.")
-    else:
-        print("Daten konnten nicht geladen werden.")
+# Lesen der Excel-Datei, Überspringen der ersten 4 Zeilen, da diese Metadaten enthalten
+df = pd.read_excel(
+    excel_datei,
+    sheet_name=sheet_name,
+    skiprows=4,
+    dtype=str  # Zunächst alle Daten als Strings einlesen
+)
 
-if __name__ == "__main__":
-    main()
+# Entfernen von möglichen Nan-Werten in der Spalte 'LOR-Schlüssel (Bezirksregion)'
+df = df.dropna(subset=['LOR-Schlüssel (Bezirksregion)'])
+
+# Entfernen von Tausendertrennzeichen und Konvertieren der 'Straftaten insgesamt' in Integer
+# Annahme: Die Spalte heißt genau 'Straftaten -insgesamt-'
+# Überprüfe die tatsächlichen Spaltennamen ggf. mit df.columns
+df['Straftaten -insgesamt-'] = df['Straftaten -insgesamt-'].str.replace('.', '').str.replace(',', '').astype(int)
+
+# Sortieren nach 'Straftaten insgesamt' in absteigender Reihenfolge
+df_sortiert = df.sort_values(by='Straftaten -insgesamt-', ascending=False)
+
+# Optional: Nur relevante Spalten auswählen
+relevante_spalten = ['LOR-Schlüssel (Bezirksregion)', 'Bezeichnung (Bezirksregion)', 'Straftaten -insgesamt-']
+df_sortiert = df_sortiert[relevante_spalten]
+
+# Anzeigen der sortierten Daten
+print(df_sortiert)
+
+# Optional: Speichern der sortierten Daten in eine neue Excel-Datei
+df_sortiert.to_excel('Sortierte_Fallzahlen_2023.xlsx', index=False)
 ```
 
-### Erklärung des Skripts
+## Erklärung der Schritte
 
-1. **Funktion `load_and_clean_data`:**
-   - **`skiprows=4`**: Überspringt die ersten 4 Zeilen, die keine relevanten Daten enthalten.
-   - **Umbenennen der Spalten**: Macht die weiteren Schritte einfacher, indem wir die relevanten Spalten verständlicher benennen.
-   - **Datenbereinigung**: Entfernt Anführungszeichen, Leerzeichen und Tausendertrennzeichen, um die Zahlen korrekt als Ganzzahlen zu importieren.
+1. **Excel-Datei einlesen**:
+   - `read_excel` liest das spezifizierte Sheet ein.
+   - `skiprows=4` überspringt die ersten vier Zeilen, die Metadaten enthalten.
+   - `dtype=str` liest alle Daten zunächst als Strings ein, um Probleme bei der Umwandlung zu vermeiden.
 
-2. **Funktion `sort_districts_by_crime`:**
-   - Sortiert den DataFrame basierend auf der Spalte `Straftaten_insgesamt` in absteigender Reihenfolge.
+2. **Daten bereinigen**:
+   - Entfernen von Zeilen ohne einen gültigen Bezirksregion-Schlüssel.
+   - Entfernen von Tausenderpunkten und -kommas aus der Spalte `'Straftaten -insgesamt-'` und Umwandeln in Ganzzahlen (`int`).
 
-3. **`main`-Funktion:**
-   - Führt die Datenlade- und Sortierschritte aus.
-   - Druckt die sortierten Ergebnisse aus.
-   - Speichert die sortierten Daten in einer neuen CSV-Datei namens `Sortierte_FZ_2023.csv` (optional).
+3. **Sortieren der Daten**:
+   - Die Daten werden nach der Spalte `'Straftaten -insgesamt-'` in absteigender Reihenfolge sortiert.
 
-### Ausführung des Skripts
+4. **Auswahl relevanter Spalten**:
+   - Für eine übersichtlichere Ausgabe werden nur der Bezirksregion-Schlüssel, die Bezeichnung und die Gesamtanzahl der Straftaten ausgewählt.
 
-1. **Stellen Sie sicher, dass Sie die erforderlichen Bibliotheken installiert haben. Wenn nicht, installieren Sie `pandas` mit dem folgenden Befehl:**
+5. **Ausgabe und Speicherung**:
+   - Die sortierten Daten werden im Terminal angezeigt.
+   - Optional können die sortierten Daten in eine neue Excel-Datei `'Sortierte_Fallzahlen_2023.xlsx'` gespeichert werden.
 
-   ```bash
-   pip install pandas
-   ```
+## Hinweise
 
-2. **Speichern Sie das obige Skript in einer Python-Datei, z.B. `sort_crime_data.py`.**
+- **Spaltennamen überprüfen**: Stelle sicher, dass die Spaltennamen genau mit denen im DataFrame übereinstimmen. Du kannst die Spaltennamen mit `print(df.columns)` überprüfen und ggf. im Skript anpassen.
+  
+- **Tausender- und Dezimaltrennzeichen**: In deinem Datensatz sind Zahlen mit Kommas angegeben (z.B., `"83,611"`). Das Skript entfernt sowohl Punkte als auch Kommas. Falls Punkte als Dezimaltrennzeichen verwendet werden, musst du die Bereinigung entsprechend anpassen.
 
-3. **Platzieren Sie die CSV-Datei `FZ_2023.csv` im gleichen Verzeichnis wie das Skript oder passen Sie den Pfad im Skript entsprechend an.**
+- **Fehlende Werte**: Das Skript entfernt Zeilen ohne einen gültigen Bezirksregion-Schlüssel. Falls weitere Bereinigungen notwendig sind, kannst du diese Schritte hinzufügen.
 
-4. **Führen Sie das Skript aus:**
+## Beispielausgabe
 
-   ```bash
-   python sort_crime_data.py
-   ```
-
-Nach der Ausführung sollten Sie eine Ausgabe sehen, die die Bezirke nach der Gesamtzahl der Straftaten sortiert anzeigt. Zusätzlich wird eine neue CSV-Datei `Sortierte_FZ_2023.csv` erstellt, die diese sortierten Daten enthält.
-
-### Beispielausgabe
+Nach dem Ausführen des Skripts solltest du eine sortierte Liste der Bezirke erhalten, beginnend mit dem Bezirk mit den meisten Straftaten insgesamt im Jahr 2023. Ein Beispielauszug könnte so aussehen:
 
 ```
-Bezirke sortiert nach Gesamtzahl der Straftaten (2023):
-
-   Bezirksname  Straftaten_insgesamt
-          Mitte               83611
-Friedrichshain-Kreuzberg             55838
-      Neukölln             45313
+      LOR-Schlüssel (Bezirksregion)       Bezeichnung (Bezirksregion)  Straftaten -insgesamt-
+0                              999999            Berlin (PKS gesamt)                   536695
+1                              020000     Friedrichshain-Kreuzberg                   55838
+2                              100000        Marzahn-Hellersdorf                   26649
 ...
 ```
 
-Diese Liste zeigt die Bezirke von Berlin, sortiert nach der Gesamtzahl der Straftaten im Jahr 2023, beginnend mit dem Bezirk Mitte als der mit den meisten Straftaten.
+## Ausführen des Skripts
 
-Ich hoffe, dieses Skript hilft Ihnen weiter! Wenn Sie weitere Anpassungen oder Fragen haben, lassen Sie es mich bitte wissen.
+Speichere das obige Skript in einer Python-Datei, beispielsweise `sortiere_fallzahlen.py`, und führe es in der Kommandozeile aus:
+
+```bash
+python sortiere_fallzahlen.py
+```
+
+Stelle sicher, dass sich die Excel-Datei `'Fallzahlen&HZ2014-2023.xlsx'` im gleichen Verzeichnis wie das Skript befindet oder passe den Pfad entsprechend an.
+
+Falls du Fragen hast oder weitere Anpassungen benötigst, lass es mich wissen!

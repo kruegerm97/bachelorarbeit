@@ -1,163 +1,117 @@
-Um die von dir bereitgestellten Kriminalitätsdaten zu analysieren und die Bezirke nach der Gesamtzahl der Straftaten im Jahr 2023 zu sortieren, können wir ein Python-Skript erstellen, das die folgenden Schritte durchführt:
+Natürlich, ich helfe Ihnen gerne dabei, ein Python-Skript zu erstellen, das das Sheet `'Fallzahlen_2023'` Ihrer Excel-Datei `'Fallzahlen&HZ2014-2023.xlsx'` nach der Anzahl der `Straftaten insgesamt` eines Bezirks in 2023 sortiert. Dazu verwenden wir die Bibliothek `pandas`, die sich hervorragend für die Datenmanipulation und -analyse eignet.
 
-1. **Daten einlesen:** Verwenden von `pandas`, um die CSV-Datei zu laden und die relevanten Daten zu extrahieren.
-2. **Daten bereinigen:** Entfernen von Tausendertrennzeichen, Konvertieren der Zahlenwerte in Integer.
-3. **Sortieren:** Bezirke basierend auf der Gesamtzahl der Straftaten sortieren.
-4. **Ergebnis anzeigen oder speichern:** Die sortierten Daten anzeigen oder in eine neue CSV-Datei exportieren.
+## Schritt-für-Schritt Anleitung
 
-Hier ist ein vollständiges Python-Skript, das diese Schritte ausführt:
+1. **Installieren der notwendigen Bibliotheken**:
+   
+   Stellen Sie sicher, dass Sie die Bibliotheken `pandas` und `openpyxl` installiert haben. Falls nicht, können Sie diese mit `pip` installieren:
 
-```python
-import pandas as pd
+   ```bash
+   pip install pandas openpyxl
+   ```
 
-def load_and_process_data(csv_file):
-    """
-    Lädt die CSV-Datei, bereinigt die Daten und sortiert die Bezirke nach
-    der Gesamtzahl der Straftaten im Jahr 2023.
-    
-    :param csv_file: Pfad zur CSV-Datei
-    :return: Ein DataFrame mit sortierten Bezirken
-    """
-    # Zuerst die Datei einlesen. Da die ersten paar Zeilen keine Daten enthalten,
-    # verwenden wir den Parameter 'skiprows', um diese zu überspringen.
-    # Basierend auf den bereitgestellten Daten scheint die tatsächliche Kopfzeile
-    # bei der Zeile mit 'LOR-Schlüssel (Bezirksregion)' zu beginnen.
-    
-    # Finden der Zeile, die als Kopfzeile dient
-    with open(csv_file, 'r', encoding='utf-8') as file:
-        for i, line in enumerate(file):
-            if line.startswith('LOR-Schlüssel'):
-                header_line = i
-                break
-    
-    # Daten in pandas DataFrame laden, Kopfzeile definieren
-    df = pd.read_csv(
-        csv_file,
-        sep=",",
-        skiprows=header_line,
-        encoding='utf-8',
-        dtype=str
-    )
-    
-    # Benennen der Spalten zur besseren Handhabung (falls notwendig)
-    df.columns = [
-        'LOR-Schlüssel',
-        'Bezeichnung',
-        'Straftaten insgesamt',
-        'Raub',
-        'Strassenraub_Handtaschen_raub',
-        'Koerper_verletzungen_insgesamt',
-        'Gefaehrl_schwere_Koerper_verletzung',
-        'Freiheitsberaubung_noetigung_bedrohung_nachstellung',
-        'Diebstahl_insgesamt',
-        'Diebstahl_Kraftwagen',
-        'Diebstahl_an_aus_Kfz',
-        'Fahrraddiebstahl',
-        'Wohnraumeinbruch',
-        'Branddelikte_insgesamt',
-        'Brand_stiftung',
-        'Sachbeschadigung_insgesamt',
-        'Sachbeschadigung_Graffiti',
-        'Rauschgift_delikte',
-        'Kieztaten'
-    ]
-    
-    # Entfernen von Anführungszeichen und Tausendertrennzeichen, Konvertieren zu Integer
-    numeric_columns = [
-        'Straftaten insgesamt', 'Raub', 'Strassenraub_Handtaschen_raub',
-        'Koerper_verletzungen_insgesamt', 'Gefaehrl_schwere_Koerper_verletzung',
-        'Freiheitsberaubung_noetigung_bedrohung_nachstellung', 'Diebstahl_insgesamt',
-        'Diebstahl_Kraftwagen', 'Diebstahl_an_aus_Kfz', 'Fahrraddiebstahl',
-        'Wohnraumeinbruch', 'Branddelikte_insgesamt', 'Brand_stiftung',
-        'Sachbeschadigung_insgesamt', 'Sachbeschadigung_Graffiti',
-        'Rauschgift_delikte', 'Kieztaten'
-    ]
-    
-    for col in numeric_columns:
-        df[col] = df[col].str.replace('"', '')  # Entfernen von Anführungszeichen
-        df[col] = df[col].str.replace(',', '').astype(int)  # Entfernen von ',' und Konvertieren zu int
-    
-    # Sortieren der Bezirke nach 'Straftaten insgesamt' absteigend
-    df_sorted = df.sort_values(by='Straftaten insgesamt', ascending=False)
-    
-    return df_sorted
+2. **Python-Skript erstellen**:
 
-def main():
-    # Pfad zur CSV-Datei
-    csv_file = 'FZ_2023.csv'
-    
-    # Daten laden und verarbeiten
-    sorted_data = load_and_process_data(csv_file)
-    
-    # Ergebnis anzeigen
-    print("Bezirke sortiert nach der Gesamtzahl der Straftaten (2023):\n")
-    for index, row in sorted_data.iterrows():
-        print(f"{row['Bezeichnung']}: {row['Straftaten insgesamt']}")
-    
-    # Optional: Sortierte Daten in eine neue CSV-Datei exportieren
-    sorted_data.to_csv('FZ_2023_sorted.csv', index=False, encoding='utf-8')
-    print("\nDie sortierten Daten wurden in 'FZ_2023_sorted.csv' gespeichert.")
+   Hier ist das Python-Skript, das die gewünschten Aufgaben durchführt:
 
-if __name__ == "__main__":
-    main()
-```
+   ```python
+   import pandas as pd
 
-### Erklärung des Skripts
+   # Pfad zur Excel-Datei
+   excel_datei = 'Fallzahlen&HZ2014-2023.xlsx'
 
-1. **Importieren der Bibliothek:**
-   - `pandas` wird für die Datenmanipulation verwendet.
+   # Einlesen des Sheets 'Fallzahlen_2023'
+   # Annahme: Die relevanten Daten beginnen ab der 5. Zeile (Index 4)
+   df = pd.read_excel(excel_datei, sheet_name='Fallzahlen_2023', skiprows=4)
 
-2. **Funktion `load_and_process_data`:**
-   - Liest die CSV-Datei ein und überspringt die irrelevanten Kopfzeilen.
-   - Benennt die Spalten verständlicher um.
-   - Bereinigt die numerischen Daten, indem Anführungszeichen und Tausendertrennzeichen entfernt werden, und konvertiert die Daten in Integer.
-   - Sortiert die DataFrame nach der Spalte `'Straftaten insgesamt'` in absteigender Reihenfolge.
+   # Anpassen der Spaltennamen, falls sie Leerzeichen oder Sonderzeichen enthalten
+   df.columns = df.columns.str.strip().str.replace('\n', ' ').str.replace(' ', '_').str.replace('-', '_').str.replace(',', '').str.replace('.', '')
 
-3. **Funktion `main`:**
-   - Definiert den Pfad zur CSV-Datei.
-   - Ruft die `load_and_process_data`-Funktion auf, um die Daten zu laden und zu sortieren.
-   - Gibt die sortierten Bezirke mit der jeweiligen Gesamtzahl der Straftaten aus.
-   - Exportiert die sortierten Daten optional in eine neue CSV-Datei namens `'FZ_2023_sorted.csv'`.
+   # Anzeigen der ersten Zeilen zur Überprüfung
+   print("Erste Zeilen des DataFrames:")
+   print(df.head())
 
-### Voraussetzungen
+   # Entfernen von Zeilen, die keine Bezirke enthalten (z.B. Gesamtübersicht)
+   # Annahme: Bezirkscode sollte numerisch sein, daher filtern wir Zeilen mit numerischen LOR-Schlüsseln
+   df = df[pd.to_numeric(df['LOR-Schlüssel_(Bezirksregion)'], errors='coerce').notnull()]
 
-- **Python installieren:** Stelle sicher, dass Python auf deinem System installiert ist. Du kannst es von der offiziellen [Python-Website](https://www.python.org/downloads/) herunterladen und installieren.
-  
-- **Pandas installieren:** Installiere die `pandas`-Bibliothek, falls noch nicht geschehen, indem du den folgenden Befehl in der Kommandozeile ausführst:
-  ```bash
-  pip install pandas
-  ```
+   # Bereinigen der 'Straftaten_insgesamt' Spalte:
+   # Entfernen von Tausendertrennzeichen und Umwandeln in Integer
+   df['Straftaten_insgesamt'] = df['Straftaten_insgesamt'].astype(str).str.replace(',', '').astype(int)
 
-### Verwendung
+   # Sortieren nach 'Straftaten_insgesamt' in absteigender Reihenfolge
+   df_sortiert = df.sort_values(by='Straftaten_insgesamt', ascending=False)
 
-1. **Speichere das Skript:**
-   - Kopiere das obige Skript und speichere es in einer Datei, z.B. `crime_analysis.py`.
+   # Anzeigen der sortierten Daten
+   print("\nSortierte Daten (nach 'Straftaten_insgesamt'):")
+   print(df_sortiert[['Bezeichnung_(Bezirksregion)', 'Straftaten_insgesamt']].head(20))
 
-2. **Platziere die CSV-Datei:**
-   - Stelle sicher, dass sich die Datei `FZ_2023.csv` im gleichen Verzeichnis wie das Skript befindet. Andernfalls passe den Pfad in der Variable `csv_file` entsprechend an.
+   # Optional: Speichern der sortierten Daten in eine neue Excel-Datei
+   sortierte_datei = 'Fallzahlen_2023_sortiert.xlsx'
+   df_sortiert.to_excel(sortierte_datei, index=False)
+   print(f"\nDie sortierten Daten wurden in der Datei '{sortierte_datei}' gespeichert.")
+   ```
 
-3. **Führe das Skript aus:**
-   - Öffne die Kommandozeile oder das Terminal, navigiere zum Verzeichnis des Skripts und führe folgenden Befehl aus:
-     ```bash
-     python crime_analysis.py
+3. **Erläuterungen zum Skript**:
+
+   - **Einlesen der Excel-Datei**:
+     
+     ```python
+     df = pd.read_excel(excel_datei, sheet_name='Fallzahlen_2023', skiprows=4)
      ```
+     Hier überspringen wir die ersten 4 Zeilen, da diese offenbar Überschriften oder leere Zeilen enthalten.
 
-4. **Ergebnis:**
-   - Das Skript gibt eine sortierte Liste der Bezirke mit der entsprechenden Gesamtzahl der Straftaten aus.
-   - Zusätzlich wird eine neue CSV-Datei namens `FZ_2023_sorted.csv` erstellt, die die sortierten Daten enthält.
+   - **Bereinigen der Spaltennamen**:
+     
+     ```python
+     df.columns = df.columns.str.strip().str.replace('\n', ' ').str.replace(' ', '_').str.replace('-', '_').str.replace(',', '').str.replace('.', '')
+     ```
+     Dies stellt sicher, dass die Spaltennamen keine Leerzeichen oder Sonderzeichen enthalten, was die Handhabung erleichtert.
 
-### Beispielausgabe
+   - **Filtern der relevanten Zeilen**:
+     
+     ```python
+     df = df[pd.to_numeric(df['LOR-Schlüssel_(Bezirksregion)'], errors='coerce').notnull()]
+     ```
+     Hier entfernen wir Zeilen, die keinen numerischen Bezirkscode haben, um sicherzustellen, dass nur Bezirke berücksichtigt werden.
 
-```
-Bezirke sortiert nach der Gesamtzahl der Straftaten (2023):
+   - **Bereinigen und Konvertieren der 'Straftaten_insgesamt' Spalte**:
+     
+     ```python
+     df['Straftaten_insgesamt'] = df['Straftaten_insgesamt'].astype(str).str.replace(',', '').astype(int)
+     ```
+     Da die Zahlen in der Excel-Datei Tausendertrennzeichen (Kommas) enthalten, entfernen wir diese und konvertieren die Werte in Integer.
 
-Mitte: 83611
-Friedrichshain-Kreuzberg: 55838
-Neukölln: 45313
-Tempelhof-Schöneberg: 41776
-...
+   - **Sortieren der Daten**:
+     
+     ```python
+     df_sortiert = df.sort_values(by='Straftaten_insgesamt', ascending=False)
+     ```
+     Hier sortieren wir die Bezirke nach der Gesamtzahl der Straftaten in absteigender Reihenfolge.
 
-Die sortierten Daten wurden in 'FZ_2023_sorted.csv' gespeichert.
-```
+   - **Speichern der sortierten Daten**:
+     
+     ```python
+     df_sortiert.to_excel(sortierte_datei, index=False)
+     ```
+     Optional speichern wir die sortierten Daten in eine neue Excel-Datei namens `'Fallzahlen_2023_sortiert.xlsx'`.
 
-Dieses Skript bietet eine einfache und effiziente Möglichkeit, die Kriminalitätsdaten nach Bezirken zu analysieren und die Bezirke basierend auf der Gesamtzahl der Straftaten zu sortieren. Du kannst das Skript weiter anpassen, um zusätzliche Analysen durchzuführen oder weitere Visualisierungen zu erstellen.
+4. **Ausführen des Skripts**:
+
+   Speichern Sie das obige Skript in einer Datei, zum Beispiel `sortiere_fallzahlen.py`, und führen Sie es aus:
+
+   ```bash
+   python sortiere_fallzahlen.py
+   ```
+
+   Nach der Ausführung erhalten Sie eine Ausgabe der Top 20 Bezirke mit den höchsten `Straftaten_insgesamt` und eine neue Excel-Datei mit den sortierten Daten.
+
+## Hinweise
+
+- **Überprüfung der Daten**: Es ist immer eine gute Praxis, die ersten paar Zeilen des eingelesenen DataFrames zu überprüfen, um sicherzustellen, dass die Daten korrekt eingelesen wurden. Dies haben wir mit `print(df.head())` gemacht.
+
+- **Anpassung an Ihre Bedürfnisse**: Falls Sie weitere Analysen durchführen oder andere Sortierkriterien anwenden möchten, können Sie das Skript entsprechend erweitern.
+
+- **Fehlerbehandlung**: Das Skript enthält grundlegende Fehlerbehandlungen, wie das Entfernen von Zeilen mit nicht-numerischen Bezirkscodes. Je nach Datenqualität könnten weitere Bereinigungen notwendig sein.
+
+Ich hoffe, dieses Skript hilft Ihnen bei der Analyse Ihrer Kriminalitätsdaten. Wenn Sie weitere Fragen haben oder Unterstützung benötigen, stehe ich Ihnen gerne zur Verfügung!

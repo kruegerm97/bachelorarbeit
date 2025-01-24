@@ -1,69 +1,54 @@
 import pandas as pd
 
-def main():
-    # Pfad zur CSV-Datei
-    csv_file = 'FZ_2023.csv'
+# Pfad zur Excel-Datei
+excel_file = 'Fallzahlen&HZ2014-2023.xlsx'
 
-    try:
-        # Einlesen der CSV-Datei, Überspringen der ersten 4 Zeilen, die keine relevanten Daten enthalten
-        df = pd.read_csv(
-            csv_file,
-            sep=',',
-            skiprows=4,
-            encoding='utf-8',
-            dtype=str
-        )
+# Lesen des Sheets 'Fallzahlen_2023', Überspringen der ersten 4 Zeilen
+df = pd.read_excel(excel_file, sheet_name='Fallzahlen_2023', skiprows=4)
 
-        # Umbenennen der Spalten für einfacheren Zugriff (falls notwendig)
-        df.columns = [
-            'LOR-Schlüssel',
-            'Bezeichnung',
-            'Straftaten_insgesamt',
-            'Raub',
-            'Strassenraub_Handtaschenraub',
-            'Koerperverletzungen_insgesamt',
-            'Gefaehrliche_schwere_Koerperverletzung',
-            'Freiheitsberaubung_Noetigung_Bedrohnung_Nachstellung',
-            'Diebstahl_insgesamt',
-            'Diebstahl_von_Kraftwagen',
-            'Diebstahl_an_aus_Kfz',
-            'Fahrraddiebstahl',
-            'Wohnraumeinbruch',
-            'Branddelikte_insgesamt',
-            'Brandstiftung',
-            'Sachbeschadigung_insgesamt',
-            'Sachbeschadigung_durch_Graffiti',
-            'Rauschgiftdelikte',
-            'Kieztaten'
-        ]
+# Umbenennen der Spalten für einfacheren Zugriff (optional)
+df.columns = [
+    "LOR-Schlüssel", "Bezeichnung", "Straftaten_gesamt", "Raub",
+    "Strassenraub_Handtaschenraub", "Koerper_verletzungen_gesamt",
+    "Gefaehrliche_schwere_Koerper_verletzung",
+    "Freiheitsberaubung_Noetigung_Bedrohung_Nachstellung",
+    "Diebstahl_gesamt", "Diebstahl_Kraftwagen",
+    "Diebstahl_Kfz", "Fahrraddiebstahl", "Wohnraumeinbruch",
+    "Branddelikte_gesamt", "Brandstiftung",
+    "Sachbeschadigung_gesamt", "Sachbeschadigung_Graffiti",
+    "Rauschgiftdelikte", "Kieztaten"
+]
 
-        # Funktion zur Umwandlung von Zahlenstrings in Integer
-        def convert_to_int(x):
-            if isinstance(x, str):
-                # Entfernen von Anführungszeichen und Kommas
-                return int(x.replace('"', '').replace(',', ''))
-            return 0  # Standardwert, falls der Eintrag kein String ist
+# Entfernen von möglichen Fußzeilen oder nicht relevanten Zeilen
+df = df[~df["LOR-Schlüssel"].isin(["", "Gesamt", "Total"])]
 
-        # Anwenden der Umwandlungsfunktion auf die relevante Spalte
-        df['Straftaten_insgesamt'] = df['Straftaten_insgesamt'].apply(convert_to_int)
+# Entfernen von Anführungszeichen und Konvertieren der Zahlen
+numeric_cols = [
+    "Straftaten_gesamt", "Raub", "Strassenraub_Handtaschenraub",
+    "Koerper_verletzungen_gesamt", "Gefaehrliche_schwere_Koerper_verletzung",
+    "Freiheitsberaubung_Noetigung_Bedrohung_Nachstellung", "Diebstahl_gesamt",
+    "Diebstahl_Kraftwagen", "Diebstahl_Kfz", "Fahrraddiebstahl",
+    "Wohnraumeinbruch", "Branddelikte_gesamt", "Brandstiftung",
+    "Sachbeschadigung_gesamt", "Sachbeschadigung_Graffiti",
+    "Rauschgiftdelikte", "Kieztaten"
+]
 
-        # Filterung der Bezirke: Ausschluss der Einträge, die nicht zugeordnet sind (z.B. LOR-Schlüssel endet mit '900' oder '999')
-        df_filtered = df[~df['LOR-Schlüssel'].str.endswith(('900', '999'))].copy()
+for col in numeric_cols:
+    # Entfernen von Anführungszeichen und Tausendertrennzeichen
+    df[col] = df[col].astype(str).str.replace('"', '').str.replace(',', '').str.replace('.', '')
+    # Konvertieren zu numerischen Datentypen
+    df[col] = pd.to_numeric(df[col], errors='coerce')
 
-        # Sortierung der Bezirke nach der Gesamtzahl der Straftaten absteigend
-        df_sorted = df_filtered.sort_values(by='Straftaten_insgesamt', ascending=False)
+# Sortieren nach 'Straftaten_gesamt' in absteigender Reihenfolge
+df_sorted = df.sort_values(by='Straftaten_gesamt', ascending=False)
 
-        # Anzeige der sortierten Bezirke
-        print(df_sorted[['Bezeichnung', 'Straftaten_insgesamt']])
+# Optional: Zurücksetzen des Indexes
+df_sorted.reset_index(drop=True, inplace=True)
 
-        # Optional: Speichern der sortierten Daten in einer neuen CSV-Datei
-        df_sorted[['Bezeichnung', 'Straftaten_insgesamt']].to_csv('sortierte_straftaten.csv', index=False, encoding='utf-8')
-        print("\nDie sortierten Daten wurden in 'sortierte_straftaten.csv' gespeichert.")
+# Ausgabe der sortierten Daten
+print(df_sorted[['LOR-Schlüssel', 'Bezeichnung', 'Straftaten_gesamt']])
 
-    except FileNotFoundError:
-        print(f"Die Datei '{csv_file}' wurde nicht gefunden. Bitte überprüfen Sie den Pfad.")
-    except Exception as e:
-        print(f"Es ist ein Fehler aufgetreten: {e}")
-
-if __name__ == "__main__":
-    main()
+# Optional: Speichern der sortierten Daten in eine neue Excel-Datei
+output_file = 'Fallzahlen_2023_sortiert.xlsx'
+df_sorted.to_excel(output_file, sheet_name='Sortiert', index=False)
+print(f"Die sortierten Daten wurden in '{output_file}' gespeichert.")

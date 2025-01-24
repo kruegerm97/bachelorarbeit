@@ -1,35 +1,74 @@
 import pandas as pd
 
-# Pfad zur CSV-Datei
-csv_datei = 'FZ_2023.csv'
+# Pfad zur Excel-Datei
+excel_file = 'Fallzahlen&HZ2014-2023.xlsx'
 
-# Lesen der CSV-Datei, Überspringen der ersten vier Zeilen, die keine relevanten Daten enthalten
-df = pd.read_csv(csv_datei, skiprows=4, sep=',', encoding='utf-8')
+# Name des Sheets
+sheet_name = 'Fallzahlen_2023'
 
-# Anzeigen der ersten paar Zeilen, um sicherzustellen, dass die Daten korrekt gelesen wurden
-# print(df.head())
+# Anzahl der Zeilen überspringen (basierend auf den bereitgestellten Daten)
+skip_rows = 4  # Anpassung je nach tatsächlichem Aufbau
 
-# Bereinigen der Spalte 'Straftaten -insgesamt-'
-# Entfernen der Anführungszeichen und Kommata, Umwandeln in Ganzzahlen
-df['Straftaten -insgesamt-'] = (
-    df['Straftaten -insgesamt-']
-    .astype(str)  # Sicherstellen, dass die Werte als Strings behandelt werden
-    .str.replace('"', '')  # Entfernen von Anführungszeichen
-    .str.replace(',', '')  # Entfernen von Tausendertrennzeichen
-    .astype(int)  # Umwandeln in Integer
+# Lesen der Excel-Datei
+df = pd.read_excel(
+    excel_file,
+    sheet_name=sheet_name,
+    skiprows=skip_rows,
+    engine='openpyxl'
 )
 
-# Optional: Entfernen von nicht zuordenbaren Bezirken, falls gewünscht
-# df = df[~df['LOR-Schlüssel (Bezirksregion)'].str.contains('99')]
+# Anzeigen der ersten paar Zeilen, um die Struktur zu überprüfen (optional)
+#print(df.head())
 
-# Sortieren der Bezirke nach der Gesamtanzahl der Straftaten absteigend
-sortierte_df = df.sort_values(by='Straftaten -insgesamt-', ascending=False)
+# Spaltennamen identifizieren und anpassen
+# Basierend auf den bereitgestellten Daten könnte die Spalte 'Straftaten insgesamt' anders benannt sein
+# Wir gehen davon aus, dass die dritte Spalte die Gesamtzahl der Straftaten enthält
+# Falls nötig, passen Sie den Spaltennamen entsprechend an
 
-# Zur besseren Lesbarkeit können Sie die Spaltennamen umbenennen
-sortierte_df = sortierte_df.rename(columns={
-    'Bezeichnung (Bezirksregion)': 'Bezirk',
-    'Straftaten -insgesamt-': 'Straftaten_Gesamt'
-})
+# Beispiel: Annahme, dass die Spalte 'Straftaten insgesamt' den Namen 'Straftaten insgesamt' hat
+# Ansonsten prüfen Sie df.columns und passen Sie den Namen an
+# Hier nutze ich den Index der Spalte, falls die Namen nicht exakt passen
 
-# Anzeigen der sortierten Liste
-print(sortierte_df[['Bezirk', 'Straftaten_Gesamt']].to_string(index=False))
+# Angenommen, die Spalte mit den Straftaten ist die dritte (Index 2)
+# und heißt ähnlich wie "Straftaten insgesamt" in deutscher Sprache
+
+# Festlegen des tatsächlichen Spaltennamens
+# Zeigen der Spaltennamen zur Identifizierung (optional)
+#print(df.columns)
+
+# Beispielspaltennamen basierend auf den Daten
+# Anpassen, falls sie anders benannt sind
+# Hier nehme ich an, die Spalte heißt 'Straftaten insgesamt' oder ähnlich
+# Eventuell müssen Sie die genaue Bezeichnung aus den Spaltennamen entnehmen
+
+# Finden der Spalte, die "Straftaten insgesamt" entspricht
+# Dies kann je nach Excel-Datei variieren
+# Hier ein Beispiel, wie man die Spalte identifizieren könnte:
+
+straftaten_spalte = None
+for col in df.columns:
+    if 'Straftaten' in str(col):
+        straffaten_spalte = col
+        break
+
+if straffaten_spalte is None:
+    raise ValueError("Die Spalte 'Straftaten insgesamt' wurde nicht gefunden.")
+
+# Bereinigen der Straftatenzahlen:
+# Entfernen von Anführungszeichen und Kommas, dann Umwandlung in Ganzzahlen
+df[straffaten_spalte] = df[straffaten_spalte].astype(str)  # Sicherstellen, dass es ein String ist
+df[straffaten_spalte] = df[straffaten_spalte].str.replace('"', '').str.replace(',', '').astype(int)
+
+# Sortieren nach der Straftatenzahl in absteigender Reihenfolge
+df_sorted = df.sort_values(by=straffaten_spalte, ascending=False)
+
+# Optional: Zurücksetzen des Indexes
+df_sorted.reset_index(drop=True, inplace=True)
+
+# Anzeigen der sortierten Daten
+print(df_sorted[['Bezeichnung (Bezirksregion)', straffaten_spalte]])
+
+# Optional: Speichern der sortierten Daten in einer neuen Excel-Datei
+output_file = 'Sortierte_Fallzahlen_2023.xlsx'
+df_sorted.to_excel(output_file, sheet_name='Sortiert', index=False)
+print(f"Die sortierten Daten wurden in '{output_file}' gespeichert.")

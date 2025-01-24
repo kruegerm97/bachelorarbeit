@@ -1,51 +1,62 @@
 import pandas as pd
 
-# Pfad zur CSV-Datei
-csv_datei = 'Fallzahlen&HZ2014-2023/FZ_2023.csv'  # Passe den Pfad entsprechend an
+# Pfad zur Excel-Datei
+excel_datei = 'Fallzahlen&HZ2014-2023.xlsx'
 
-# Da die ersten 4 Zeilen Metadaten enthalten, überspringen wir diese
-try:
-    df = pd.read_csv(csv_datei, skiprows=4, delimiter=',', encoding='utf-8')
-except FileNotFoundError:
-    print(f"Die Datei {csv_datei} wurde nicht gefunden.")
-    exit(1)
-except Exception as e:
-    print(f"Beim Lesen der Datei ist ein Fehler aufgetreten: {e}")
-    exit(1)
+# Namen des Sheets
+sheet_name = 'Fallzahlen_2023'
 
-# Anzeige der ersten paar Zeilen, um die Struktur zu verstehen
-print("Erste fünf Zeilen der CSV-Datei:")
+# Überspringe die ersten 4 Zeilen, die Metadaten enthalten
+# Annahme: Die Header befinden sich in der 5. Zeile (Index 4)
+df = pd.read_excel(
+    excel_datei,
+    sheet_name=sheet_name,
+    skiprows=4,
+    thousands=',',    # Komma als Tausender-Trennzeichen
+    decimal='.',      # Punkt als Dezimaltrennzeichen (falls vorhanden)
+    engine='openpyxl' # Sicherstellen, dass openpyxl verwendet wird
+)
+
+# Anzeigen der ersten paar Zeilen, um sicherzustellen, dass die Daten korrekt geladen wurden
+print("Erste Zeilen des geladenen DataFrames:")
 print(df.head())
 
 # Überprüfen der Spaltennamen
 print("\nSpaltennamen:")
-print(df.columns.tolist())
+print(df.columns)
 
-# Annahme: Die Spalte "Straftaten -insgesamt-" ist die dritte Spalte
-# Wegen Zeilenumbrüchen im Spaltennamen könnte der tatsächliche Name variieren
-# Daher suchen wir die Spalte, die "Straftaten" und "insgesamt" enthält
-spalte_straftaten = None
-for spalte in df.columns:
-    if 'Straftaten' in spalte and 'insgesamt' in spalte:
-        spalte_straftaten = spalte
-        break
+# Falls die Spaltennamen unerwartete Leerzeichen oder Zeilenumbrüche enthalten,
+# kann es hilfreich sein, sie zu bereinigen. Beispielsweise:
+df.columns = df.columns.str.strip().str.replace('\n', ' ').str.replace('\r', '')
 
-if spalte_straftaten is None:
-    print("Die Spalte für 'Straftaten insgesamt' wurde nicht gefunden.")
-    exit(1)
+# Anzeigen der bereinigten Spaltennamen
+print("\nBereinigte Spaltennamen:")
+print(df.columns)
 
-# Entfernen von Tausender-Trennzeichen und Konvertieren zu Integer
-df[spalte_straftaten] = df[spalte_straftaten].astype(str).str.replace(',', '').astype(int)
+# Sicherstellen, dass die Spalte 'Straftaten -insgesamt-' korrekt benannt ist
+# Anpassen des Spaltennamens falls erforderlich
+spalte_straftaten = 'Straftaten -insgesamt-'  # Passe diesen Namen an, falls nötig
 
-# Optional: Entfernen von überschüssigen Leerzeichen in den Bezirksnamen
-df['Bezeichnung (Bezirksregion)'] = df['Bezeichnung (Bezirksregion)'].str.strip()
+if spalte_straftaten not in df.columns:
+    raise ValueError(f"Die erwartete Spalte '{spalte_straftaten}' wurde nicht gefunden. Bitte überprüfe die Spaltennamen.")
 
-# Sortieren nach der Anzahl der Straftaten insgesamt in absteigender Reihenfolge
-df_sortiert = df.sort_values(by=spalte_straftaten, ascending=False)
+# Konvertiere die Spalte in numerische Werte (falls noch nicht geschehen)
+df[spalte_straftaten] = pd.to_numeric(df[spalte_straftaten], errors='coerce')
 
-# Auswahl der relevanten Spalten für die Ausgabe
-ergebnis = df_sortiert[['Bezeichnung (Bezirksregion)', spalte_straftaten]]
+# Optional: Entferne Zeilen, bei denen die Gesamtzahl der Straftaten fehlt
+df = df.dropna(subset=[spalte_straftaten])
 
-# Anzeige der sortierten Ergebnisse
-print("\nBezirke sortiert nach insgesamt registrierten Straftaten im Jahr 2023:")
-print(ergebnis.to_string(index=False))
+# Sortiere den DataFrame nach der Gesamtzahl der Straftaten in absteigender Reihenfolge
+df_sorted = df.sort_values(by=spalte_straftaten, ascending=False)
+
+# Optional: Zur besseren Lesbarkeit den Index zurücksetzen
+df_sorted = df_sorted.reset_index(drop=True)
+
+# Anzeigen der sortierten Daten
+print("\nSortierte Daten nach 'Straftaten -insgesamt-':")
+print(df_sorted[[ 'Bezeichnung (Bezirksregion)', spalte_straftaten ]].head(10))  # Zeigt die Top 10 Bezirke
+
+# Speichern der sortierten Daten in eine neue Excel-Datei
+sortierte_datei = 'Fallzahlen_2023_sortiert.xlsx'
+df_sorted.to_excel(sortierte_datei, index=False)
+print(f"\nDie sortierten Daten wurden in '{sortierte_datei}' gespeichert.")
