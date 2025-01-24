@@ -1,0 +1,161 @@
+Gerne helfe ich Ihnen dabei, ein Python-Skript zu erstellen, das Ihre CSV-Datei `FZ_2023.csv` liest, die Gesamtzahl der Straftaten pro Bezirk extrahiert und die Bezirke basierend auf dieser Zahl in absteigender Reihenfolge sortiert. Wir werden dazu die `pandas`-Bibliothek verwenden, die sich hervorragend für die Datenanalyse eignet.
+
+### Schritt-für-Schritt-Anleitung
+
+1. **Installieren Sie die notwendigen Bibliotheken**
+   
+   Stellen Sie sicher, dass Sie die `pandas`-Bibliothek installiert haben. Falls nicht, können Sie sie mit dem folgenden Befehl installieren:
+
+   ```bash
+   pip install pandas
+   ```
+
+2. **Erstellen Sie das Python-Skript**
+
+   Erstellen Sie eine neue Python-Datei, zum Beispiel `analyse_fz.py`, und fügen Sie den folgenden Code ein:
+
+   ```python
+   import pandas as pd
+
+   # Pfad zur CSV-Datei
+   csv_file = 'FZ_2023.csv'
+
+   # Lesen der CSV-Datei
+   # - Überspringen der ersten 4 Zeilen, die Metadaten enthalten
+   # - Festlegen des Trennzeichens auf Komma
+   # - Festlegen von Anführungszeichen auf "
+   # - Umgang mit Tausendertrennzeichen (,)
+   try:
+       df = pd.read_csv(
+           csv_file,
+           skiprows=4,
+           sep=',',
+           quotechar='"',
+           thousands=',',
+           encoding='utf-8'
+       )
+   except FileNotFoundError:
+       print(f"Die Datei '{csv_file}' wurde nicht gefunden.")
+       exit(1)
+   except Exception as e:
+       print(f"Beim Lesen der Datei ist ein Fehler aufgetreten: {e}")
+       exit(1)
+
+   # Anzeigen der ersten paar Zeilen, um die Struktur zu verstehen
+   print("Erste Zeilen des DataFrames:")
+   print(df.head())
+
+   # Bereinigen der Spaltennamen (Entfernen von Zeilenumbrüchen und überflüssigen Leerzeichen)
+   df.columns = df.columns.str.replace('\n', ' ').str.strip()
+
+   # Überprüfen, ob die relevante Spalte vorhanden ist
+   total_crimes_column = 'Straftaten - insgesamt-'
+   if total_crimes_column not in df.columns:
+       print(f"Die Spalte '{total_crimes_column}' wurde in den Daten nicht gefunden.")
+       exit(1)
+
+   # Entfernen von möglichen Leerzeichen in den Bezirksnamen
+   df['Bezeichnung (Bezirksregion)'] = df['Bezeichnung (Bezirksregion)'].str.strip()
+
+   # Sortieren des DataFrames basierend auf der Gesamtzahl der Straftaten in absteigender Reihenfolge
+   df_sorted = df.sort_values(by=total_crimes_column, ascending=False)
+
+   # Zur besseren Lesbarkeit die Index zurücksetzen
+   df_sorted.reset_index(drop=True, inplace=True)
+
+   # Ausgabe der sortierten Bezirke mit deren Gesamtzahl der Straftaten
+   print("\nBezirke sortiert nach der Gesamtzahl der Straftaten (absteigend):")
+   print(df_sorted[['Bezeichnung (Bezirksregion)', total_crimes_column]])
+
+   # Optional: Speichern des sortierten DataFrames in eine neue CSV-Datei
+   output_file = 'FZ_2023_sorted.csv'
+   try:
+       df_sorted[['Bezeichnung (Bezirksregion)', total_crimes_column]].to_csv(
+           output_file,
+           index=False,
+           encoding='utf-8'
+       )
+       print(f"\nDie sortierten Daten wurden erfolgreich in '{output_file}' gespeichert.")
+   except Exception as e:
+       print(f"Beim Speichern der Datei ist ein Fehler aufgetreten: {e}")
+   ```
+
+3. **Erklärung des Skripts**
+
+   - **Importieren der Bibliothek**: Wir importieren `pandas` als `pd`, eine gängige Alias in der Python-Community.
+   
+   - **Lesen der CSV-Datei**: Mit `pd.read_csv` lesen wir die Datei ein, überspringen die ersten 4 Zeilen (die Metadaten enthalten), setzen das Trennzeichen auf Komma und definieren das Tausendertrennzeichen. Dadurch werden Zahlen wie `"83,611"` korrekt als `83611` interpretiert.
+   
+   - **Bereinigen der Spaltennamen**: Entfernen von Zeilenumbrüchen und Leerzeichen aus den Spaltennamen, um sie einfacher zugänglich zu machen.
+   
+   - **Sortieren der Daten**: Der DataFrame wird basierend auf der Spalte `"Straftaten - insgesamt-"` in absteigender Reihenfolge sortiert.
+   
+   - **Ausgabe und Speicherung**: Die sortierten Bezirke werden in der Konsole ausgegeben und optional in eine neue CSV-Datei `FZ_2023_sorted.csv` gespeichert.
+
+4. **Ausführen des Skripts**
+
+   Stellen Sie sicher, dass sich die Datei `FZ_2023.csv` im gleichen Verzeichnis wie das Skript `analyse_fz.py` befindet. Führen Sie dann das Skript mit folgendem Befehl aus:
+
+   ```bash
+   python analyse_fz.py
+   ```
+
+   Sie sollten eine Ausgabe erhalten, die die Bezirke nach der Gesamtzahl der Straftaten sortiert anzeigt, sowie eine neue Datei `FZ_2023_sorted.csv`, die diese sortierten Daten enthält.
+
+### Beispielausgabe
+
+```
+Erste Zeilen des DataFrames:
+  LOR-Schlüssel (Bezirksregion) Bezeichnung (Bezirksregion)  \
+0                       010000                         Mitte   
+1                       011001                Tiergarten Süd   
+2                       011002            Regierungsviertel   
+3                       011003                Alexanderplatz   
+4                       011004         Brunnenstraße Süd   
+
+   Straftaten - insgesamt-  Raub  ...  Rummelsburger Bucht  \
+0                   83611    884  ...                  0   
+1                    4491     47  ...                  0   
+2                    6550     44  ...                  0   
+3                   19673    199  ...                  0   
+4                    3724     51  ...                  0   
+
+   Karlshorst  ... Bezeichnung (Bezirksregion)1  Straftaten - insgesamt-  
+0         NaN  ...                            NaN                   NaN  
+1         NaN  ...                            NaN                   NaN  
+2         NaN  ...                            NaN                   NaN  
+3         NaN  ...                            NaN                   NaN  
+4         NaN  ...                            NaN                   NaN  
+
+[5 rows x 19 columns]
+
+Bezirke sortiert nach der Gesamtzahl der Straftaten (absteigend):
+    Bezeichnung (Bezirksregion)  Straftaten - insgesamt-
+0                        Mitte                  83611
+1           Friedrichshain-Kreuzberg                  55838
+2                     Tempelhof-Schöneberg                  41776
+3                  Neukölln                  45313
+4                 Lichtenberg                  31563
+...                         ...                     ...
+95                 Rummelsburger Bucht                      47
+96               Karlshorst                      1680
+97           Marienfelde Nord                    1369
+98             Marienfelde Süd                    1105
+99                  Lichtenrade Nord                      974
+
+[100 rows x 2 columns]
+
+Die sortierten Daten wurden erfolgreich in 'FZ_2023_sorted.csv' gespeichert.
+```
+
+*Hinweis: Die tatsächliche Ausgabe hängt von den vollständigen Daten in Ihrer CSV-Datei ab.*
+
+### Anpassungen und Erweiterungen
+
+- **Fehlerbehandlung**: Das Skript enthält grundlegende Fehlerbehandlungen für das Lesen und Schreiben der CSV-Dateien. Sie können diese erweitern, um spezifischere Fehlerfälle abzudecken.
+  
+- **Weitere Analysen**: Sie können zusätzliche Analysen durchführen, z.B. Visualisierungen der Daten mit Bibliotheken wie `matplotlib` oder `seaborn`.
+
+- **Interaktive Elemente**: Für eine benutzerfreundlichere Anwendung könnten Sie Elemente wie eine grafische Benutzeroberfläche oder Befehlszeilenargumente hinzufügen.
+
+Ich hoffe, dieses Skript hilft Ihnen bei der Analyse Ihrer Kriminalitätsdaten! Wenn Sie weitere Fragen oder Anpassungswünsche haben, lassen Sie es mich bitte wissen.

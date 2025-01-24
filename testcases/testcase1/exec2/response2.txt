@@ -1,0 +1,131 @@
+Um die bereitgestellten Kriminalitätsdaten (`FZ_2023.csv`) nach der Anzahl der insgesamt begangenen Straftaten pro Bezirk im Jahr 2023 zu analysieren und zu sortieren, können wir ein Python-Skript erstellen. Dieses Skript verwendet die Bibliothek `pandas`, die sich hervorragend für die Datenanalyse und -manipulation eignet.
+
+Im Folgenden findest du ein vollständiges Python-Skript, das die gewünschten Aufgaben durchführt:
+
+```python
+import pandas as pd
+
+# Datei einlesen
+# Da die ersten 4 Zeilen Metadaten und leere Zeilen enthalten, überspringen wir diese
+df = pd.read_csv('FZ_2023.csv', sep=',', skiprows=4, encoding='utf-8')
+
+# Spaltennamen bereinigen: Entferne Zeilenumbrüche und führende/trailende Leerzeichen
+df.columns = df.columns.str.replace('\n', ' ').str.strip()
+
+# Identifizieren der relevanten Spalten
+# Angenommen, die Spalte für "Straftaten insgesamt" enthält das Wort "insgesamt"
+total_crime_col = [col for col in df.columns if 'insgesamt' in col.lower() and 'straftaten' in col.lower()]
+if not total_crime_col:
+    raise ValueError("Die Spalte 'Straftaten insgesamt' wurde nicht gefunden.")
+total_crime_col = total_crime_col[0]
+
+# Identifizieren der Spalte für Bezirksnamen
+district_col = 'Bezeichnung (Bezirksregion)'
+
+# Filtern der relevanten Daten:
+# - Ausschließen von Zeilen, die nicht zuzuordnen sind
+# - Ausschließen der Gesamtsumme (z.B. "Berlin (PKS gesamt)")
+df_filtered = df[~df[district_col].str.contains('nicht zuzuordnen|gesamt|Stadtgebiet Berlin', case=False, na=False)]
+
+# Bereinigen der "Straftaten insgesamt" Spalte:
+# - Entfernen von Tausendertrennzeichen (Kommas und Punkte)
+# - Konvertieren in Ganzzahlen
+df_filtered[total_crime_col] = df_filtered[total_crime_col].astype(str).str.replace('[.,]', '', regex=True).astype(int)
+
+# Sortieren nach der Anzahl der Straftaten insgesamt in absteigender Reihenfolge
+df_sorted = df_filtered.sort_values(by=total_crime_col, ascending=False)
+
+# Optional: Zur besseren Lesbarkeit die DataFrame nur mit relevanten Spalten anzeigen
+result = df_sorted[[district_col, total_crime_col]]
+
+# Ausgabe der sortierten Liste
+print(result.to_string(index=False))
+```
+
+### Erklärung des Skripts
+
+1. **Importieren der benötigten Bibliothek:**
+   ```python
+   import pandas as pd
+   ```
+   `pandas` ist eine leistungsstarke Bibliothek zur Datenanalyse und -manipulation.
+
+2. **Einlesen der CSV-Datei:**
+   ```python
+   df = pd.read_csv('FZ_2023.csv', sep=',', skiprows=4, encoding='utf-8')
+   ```
+   - **`sep=','`**: Gibt das Trennzeichen in der CSV-Datei an (Komma).
+   - **`skiprows=4`**: Überspringt die ersten 4 Zeilen, die keine relevanten Daten enthalten.
+   - **`encoding='utf-8'`**: Stellt sicher, dass die Datei korrekt gelesen wird, insbesondere wenn Sonderzeichen vorhanden sind.
+
+3. **Bereinigen der Spaltennamen:**
+   ```python
+   df.columns = df.columns.str.replace('\n', ' ').str.strip()
+   ```
+   Entfernt Zeilenumbrüche und überschüssige Leerzeichen aus den Spaltennamen.
+
+4. **Identifizieren der relevanten Spalten:**
+   - **`total_crime_col`**: Die Spalte, die die Gesamtanzahl der Straftaten enthält.
+   - **`district_col`**: Die Spalte mit den Bezirksnamen.
+   
+   ```python
+   total_crime_col = [col for col in df.columns if 'insgesamt' in col.lower() and 'straftaten' in col.lower()]
+   if not total_crime_col:
+       raise ValueError("Die Spalte 'Straftaten insgesamt' wurde nicht gefunden.")
+   total_crime_col = total_crime_col[0]
+   ```
+
+5. **Filtern der relevanten Daten:**
+   Ausschließen von Zeilen, die nicht zuordenbare Bezirke enthalten oder die Gesamtsumme darstellen.
+   ```python
+   df_filtered = df[~df[district_col].str.contains('nicht zuzuordnen|gesamt|Stadtgebiet Berlin', case=False, na=False)]
+   ```
+
+6. **Bereinigen und Konvertieren der Strafdaten:**
+   Entfernen von Tausendertrennzeichen und Umwandeln der Werte in Ganzzahlen.
+   ```python
+   df_filtered[total_crime_col] = df_filtered[total_crime_col].astype(str).str.replace('[.,]', '', regex=True).astype(int)
+   ```
+
+7. **Sortieren der Daten:**
+   Die Bezirke werden nach der Gesamtanzahl der Straftaten in absteigender Reihenfolge sortiert.
+   ```python
+   df_sorted = df_filtered.sort_values(by=total_crime_col, ascending=False)
+   ```
+
+8. **Ausgabe der Ergebnisse:**
+   Nur die relevanten Spalten werden angezeigt, und die Liste wird in der Konsole ausgegeben.
+   ```python
+   result = df_sorted[[district_col, total_crime_col]]
+   print(result.to_string(index=False))
+   ```
+
+### Beispielhafte Ausgabe
+
+Die Ausgabe könnte wie folgt aussehen (Beispielwerte):
+
+```
+Bezeichnung (Bezirksregion)  Straftaten insgesamt-
+           Mitte                     83611
+   Tempelhof-Schöneberg               41776
+  Lichtenberg                        31563
+     Pankow                           39164
+```
+
+### Hinweise und Empfehlungen
+
+- **Installation von `pandas`:** Stelle sicher, dass die `pandas`-Bibliothek installiert ist. Dies kannst du mit folgendem Befehl in deiner Kommandozeile tun:
+  ```bash
+  pip install pandas
+  ```
+
+- **Dateipfad:** Stelle sicher, dass sich die Datei `FZ_2023.csv` im gleichen Verzeichnis wie dein Python-Skript befindet oder gib den vollständigen Pfad zur Datei an.
+
+- **Datenüberprüfung:** Es ist immer eine gute Idee, die eingelesenen Daten zu überprüfen, um sicherzustellen, dass sie korrekt interpretiert wurden. Du kannst dazu `df.head()` verwenden, um die ersten Zeilen der DataFrame anzuzeigen:
+  ```python
+  print(df.head())
+  ```
+
+- **Fehlerbehandlung:** Das Skript enthält grundlegende Fehlerbehandlungen, wie das Überprüfen, ob die relevante Spalte gefunden wurde. Weitere Fehlerbehandlungen können hinzugefügt werden, um das Skript robuster zu machen.
+
+Mit diesem Skript kannst du die Kriminalitätsdaten effizient analysieren und die Bezirke nach der Anzahl der begangenen Straftaten im Jahr 2023 sortiert anzeigen.

@@ -27,3 +27,8 @@ Zur Methodik: Pro Testcase eine offene unspezifische Prompt und eine Prompt mit 
 3. Testcase: Filterung Bezirke mit mehr als 1000 Straftaten.
 4. Testcase: Balkendiagramm X-Achse Bezirke, Y-Achse Anzahl der einzelnen Straftaten verteil.
 5. Testcase: Zeitreihe Kriminalitaetstrends ueber die Jahre hinweg.
+
+Nummerierung der Seiten
+
+Probleme bei der Durchführung:
+ChatGPT nimmt keine Dateien wie excel etc an. Man muss API benutzen und die Tabelle als CSV Content übergeben.
