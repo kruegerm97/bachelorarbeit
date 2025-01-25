@@ -16,6 +16,41 @@
 \usepackage[backend=biber,style=numeric,sorting=none]{biblatex}
 \addbibresource{./references.bib}
 \usepackage{float}
+\usepackage[autostyle=true,german=quotes]{csquotes}
+\usepackage{listings}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{
+    style=mystyle,
+    language=Python,
+    frame=single,
+    showstringspaces=false,
+    inputencoding=utf8,
+    literate={ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1 {Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1 {ß}{{\ss}}1,
+}
 
 % Für Überschriften etwas schönere Darstellung (optional):
 % \usepackage{titlesec}
@@ -263,7 +298,7 @@ TODO: noch mehr ausschreiben
 \label{sec:auswertungskriterien}
     Korrektheit des Codes und der Ergebnisse, Performance des Codes im Bezug auf Laufzeit und Ressourcennutzung, Qualität des Codes (Struktur des Codes, Kommentare/Dokumentation, verwendete Libraries), Wartbarkeit und ist der Code erweiterbar.\\
 
-    Die Auswertung der generiertes Python Skripte erfolgt anhand der in Kapitel \ref{sec:forschungsfragen} definierten Kriterien. Um die Korrektheit des Codes zu messen wird das Pass@k Verfahren verwendet, dabei steht "k" für die Anzahl der ausgeführten Versuche pro Testfall. In diesem Experiment beschränke ich mich auf k=10, um eine gute Balance zwischen Genauigkeit und Rechenzeit zu finden. Bei diesem Verfahren ergibt sich als Ergebnis ein Prozentsatz über die Anzahl der erfolgreichen Versuche. Die ausgeführten Versuche werden anschließend in erfolgreich und nicht erfolgreich unterteilt und getrennt genauer betrachtet. Um zu entscheiden, ob ein Versuch erfolgreich war, werden Tests definiert, welche das Ergebnis und den Code selbst prüfen. Im Code wird dabei darauf geachtet, welche Bibliotheken, Funktionen und Pandas Dataframes benutzt wurden.
+    Die Auswertung der generierten Python Skripte erfolgt anhand der in Kapitel \ref{sec:forschungsfragen} definierten Kriterien. Um die Korrektheit des Codes zu messen wird das Pass@k Verfahren verwendet, dabei steht "k" für die Anzahl der ausgeführten Versuche pro Testfall. In diesem Experiment beschränke ich mich auf k=10, um eine gute Balance zwischen Genauigkeit und Rechenzeit zu finden. Bei diesem Verfahren ergibt sich als Ergebnis ein Prozentsatz über die Anzahl der erfolgreichen Versuche. Die ausgeführten Versuche werden anschließend in erfolgreich und nicht erfolgreich unterteilt und getrennt genauer betrachtet. Um zu entscheiden, ob ein Versuch erfolgreich war, werden Tests definiert, welche das Ergebnis und den Code selbst prüfen. Im Code wird dabei darauf geachtet, welche Bibliotheken, Funktionen und Pandas Dataframes benutzt wurden.
     In der genaueren Analyse des Codes wird bei den nicht erfolgreichen Versuchen wird untersucht, warum der Code nicht korrekt ausgeführt wurde und was für Verbesserungen vorgenommen werden können. Bei den erfolgreichen Versuchen hingegen wird analysiert, wie der Code strukturiert ist, ob er gut dokumentiert ist, ob er erweiterbar ist und wie die Laufzeit und Ressourcennutzung des Codes abschneidet.
 
 \subsection{Verwendete Tools}
@@ -274,14 +309,61 @@ TODO: noch mehr ausschreiben
 
 \section{Auswertung der Python-Code-Generiung zur Datenanalyse durch LLMs}
 \label{sec:auswertung}
+\subsection{Testfall 1}
+\label{subsec:auswertung_testfall1}
+Im ersten Testfall wurde ein Python-Skript generiert, das die Excel-Tabelle \enquote{Fallzahlen\_2023} nach der Anzahl der Straftaten insgesamt in 2023 sortieren sollte. Hierfür gab es zehn Ausführungen (\emph{Executions}). Die wichtigsten Beobachtungen sind:
+
+\paragraph{Erfolgsquote (Pass@10):}
+\begin{itemize}
+    \item Fünf Skripte (\#1, \#4, \#5, \#6 und \#2 mit Teilfehler) konnten letztlich eine korrekte Sortierung vornehmen oder eine korrekte Ausgabe erzeugen.
+    \item Fünf Skripte (\#3, \#7, \#8, \#9, \#10) schlugen aufgrund von \enquote{KeyError}-Fehlermeldungen fehl, da der generierte Code nicht exakt mit den vorhandenen Spaltennamen übereinstimmte.
+\end{itemize}
+Berücksichtigt man Skript \#2 als \enquote{erfolgreich} (trotz Fehlermeldung), ergibt sich damit ein \textbf{Pass@10 von 50\%}.
+
+\paragraph{Korrektheit und typische Fehlerquellen:}
+Der Hauptgrund für Fehlermeldungen lag in der \textbf{Spaltenbenennung}. Das LLM generierte teils leicht abweichende oder gar nicht existierende Spaltennamen wie \enquote{Straftaten -insgesamt-} anstelle von \enquote{Straftaten \textbackslash n-insgesamt-}, was in \verb|KeyError|-Ausnahmen resultierte. In den Fällen mit korrekter Spaltenzuordnung funktionierte das Skript erwartungsgemäß.
+
+\paragraph{Performance und Ressourcenverbrauch:}
+\begin{itemize}
+    \item Die Laufzeit betrug bei allen erfolgreichen Skripten nur wenige Zehntelsekunden.
+    \item Der Speicherverbrauch bewegte sich bei rund 80\,MB \emph{Maximum Resident Set Size}.
+\end{itemize}
+Damit sind alle Skripte für diesen kleinen Datensatz sehr effizient.
+
+\paragraph{Codequalität und Wartbarkeit:}
+\begin{itemize}
+    \item Struktur: Die meisten Skripte bestanden aus wenigen, übersichtlichen Schritten: \emph{Daten einlesen}, \emph{Spalte bereinigen/umbenennen}, \emph{sortieren}, \emph{Datei abspeichern}.
+    \item Dokumentation: Die Skripte waren alle gut kommentiert und erklärten die Schritte und die Funktionsweise. Dadurch ist der Code leicht nachvollziehbar und einfach zu warten.
+    \item Erweiterbarkeit: Sofern die Spaltennamen exakt passen, können die Skripte leicht um weitere Verarbeitungsschritte ergänzt werden. Allerdings fehlt eine robuste Fehlerbehandlung, die bei leicht geänderten Spaltennamen (oder anderen Datenfehlern) reagieren würde. Lediglich bei einer der fünf fehlgeschlagenen Ausführungen (Ausführung 7) wurde der \verb|KeyError| vom Skript aufgefangen und eine entsprechende Fehlermeldung ausgegeben.
+\end{itemize}
+
+\paragraph{Fazit zu Testfall 1:}
+Die Ergebnisse zeigen, dass LLMs in knapp der Hälfte der Fälle sofort lauffähigen Code zur Sortierung eines Excel-Datensatzes liefern. Die größte Schwachstelle ist das \textbf{fehleranfällige Handling von Spaltennamen}. In Bezug auf \textbf{Performance} gab es keine Probleme, und die erfolgreichen Skripte waren korrekt und effizient. Allerdings ist die Codequalität nur teilweise zufriedenstellend, da oft Kommentare und Fehlertoleranz fehlen. Für produktive Einsätze ist daher eine \emph{manuelle Nachbearbeitung} oder ein robustes Spaltenmapping häufig noch notwendig.\\
+Die 
 
 \section{Fazit und Ausblick}
 \label{sec:fazit}
 
 \newpage
 % Literatur
-\section{Literaturverzeichnis}
+\section{Anhang}
 \label{sec:anhang}
+\subsection{Literaturverzeichnis}
 \printbibliography
+
+\subsection{Quellcodeverzeichnis}
+\subsubsection{Testfall 1}
+\lstinputlisting[language=Python, caption={OpenAI API Request Skript Testfall 1}, label={lst:request1}]{../testcases/testcase1/request.py}
+\lstinputlisting[language=Python, caption={Generierter Python Code Testfall 1, Ausführung 1}, label={lst:code1_1}]{../testcases/testcase1/exec1/script.py}
+\lstinputlisting[language=Python, caption={Generierter Python Code Testfall 1, Ausführung 2}, label={lst:code1_2}]{../testcases/testcase1/exec2/script.py}
+\lstinputlisting[language=Python, caption={Generierter Python Code Testfall 1, Ausführung 3}, label={lst:code1_3}]{../testcases/testcase1/exec3/script.py}
+\lstinputlisting[language=Python, caption={Generierter Python Code Testfall 1, Ausführung 4}, label={lst:code1_4}]{../testcases/testcase1/exec4/script.py}
+\lstinputlisting[language=Python, caption={Generierter Python Code Testfall 1, Ausführung 5}, label={lst:code1_5}]{../testcases/testcase1/exec5/script.py}
+\lstinputlisting[language=Python, caption={Generierter Python Code Testfall 1, Ausführung 6}, label={lst:code1_6}]{../testcases/testcase1/exec6/script.py}
+\lstinputlisting[language=Python, caption={Generierter Python Code Testfall 1, Ausführung 7}, label={lst:code1_7}]{../testcases/testcase1/exec7/script.py}
+\lstinputlisting[language=Python, caption={Generierter Python Code Testfall 1, Ausführung 8}, label={lst:code1_8}]{../testcases/testcase1/exec8/script.py}
+\lstinputlisting[language=Python, caption={Generierter Python Code Testfall 1, Ausführung 9}, label={lst:code1_9}]{../testcases/testcase1/exec9/script.py}
+\lstinputlisting[language=Python, caption={Generierter Python Code Testfall 1, Ausführung 10}, label={lst:code1_10}]{../testcases/testcase1/exec10/script.py}
+
 TODO: Abbildungsverzeichnis einfügen
 \end{document}
