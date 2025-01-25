@@ -1,0 +1,63 @@
+Erste Zeilen des geladenen DataFrames:
+   LOR-Schlüssel (Bezirksregion) Bezeichnung (Bezirksregion)  ...  Rauschgift-delikte  Kieztaten
+0                          10000                       Mitte  ...                3306      19212
+1                          11001              Tiergarten Süd  ...                 210       1119
+2                          11002           Regierungsviertel  ...                 165       1119
+3                          11003              Alexanderplatz  ...                 735       4074
+4                          11004           Brunnenstraße Süd  ...                  83        871
+
+[5 rows x 19 columns]
+
+Spaltennamen:
+Index(['LOR-Schlüssel (Bezirksregion)', 'Bezeichnung (Bezirksregion)',
+       'Straftaten \n-insgesamt-', 'Raub', 'Straßenraub,\nHandtaschen-raub',
+       'Körper-verletzungen \n-insgesamt-',
+       'Gefährl. und schwere Körper-verletzung',
+       'Freiheits-beraubung, Nötigung,\nBedrohung, Nachstellung',
+       'Diebstahl \n-insgesamt-', 'Diebstahl von Kraftwagen',
+       'Diebstahl \nan/aus Kfz', 'Fahrrad-\ndiebstahl', 'Wohnraum-\neinbruch',
+       'Branddelikte \n-insgesamt-', 'Brand-\nstiftung',
+       'Sach-beschädigung -insgesamt-', 'Sach-beschädigung durch Graffiti',
+       'Rauschgift-delikte', 'Kieztaten'],
+      dtype='object')
+
+Bereinigte Spaltennamen:
+Index(['LOR-Schlüssel (Bezirksregion)', 'Bezeichnung (Bezirksregion)',
+       'Straftaten  -insgesamt-', 'Raub', 'Straßenraub, Handtaschen-raub',
+       'Körper-verletzungen  -insgesamt-',
+       'Gefährl. und schwere Körper-verletzung',
+       'Freiheits-beraubung, Nötigung, Bedrohung, Nachstellung',
+       'Diebstahl  -insgesamt-', 'Diebstahl von Kraftwagen',
+       'Diebstahl  an/aus Kfz', 'Fahrrad- diebstahl', 'Wohnraum- einbruch',
+       'Branddelikte  -insgesamt-', 'Brand- stiftung',
+       'Sach-beschädigung -insgesamt-', 'Sach-beschädigung durch Graffiti',
+       'Rauschgift-delikte', 'Kieztaten'],
+      dtype='object')
+Traceback (most recent call last):
+  File "/home/mauke/Documents/Uni/Bachelorarbeit/testcases/testcase1/exec8/script.py", line 41, in <module>
+    raise ValueError(f"Die erwartete Spalte '{spalte_straftaten}' wurde nicht gefunden. Bitte überprüfe die Spaltennamen.")
+ValueError: Die erwartete Spalte 'Straftaten -insgesamt-' wurde nicht gefunden. Bitte überprüfe die Spaltennamen.
+Command exited with non-zero status 1
+	Command being timed: "python exec8/script.py"
+	User time (seconds): 2.15
+	System time (seconds): 0.03
+	Percent of CPU this job got: 776%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.28
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 81896
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 14011
+	Voluntary context switches: 33
+	Involuntary context switches: 92
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 1

@@ -1,7 +1,9 @@
 from openai import OpenAI
+import os
 
 # OpenAI API Key
-client = OpenAI(api_key="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")
+api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=api_key)
 
 # CSV-Datei öffnen und Inhalt in Variable speichern
 csv_file = "FZ_2023.csv"

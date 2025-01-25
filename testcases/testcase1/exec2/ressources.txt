@@ -1,0 +1,46 @@
+Traceback (most recent call last):
+  File "/home/mauke/Documents/Uni/Bachelorarbeit/venv/lib/python3.13/site-packages/pandas/core/indexes/base.py", line 3805, in get_loc
+    return self._engine.get_loc(casted_key)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7081, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7089, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'LOR-Schlüssel_(Bezirksregion)'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/mauke/Documents/Uni/Bachelorarbeit/testcases/testcase1/exec2/script.py", line 19, in <module>
+    df = df[pd.to_numeric(df['LOR-Schlüssel_(Bezirksregion)'], errors='coerce').notnull()]
+                          ~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mauke/Documents/Uni/Bachelorarbeit/venv/lib/python3.13/site-packages/pandas/core/frame.py", line 4102, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "/home/mauke/Documents/Uni/Bachelorarbeit/venv/lib/python3.13/site-packages/pandas/core/indexes/base.py", line 3812, in get_loc
+    raise KeyError(key) from err
+KeyError: 'LOR-Schlüssel_(Bezirksregion)'
+
+Command exited with non-zero status 1
+	Command being timed: "python exec2/script.py"
+	User time (seconds): 2.18
+	System time (seconds): 0.04
+	Percent of CPU this job got: 853%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.26
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 83164
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 14328
+	Voluntary context switches: 41
+	Involuntary context switches: 148
+	Swaps: 0
+	File system inputs: 376
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 1

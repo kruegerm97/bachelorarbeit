@@ -1,0 +1,28 @@
+Traceback (most recent call last):
+  File "/home/mauke/Documents/Uni/Bachelorarbeit/testcases/testcase1/exec10/script.py", line 17, in <module>
+    raise ValueError(f"Spalte '{col}' nicht gefunden. Überprüfe die Spaltennamen.")
+ValueError: Spalte 'Straftaten -insgesamt-' nicht gefunden. Überprüfe die Spaltennamen.
+Command exited with non-zero status 1
+	Command being timed: "python exec10/script.py"
+	User time (seconds): 2.16
+	System time (seconds): 0.04
+	Percent of CPU this job got: 879%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.25
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 81048
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 13995
+	Voluntary context switches: 34
+	Involuntary context switches: 160
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 1
