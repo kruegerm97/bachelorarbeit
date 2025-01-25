@@ -311,12 +311,13 @@ TODO: noch mehr ausschreiben
 \label{sec:auswertung}
 \subsection{Testfall 1}
 \label{subsec:auswertung_testfall1}
+TODO: ChatGPT\\
 Im ersten Testfall wurde ein Python-Skript generiert, das die Excel-Tabelle \enquote{Fallzahlen\_2023} nach der Anzahl der Straftaten insgesamt in 2023 sortieren sollte. Hierfür gab es zehn Ausführungen (\emph{Executions}). Die wichtigsten Beobachtungen sind:
 
 \paragraph{Erfolgsquote (Pass@10):}
 \begin{itemize}
     \item Fünf Skripte (\#1, \#4, \#5, \#6 und \#2 mit Teilfehler) konnten letztlich eine korrekte Sortierung vornehmen oder eine korrekte Ausgabe erzeugen.
-    \item Fünf Skripte (\#3, \#7, \#8, \#9, \#10) schlugen aufgrund von \enquote{KeyError}-Fehlermeldungen fehl, da der generierte Code nicht exakt mit den vorhandenen Spaltennamen übereinstimmte.
+    \item Fünf Skripte (\#3, \#7, \#8, \#9, \#10) schlugen aufgrund von \verb|KeyError|-Fehlermeldungen fehl, da der generierte Code nicht exakt mit den vorhandenen Spaltennamen übereinstimmte.
 \end{itemize}
 Berücksichtigt man Skript \#2 als \enquote{erfolgreich} (trotz Fehlermeldung), ergibt sich damit ein \textbf{Pass@10 von 50\%}.
 
