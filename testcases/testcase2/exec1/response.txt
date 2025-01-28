@@ -1,138 +1,157 @@
-Natürlich! Hier ist ein Python-Skript, das mithilfe von `pandas` die Excel-Datei mit den Kriminalitätsdaten von 2014 bis 2023 einliest, die relevanten Tabellen zusammenführt und den Bezirk mit den meisten Straftaten über alle Jahre hinweg ermittelt.
+Natürlich! Unten findest du ein Python-Skript, das die beschriebenen Anforderungen erfüllt. Das Skript verwendet die `pandas`-Bibliothek, um die Excel-Datei zu lesen, nur die relevanten Sheets zu verarbeiten, die Straftaten pro Bezirk zu summieren und schließlich den Bezirk mit den meisten Straftaten über alle Jahre hinweg zu ermitteln.
 
-### Voraussetzungen
+### **Schritte des Skripts:**
 
-Stelle sicher, dass du die folgenden Python-Pakete installiert hast:
+1. **Importieren der notwendigen Bibliotheken:**
+   - `pandas` zum Lesen und Verarbeiten der Excel-Datei.
+   - `re` zur Verwendung von regulären Ausdrücken beim Filtern der Sheets.
 
-- `pandas`
-- `openpyxl` (für das Einlesen von Excel-Dateien)
+2. **Definieren des Dateipfads:**
+   - Ersetze `"Fallzahlen&HZ2014-2023.xlsx"` durch den tatsächlichen Pfad deiner Excel-Datei.
 
-Du kannst sie mit `pip` installieren:
+3. **Lesen der Sheet-Namen und Filtern der relevanten Sheets:**
+   - Nur Sheets mit dem Namen `Fallzahlen_YYYY` (z.B. `Fallzahlen_2014`) werden verarbeitet.
 
-```bash
-pip install pandas openpyxl
-```
+4. **Verarbeiten jedes relevanten Sheets:**
+   - Lesen der Daten.
+   - Bereinigen der numerischen Werte (Entfernen von Kommas und Umwandeln in Integer).
+   - Extrahieren der Bezirksbezeichnung und der Gesamtstraftaten.
 
-### Python-Skript
+5. **Kombinieren der Daten über alle Jahre:**
+   - Gruppieren nach Bezirk und Summieren der Straftaten.
+
+6. **Ermitteln des Bezirks mit den meisten Straftaten:**
+   - Finden des Bezirks mit der höchsten Summe an Straftaten.
+
+### **Python-Skript:**
 
 ```python
 import pandas as pd
+import re
 
-def find_district_with_most_crimes(file_path):
-    """
-    Liest die Kriminalitätsdaten aus der gegebenen Excel-Datei,
-    führt die Daten über alle Jahre zusammen und gibt den Bezirk mit den meisten Straftaten zurück.
-    
-    :param file_path: Pfad zur Excel-Datei "Fallzahlen&HZ2014-2023.xlsx"
-    :return: None (gibt das Ergebnis aus)
-    """
-    
-    # Definiere die Jahre, die in den Sheets enthalten sind
-    years = list(range(2014, 2024))  # 2014 bis 2023 inclusive
-    sheet_names = [f'Fallzahlen_{year}' for year in years]
-    
-    # Initialisiere ein Dictionary, um die Gesamtzahlen pro Bezirk zu speichern
-    total_crimes = {}
-    
-    for sheet in sheet_names:
+def find_top_crime_district(excel_file_path):
+    # Lade die Excel-Datei
+    try:
+        xl = pd.ExcelFile(excel_file_path)
+    except FileNotFoundError:
+        print(f"Die Datei {excel_file_path} wurde nicht gefunden.")
+        return
+    except Exception as e:
+        print(f"Ein Fehler ist beim Lesen der Excel-Datei aufgetreten: {e}")
+        return
+
+    # Definiere das Muster für relevante Sheets (Fallzahlen_2014 bis Fallzahlen_2023)
+    pattern = re.compile(r"Fallzahlen_\d{4}")
+
+    # Filtere die Sheet-Namen
+    relevant_sheets = [sheet for sheet in xl.sheet_names if pattern.fullmatch(sheet)]
+
+    if not relevant_sheets:
+        print("Keine relevanten Sheets gefunden.")
+        return
+
+    # Initialisiere eine Liste zur Speicherung der Datenframes
+    df_list = []
+
+    for sheet in relevant_sheets:
         try:
-            # Lese das aktuelle Sheet
-            df = pd.read_excel(file_path, sheet_name=sheet)
-            
-            # Bereinige die Spaltennamen: Entferne Zeilenumbrüche und führende/trailende Leerzeichen
-            df.columns = df.columns.str.replace('\n', ' ').str.strip()
-            
-            # Identifiziere die Spalte für 'Straftaten insgesamt'
-            crimes_col = [col for col in df.columns if 'Straftaten' in col and 'insgesamt' in col.lower()]
-            if not crimes_col:
-                raise ValueError(f"Straftaten insgesamt Spalte nicht gefunden im Sheet: {sheet}")
-            crimes_col = crimes_col[0]
-            
-            # Selektiere die relevanten Spalten
-            relevant_df = df[['Bezeichnung (Bezirksregion)', crimes_col]]
-            relevant_df = relevant_df.rename(columns={
-                'Bezeichnung (Bezirksregion)': 'Bezirksregion',
-                crimes_col: 'Straftaten_insgesamt'
-            })
-            
-            # Bereinige die 'Straftaten_insgesamt' Zahlen: Entferne Kommas, Anführungszeichen und ersetze fehlende Werte
-            relevant_df['Straftaten_insgesamt'] = relevant_df['Straftaten_insgesamt'].astype(str)\
-                .str.replace('"', '')\
-                .str.replace(',', '.')\
-                .str.replace('–', '0')\
-                .str.strip()
-            
-            # Konvertiere die Spalte in numerische Werte, setze Fehler auf NaN und fülle diese mit 0
-            relevant_df['Straftaten_insgesamt'] = pd.to_numeric(relevant_df['Straftaten_insgesamt'], errors='coerce').fillna(0)
-            
-            # Gruppiere nach Bezirk und summiere die Straftaten
-            grouped = relevant_df.groupby('Bezirksregion')['Straftaten_insgesamt'].sum()
-            
-            # Füge die Summen zum Gesamt-Dictionary hinzu
-            for bezirk, sum_crimes in grouped.items():
-                if bezirk in total_crimes:
-                    total_crimes[bezirk] += sum_crimes
-                else:
-                    total_crimes[bezirk] = sum_crimes
-        
+            # Lese das Sheet, überspringe die ersten 5 Zeilen, die Metadaten enthalten könnten
+            df = pd.read_excel(xl, sheet_name=sheet, skiprows=5)
+
+            # Verwende die ersten Zeilen als Header, falls notwendig
+            # df.columns = df.iloc[0]
+            # df = df[1:]
+
+            # Wähle die relevanten Spalten
+            # Angenommen, 'Bezeichnung (Bezirksregion)' ist die Bezirksbezeichnung
+            # und 'Straftaten \n-insgesamt-' ist die Gesamtanzahl der Straftaten
+            bezirk_col = 'Bezeichnung (Bezirksregion)'
+            strftaten_col = 'Straftaten \n-insgesamt-'
+
+            if bezirk_col not in df.columns or strftaten_col not in df.columns:
+                # Möglicherweise sind die Spalten leicht anders benannt, versuche es mit ähnlichen Namen
+                bezirk_col = [col for col in df.columns if 'Bezeichnung' in col][0]
+                strftaten_col = [col for col in df.columns if 'Straftaten' in col and 'insgesamt' in col][0]
+
+            temp_df = df[[bezirk_col, strftaten_col]].copy()
+
+            # Bereinige die Straftaten-Spalte: Entferne Kommas und konvertiere zu int
+            temp_df[strftaten_col] = temp_df[strftaten_col].astype(str).str.replace(',', '').str.replace('.', '').astype(int)
+
+            # Entferne eventuelle NaN oder leere Bezirke
+            temp_df = temp_df.dropna(subset=[bezirk_col, strftaten_col])
+
+            # Füge das bereinigte DataFrame zur Liste hinzu
+            df_list.append(temp_df)
+
         except Exception as e:
-            print(f"Fehler beim Verarbeiten des Sheets {sheet}: {e}")
-    
-    # Konvertiere das Dictionary zu einem DataFrame für einfachere Handhabung
-    total_df = pd.DataFrame(list(total_crimes.items()), columns=['Bezirksregion', 'Total_Straftaten'])
-    
+            print(f"Ein Fehler ist beim Verarbeiten des Sheets {sheet} aufgetreten: {e}")
+            continue
+
+    if not df_list:
+        print("Keine Daten zum Verarbeiten vorhanden.")
+        return
+
+    # Kombiniere alle DataFrames
+    combined_df = pd.concat(df_list)
+
+    # Gruppiere nach Bezirk und summiere die Straftaten
+    total_crimes = combined_df.groupby(bezirk_col)[strftaten_col].sum()
+
     # Finde den Bezirk mit den meisten Straftaten
-    max_row = total_df.loc[total_df['Total_Straftaten'].idxmax()]
-    
-    print(f"Bezirk mit den meisten Straftaten: {max_row['Bezirksregion']} mit {max_row['Total_Straftaten']:.0f} Straftaten.")
+    top_district = total_crimes.idxmax()
+    top_crimes = total_crimes.max()
 
-# Beispielaufruf
-if __name__ == "__main__":
-    # Ersetze den Pfad durch den tatsächlichen Pfad zu deiner Excel-Datei
-    excel_file_path = 'Fallzahlen&HZ2014-2023.xlsx'
-    find_district_with_most_crimes(excel_file_path)
+    print(f"Der Bezirk mit den meisten Straftaten über alle Jahre ist '{top_district}' mit insgesamt {top_crimes} Straftaten.")
+
+    return top_district, top_crimes
+
+# Beispielaufruf:
+# Ersetze 'Fallzahlen&HZ2014-2023.xlsx' durch den Pfad zu deiner Excel-Datei
+excel_file = 'Fallzahlen&HZ2014-2023.xlsx'
+find_top_crime_district(excel_file)
 ```
 
-### Erklärung des Skripts
+### **Erklärung der Schlüsselkomponenten:**
 
-1. **Importieren der notwendigen Bibliotheken:**
-   - `pandas` ist für die Datenverarbeitung zuständig.
-   
-2. **Definieren der Funktion `find_district_with_most_crimes`:**
-   - **Parameter:** `file_path` – der Pfad zur Excel-Datei.
-   - **Prozess:**
-     - Erstelle eine Liste der Sheet-Namen basierend auf den Jahren 2014 bis 2023.
-     - Für jedes Sheet:
-       - Lese das Sheet ein.
-       - Bereinige die Spaltennamen, um Zeilenumbrüche und unnötige Leerzeichen zu entfernen.
-       - Identifiziere die Spalte, die die Gesamtanzahl der Straftaten enthält (`Straftaten \n-insgesamt-` oder ähnliche Bezeichnungen).
-       - Selektiere die relevanten Spalten (Bezirk und Straftaten).
-       - Bereinige die Daten in der Straftaten-Spalte, indem Kommas, Anführungszeichen und fehlende Werte entfernt oder ersetzt werden.
-       - Konvertiere die Straftaten-Spalte in numerische Werte.
-       - Gruppiere die Daten nach Bezirk und summiere die Straftaten.
-       - Füge die Summen zum Gesamt-Dictionary hinzu.
-     - Nach dem Verarbeiten aller Sheets:
-       - Konvertiere das Dictionary in einen DataFrame.
-       - Identifiziere den Bezirk mit den meisten Straftaten und gib das Ergebnis aus.
+- **Regulärer Ausdruck (`re.compile(r"Fallzahlen_\d{4}")`):**
+  - Dieses Muster stellt sicher, dass nur Sheets, die genau dem Format `Fallzahlen_YYYY` entsprechen, ausgewählt werden.
 
-3. **Ausführung des Skripts:**
-   - Der `if __name__ == "__main__":` Block stellt sicher, dass die Funktion nur ausgeführt wird, wenn das Skript direkt gestartet wird.
-   - Ersetze `'Fallzahlen&HZ2014-2023.xlsx'` mit dem tatsächlichen Pfad zu deiner Excel-Datei, falls diese sich in einem anderen Verzeichnis befindet.
+- **`skiprows=5`:**
+  - Überspringt die ersten 5 Zeilen jedes Sheets, die in deinem Beispiel Metadaten und Überschriften enthalten. Passe diesen Wert an, falls die Anzahl der zu überspringenden Zeilen variiert.
 
-### Ergebnis
+- **Datenbereinigung:**
+  - Entfernt Kommas und Punkte aus den Zahlenwerten, um sicherzustellen, dass sie korrekt in Integer konvertiert werden können.
 
-Nach der Ausführung des Skripts erhältst du eine Ausgabe ähnlich der folgenden:
+- **Gruppierung und Aggregation:**
+  - Die Straftaten werden nach Bezirk summiert, um den Gesamtwert über alle Jahre hinweg zu erhalten.
 
-```
-Bezirk mit den meisten Straftaten: Friedrichshain-Kreuzberg mit 543156 Straftaten.
+### **Voraussetzungen:**
+
+- **Pandas installieren:**
+  - Stelle sicher, dass die `pandas`-Bibliothek installiert ist. Du kannst sie mit folgendem Befehl installieren:
+    ```bash
+    pip install pandas
+    ```
+  
+- **Excel-Datei:**
+  - Stelle sicher, dass die Excel-Datei `Fallzahlen&HZ2014-2023.xlsx` im selben Verzeichnis wie das Skript liegt oder gib den vollständigen Pfad zur Datei an.
+
+### **Ausführung des Skripts:**
+
+Speichere das Skript in einer `.py`-Datei, zum Beispiel `top_crime_district.py`, und führe es mit Python aus:
+```bash
+python top_crime_district.py
 ```
 
-Dieses Ergebnis zeigt den Bezirk ("Bezirksregion") mit der höchsten kumulierten Anzahl an Straftaten über die Jahre 2014 bis 2023.
+Das Skript gibt den Bezirk mit den meisten Straftaten über alle Jahre hinweg sowie die Gesamtzahl der Straftaten aus.
 
-### Zusätzliche Hinweise
+### **Anpassungen:**
 
-- **Fehlerbehandlung:** Das Skript enthält grundlegende Fehlerbehandlung. Falls ein Sheet nicht den erwarteten Aufbau hat oder eine Spalte fehlt, wird eine Fehlermeldung ausgegeben und der Prozess fortgesetzt.
-- **Anpassungen:** Je nach genauer Struktur deiner Excel-Datei (z.B. andere Spaltennamen, zusätzliche Leerzeichen) musst du möglicherweise kleinere Anpassungen am Skript vornehmen.
-- **Optimierungen:** Für sehr große Excel-Dateien oder viele Sheets könnten weitere Optimierungen hinsichtlich der Speicherverwaltung und Performance vorgenommen werden.
+- **Sheet-Namen oder Spalten:**
+  - Falls die Sheet-Namen oder die Spaltennamen leicht abweichen, musst du möglicherweise das Skript entsprechend anpassen. Das Skript versucht jedoch, ähnliche Spaltennamen zu identifizieren, falls die exakten Namen nicht gefunden werden.
 
-Ich hoffe, dieses Skript hilft dir weiter! Falls du weitere Anpassungen oder Fragen hast, lass es mich gerne wissen.
+- **Datenstrukturen:**
+  - Wenn die Struktur deiner Excel-Sheets anders ist (z.B. eine andere Anzahl an Überschriftenzeilen), musst du die Parameter wie `skiprows` anpassen.
+
+Ich hoffe, dieses Skript hilft dir weiter! Wenn du weitere Anpassungen benötigst oder Fragen hast, lass es mich wissen.

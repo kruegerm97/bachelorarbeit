@@ -273,25 +273,28 @@ TODO: noch mehr ausschreiben
 \subsection{Vorgehensweise der Untersuchung}
     In der Untersuchung soll geprüft werden, inwieweit Large Language Models in der Lage sind gängige Datenanalyse-Schritte auf Grundlage eines gegebenen Datensatzes durchzuführen. Hierbei wird ChatGPT als aktueller Marktführer mit dem Sprachmodell GPTo1, welches das neueste Modell ist, verwendet. Ebenso gilt es herauszufinden wie qualitativ und effizient diese Lösung ist. Hierbei bezieht es sich auf die Forschungsfragen aus Kapitel \ref{sec:forschungsfragen}.
     Für die Vorgehensweise hierbei wird zuerst der verwendete Datensatz von Berlin Open Data an das Modell übergeben und dazu eine Prompt verfasst. Diese Prompts können in Kapitel \ref{sec:testfaelle} eingesehen werden.
-    Im Anschluss durchläuft der Code mehrere Tests und manuelle Analysen um die Qualität und Effizienz des generierten Codes zu bewerten. Die genauen Auswertungskriterien sind in Kapitel \ref{sec:auswertungkriterien} aufgeführt.
+    Im Anschluss durchläuft der Code mehrere Tests und manuelle Analysen um die Qualität und Effizienz des generierten Codes zu bewerten. Die genauen Auswertungskriterien sind in Kapitel \ref{sec:auswertungskriterien} aufgeführt.
     Die Ergebnisse der Auswertung werden in Kapitel \ref{sec:auswertung} detailliert dargestellt und auch mit den Ergebnissen anderer Arbeiten, wie etwa von Chen et al. (2021)\cite{chen2021evaluatinglargelanguagemodels} und Liu et al. (2023)\cite{NEURIPS2023_43e9d647} verglichen.
 
 \subsection{Testfälle der Datenanalyse}
 \label{sec:testfaelle}
 \subsubsection{Testfall 1}
-    Im ersten Testfall soll der Datensatz nach einer gewissen Spalte sortiert werden. Die Begründung hierfür ist, dass dies eine sehr einfache, aber auch sehr häufig aufkommende Datenanalyse-Aufgabe ist und somit einen guten Einstieg in die Untersuchung darstellt. Die Prompt für diese Aufgabe lautet: \emph{Hier ist meine CSV-Datei mit dem Namen "HZ\_2023.csv": \textbf{[CSV\_content]}, bitte analysiere diese Daten und erstelle mir ein Python Skript, das nach der Anzahl der Straftaten insgesamt eines Bezirks in 2023 sortiert.}.
+    Im ersten Testfall soll der Datensatz nach einer gewissen Spalte sortiert werden. Die Begründung hierfür ist, dass dies eine sehr einfache, aber auch sehr häufig aufkommende Datenanalyse-Aufgabe ist und somit einen guten Einstieg in die Untersuchung darstellt. Die Prompt für diese Aufgabe lautet: \emph{Ich habe eine Excel Datei mit dem Namen 'Fallzahlen\&HZ2014-2023.xlsx', mit mehreren Sheets. Hier ist der Inhalt des Sheets 'Fallzahlen\_2023': \textbf{[CSV\_content]}, bitte analysiere die Daten und erstelle mir ein Python Skript, das das Sheet 'Fallzahlen\_2023' der Excel Datei nach der Anzahl der Straftaten insgesamt eines Bezirks in 2023 sortiert.}
 
-\subsubsection{Testfall 2}
-    Für den zweiten Testfall sollen die Tabellen der Excel Datei durch einen Join zusammengeführt und dann der Bezirk mit den meisten Straftaten insgesamt von allen Jahren kombiniert geliefert werden. Die Prompt für diese Aufgabe lautet: \emph{Erstelle mir ein Python Skript, mit welchem die Tabellen der Excel Datei durch einen Join zusammengeführt werden und der Bezirk mit den meisten Straftaten von allen Jahren kombiniert zurückgegeben wird.}.
+\subsubsection{Testfall 2 Verbund und Aggregation}
+    Für den zweiten Testfall sollen die Tabellen der Excel Datei durch einen Join zusammengeführt und dann der Bezirk mit den meisten Straftaten insgesamt von allen Jahren kombiniert geliefert werden. Die Prompt für diese Aufgabe lautet: \emph{Ich habe eine Execl Datei mit dem Namen "Fallzahlen\&HZ2014-2023.xlsx", hier sind die Inhalte von den Sheets Fallzahlen\_2014 bis Fallzaheln\_2023, jedes Jahr hat ein eigenes Sheet mit der gleichen Namenskonvention: \textbf{[CSV\_content]}. Die anderen Sheets, die nicht dieser Konvention folgen, sollen ignoriert werden. Erstelle mir ein Python Skript, mit welchem die Tabellen der relevanten Sheets der Excel Datei durch einen Join zusammengeführt werden und der Bezirk mit den meisten Straftaten von allen Jahren kombiniert zurückgegeben wird.}
 
 \subsubsection{Testfall 3}
-    Im dritten Testfall soll das Sprachmodell die prozentuale Verteilung der Straftaten in den Bezirken berechnen. Die Prompt für diese Aufgabe lautet: \emph{Erstelle mir ein Python Skript, mit welchem die prozentuale Verteilung der genauen Straftaten anteilig der Straftaten insgesamt pro Bezirk berechnet wird.}.
+    Im dritten Testfall soll das Sprachmodell die prozentuale Verteilung der Straftaten in den Bezirken berechnen. Die Prompt für diese Aufgabe lautet: \emph{Erstelle mir ein Python Skript, mit welchem die prozentuale Verteilung der genauen Straftaten anteilig der Straftaten insgesamt pro Bezirk berechnet wird.}
+    Prozentuale Verteilung pro Bezirk. Also Straftaten insgesamt von allen Bezirken und prozentualer Anteil pro Bezirk berechnen.
 
 \subsubsection{Testfall 4}
-    Im vierten Testfall soll eine simple Visualisierung des Datensatzes stattfinden. Es soll ein Balkendiagramm der Bezirke und der Verteilung der genauen Straftaten erstellt werden. Hierbei sollen die Bezirke auf der x-Achse und die Anzahl der einzelnen Straftaten mit ihrer Verteilung in einem Balken auf der y-Achse dargestellt und absteigend mit der Anzahl der Straftaten insgesamt pro Bezirk sortiert werden. Die Prompt für diese Aufgabe lautet: \emph{Erstelle mir ein Python Skript, mit welchem ein Balkendiagramm der Anzahl der Straftaten insgesamt und dessen Verteilung der genauen Straftaten pro Bezirk erstellt wird. Hierbei sollen auf der X-Achse die Bezirke und auf der Y-Achse pro Bezirk ein Balken über die Verteilung der Anzahl der Straftaten sein.}.
+    Im vierten Testfall soll eine simple Visualisierung des Datensatzes stattfinden. Es soll ein Balkendiagramm der Bezirke und der Verteilung der genauen Straftaten erstellt werden. Hierbei sollen die Bezirke auf der x-Achse und die Anzahl der einzelnen Straftaten mit ihrer Verteilung in einem Balken auf der y-Achse dargestellt und absteigend mit der Anzahl der Straftaten insgesamt pro Bezirk sortiert werden. Die Prompt für diese Aufgabe lautet: \emph{Erstelle mir ein Python Skript, mit welchem ein Balkendiagramm der Anzahl der Straftaten insgesamt und dessen Verteilung der genauen Straftaten pro Bezirk erstellt wird. Hierbei sollen auf der X-Achse die Bezirke und auf der Y-Achse pro Bezirk ein Balken über die Verteilung der Anzahl der Straftaten sein.}
+    faellt weg
 
-\subsubsection{Testfall 5}
-    Für den letzten Testfall ist die Erstellung einer Zeitreihe vorgesehen. Hierbei soll die Anzahl der Straftaten insgesamt pro Jahr in einer Zeitreihe dargestellt werden. Die Prompt für diese Aufgabe lautet: \emph{Erstelle mir ein Python Skript, mit welchem eine Zeitreihe der Anzahl der Straftaten insgesamt pro Jahr dargestellt wird.}.
+\subsubsection{Testfall 5 Zeitreihenanalyse prozentuale Verteilung}
+    Für den letzten Testfall ist die Erstellung einer Zeitreihe vorgesehen. Hierbei soll die Anzahl der Straftaten insgesamt pro Jahr in einer Zeitreihe dargestellt werden. Die Prompt für diese Aufgabe lautet: \emph{Erstelle mir ein Python Skript, mit welchem eine Zeitreihe der Anzahl der Straftaten insgesamt pro Jahr dargestellt wird.}
+    Zeitreihe als Pandas dataframe
 
 
 \subsection{Auswertungskriterien}

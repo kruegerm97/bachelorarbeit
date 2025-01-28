@@ -32,3 +32,31 @@ Nummerierung der Seiten
 
 Probleme bei der Durchführung:
 ChatGPT nimmt keine Dateien wie excel etc an. Man muss API benutzen und die Tabelle als CSV Content übergeben.
+
+Gesamte responses in Arbeit packen
+
+Fragen:
+Aenderung Gliederung okay?
+Wann genau soll Code angezeigt werden?
+Wann Anmeldung Kolloqium?
+
+Daten von Open Data besser beschreiben und was dabei rauskommen soll. Neues Kapitel vor Methodik. Da Testfaelle beschreiben
+-> fuer empirische Analyse werden Daten runtergebrochen zu pd mit nur oberbezirken 
+Grundlagenkapitel Prompting
+mehrere Prompting strategien (bspw. mehr Metadaten (welche Spalte ist relevant etc.)) (chain of thought) 3 verschiedene Prompts pro testfall und pro prompt 5 Ausfuehrungen
+Ergebnisse mit barcharts oder tabellen
+nicht volle Sheets als csv geben, sondern nur erste Zeilen
+eine prompt nur aus augen des normalen users, eine mit metadaten und eine mit chain of thought.
+Ein Testfall mit neuer Excel mit nur einem Sheet fuer verschiedenen Aufwand
+Nur die Oberbezirke benutzen, alle Unterbezirke aus der Excel loeschen.
+ein testfall alle sheets joinen aber nicht sortieren.
+
+Keine Visualisierung (Testfall 4 raus.)
+Testfall 5 prozentuale Veraenderung der Straftaten insgesamt pro Bezirk (auch in Tabelle)
+fuer jedes Jahr ein Pandas Dataframe nur fuer Oberbezirke und diese in Prompt
+
+Prio:
+neues Kapitel vor Methodik zu Ausgangsdaten und worauf sie runtergebrochen werden und was bei den Testfaellen rauskommen soll.
+Auch dataframe aus eigener Programmierung, der verwendet werden soll von den Skripten.
+Wenn Zeit auch fertige Tabelle aus eigener Programmierung fuer die Testfaelle um gewollte Ergebnisse der Testfaelle zu haben.
+Auch erklaeren, dass verschiedene Prompting Strategien pro Testfall verwendet werden.

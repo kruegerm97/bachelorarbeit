@@ -15,7 +15,7 @@ for jahr in jahre:
 
 # Prompt erstellen: CSV-Daten einbetten + Anweisung
 prompt = f"""
-Ich habe eine Execl Datei mit dem Namen "Fallzahlen&HZ2014-2023", hier sind die Inhalte von den Sheets Fallzahlen_2014 bis Fallzaheln_2023, jedes Jahr hat ein eigenes Sheet mit der gleichen Namenskonvention: {csv_contents}, erstelle mir ein Python Skript, mit welchem die Tabellen der Excel Datei durch einen Join zusammengeführt werden und der Bezirk mit den meisten Straftaten von allen Jahren kombiniert zurückgegeben wird.
+Ich habe eine Execl Datei mit dem Namen "Fallzahlen&HZ2014-2023.xlsx", hier sind die Inhalte von den Sheets Fallzahlen_2014 bis Fallzaheln_2023, jedes Jahr hat ein eigenes Sheet mit der gleichen Namenskonvention: {csv_contents}. Die anderen Sheets, die nicht dieser Konvention folgen, sollen ignoriert werden. Erstelle mir ein Python Skript, mit welchem die Tabellen der relevanten Sheets der Excel Datei durch einen Join zusammengeführt werden und der Bezirk mit den meisten Straftaten von allen Jahren kombiniert zurückgegeben wird.
 """
 
 # Anfrage an die OpenAI Chat-API
