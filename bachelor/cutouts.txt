@@ -1,0 +1,3 @@
+Section 4:
+\subsection{Zusammenfassung}
+In diesem Kapitel wurden die Ausgangsdaten (Kriminalitätsstatistiken für 2014--2023) vorgestellt und erläutert, wie sie für die empirische Analyse \emph{vereinfacht} werden: Wir beschränken uns \textbf{ausschließlich} auf die Oberbezirke und ignorieren die detaillierteren Unterbezirksinformationen. Anschließend wurden vier Testfälle definiert, die verschiedene Aspekte der Datenanalyse abdecken (Sortierung, Joins, prozentuale Anteile und Zeitreihen). Pro Testfall finden \textbf{drei Prompting-Strategien} Anwendung, die jeweils \emph{fünf Mal} wiederholt werden. Dadurch entstehen 15 Ausführungen je Testfall, deren Ergebnisse in den folgenden Kapiteln ausgewertet und diskutiert werden.

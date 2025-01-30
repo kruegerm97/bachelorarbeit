@@ -1,13 +1,4 @@
-Plan:
-Nur ein LLM gpto1
-mehrere testfaelle: spezifischer, visuelle darstellung etc.
-berlin data 
-
-Fragen:
-Wie genau Quellen einbinden? github links und ist web:1 okay?
-Muss Deckblatt Vorlage 1:1 verwendet werden?
-Sollen Daten auch visuell angezeigt werden nach Analyse oder soll die Fragestellung nach einem gezielten Wert stattfinden, z.B. wie viele ... im Jahr ...?
-Kein Zugriff auf alte Arbeiten trotz VPN Zugang.
+TODO notes: Section 4 ChatGPT als Quelle angeben
 
 Korrektheit des Codes und der Ergebnisse (Spaltenanzahl und Reihenfolge richtig?), Performance des Codes im Bezug
 auf Laufzeit und Ressourcennutzung, Qualität des Codes (Struktur des
@@ -22,32 +13,25 @@ Bei visualisierung pandas dataframe vorgeben
 
 Zur Methodik: Pro Testcase eine offene unspezifische Prompt und eine Prompt mit genauen Vorgaben (Z.B. welchen Pandas Dataframe fuer Visualisierung; Join basierend auf LOR Schluessel, etc.).
 
-1. Testcase: Wiedergabe Bezirk eines Jahres mit den meisten Straftaten insgesamt.
-2. Testcase: Join, Wiedergabe Bezirk mit den meisten Straftaten ueber mehrere Jahre hinweg.
-3. Testcase: Filterung Bezirke mit mehr als 1000 Straftaten.
-4. Testcase: Balkendiagramm X-Achse Bezirke, Y-Achse Anzahl der einzelnen Straftaten verteil.
-5. Testcase: Zeitreihe Kriminalitaetstrends ueber die Jahre hinweg.
-
-Nummerierung der Seiten
-
 Probleme bei der Durchführung:
 ChatGPT nimmt keine Dateien wie excel etc an. Man muss API benutzen und die Tabelle als CSV Content übergeben.
 
 Gesamte responses in Arbeit packen
 
 Fragen:
-Aenderung Gliederung okay?
 Wann genau soll Code angezeigt werden?
 Wann Anmeldung Kolloqium?
+Ursprungsdatei Daten auch in die Arbeit?
+Wie ChatGPT als Quelle angeben? Selbst text beschrieben und von ChatGPT ausschreiben und Latex generieren lassen.
 
 Daten von Open Data besser beschreiben und was dabei rauskommen soll. Neues Kapitel vor Methodik. Da Testfaelle beschreiben
 -> fuer empirische Analyse werden Daten runtergebrochen zu pd mit nur oberbezirken 
 Grundlagenkapitel Prompting
 mehrere Prompting strategien (bspw. mehr Metadaten (welche Spalte ist relevant etc.)) (chain of thought) 3 verschiedene Prompts pro testfall und pro prompt 5 Ausfuehrungen
-Ergebnisse mit barcharts oder tabellen
-nicht volle Sheets als csv geben, sondern nur erste Zeilen
+Ergebnisse mit barcharts oder tabellen (Tabelle Kopfzeile mit Prompts, erste Spalte kommen Ausfuehrungen)
+nicht volle Sheets als csv geben, sondern nur erste Zeilen (oder gar nicht csv sondern als Pandas Dataframe)
 eine prompt nur aus augen des normalen users, eine mit metadaten und eine mit chain of thought.
-Ein Testfall mit neuer Excel mit nur einem Sheet fuer verschiedenen Aufwand
+(Ein Testfall mit neuer Excel mit nur einem Sheet fuer verschiedenen Aufwand) entfaellt weil Benutzung von Pandas Dataframe
 Nur die Oberbezirke benutzen, alle Unterbezirke aus der Excel loeschen.
 ein testfall alle sheets joinen aber nicht sortieren.
 

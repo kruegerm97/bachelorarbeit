@@ -18,6 +18,7 @@
 \usepackage{float}
 \usepackage[autostyle=true,german=quotes]{csquotes}
 \usepackage{listings}
+\usepackage{amsmath}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -265,6 +266,138 @@ TODO: Vielleicht Grafik der Ergebnisse einfügen
     Auch in dieser Arbeit von Jiawei Liu wird die Effizienz von Code untersucht, welcher von LLMs generiert wird. Hierbei mit Fokus auf Performance und Ressourcennutzung. Dafür wird \emph{Differential Performance Evaluation (DPE)} entwickelt und der \emph{EvalPerf}-Benchmark eingeführt. Dieser enthält komplexere Programmieraufgaben als der zuvor eingeführt \emph{EvalPlus}. Hier kommt man zu dem Entschluss, dass größere Modelle nicht automatisch auch effizienteren Code erzeugen. Stattdessen werden Effizienz und Korrektheit des Codes durch \emph{Instruction Tuning}(gezieltes Trainieren des Modells, um besser auf Anweisungen in natürlicher Sprache zu reagieren) verbessert.
 \end{enumerate}
 Zusammenfassend zeigen die genannten Studien, dass LLMs zwar großes Potenzial zur automatisierten Code Generierung besitzen, sie aber immer noch Probleme aufweisen und menschliche Entwickler nicht komplett ersetzen können. Besonders bei komplexeren Aufgaben, spezifischen Anforderungen oder Fragen zur Softwarearchitektur stoßen sie an ihre Grenzen.
+
+\section{Ausgangsdaten und Testfallspezifikation}
+\subsection{Überblick und Reduktion der Datengrundlage}
+Die Datengrundlage für die empirische Untersuchung bilden Kriminalitätsstatistiken (sogenannte \emph{Fallzahlen}) der Stadt Berlin\cite{opendataberlin}. Die zugehörige Excel-Datei umfasst mehrere Sheets, jeweils zu den Jahren 2014--2023. Darin sind die Straftaten pro Bezirk (bzw. Ober- und Unterbezirke) aufgelistet. In der Ursprungsform gliedert sich die Tabelle wie folgt:
+\begin{itemize}
+    \item \textbf{Oberbezirk}: Enthält aggregierte Zahlen der jeweiligen Region.
+    \item \textbf{Unterbezirke}: Ausführlichere Aufschlüsselung der Straftaten innerhalb des Oberbezirks.
+    \item \textbf{Spalten mit Straftat-Kategorien}: u.\,a. \enquote{Straftaten insgesamt}, \enquote{Körperverletzungen}, \enquote{Diebstahl}, \dots
+\end{itemize}
+
+Für die weitere Analyse wird jedoch nur auf \emph{Oberbezirks}-Daten zurückgegriffen. Die Unterbezirke werden \textbf{nicht} berücksichtigt, um die Komplexität zu reduzieren und das Fokusgebiet auf obergeordnete Bezirke zu legen. Ziel ist eine übersichtlichere Zusammenfassung, bei der \enquote{Oberbezirk} die wichtigste Bezugsgröße ist.
+
+\subsection{Umwandlung in Pandas DataFrames}
+Jedes Jahr (bzw. jedes Sheet) soll in einer separaten \texttt{pandas}-DataFrame-Tabelle abgebildet werden. Dies geschieht folgendermaßen:
+\begin{enumerate}
+    \item \textbf{Reduzieren der Datengrundlage}: Entfernen der Unterbezirke, um nur die Oberbezirke zu behalten.
+    \item \textbf{Einlesen der Excel-Sheets}: Mit \texttt{pandas.read\_excel(...)} wird jede Jahres-Tabelle eingelesen.
+    \item \textbf{Bereinigung und Umbenennung}: Unnötige Spalten werden entfernt, Spaltennamen ggf. standardisiert (z.\,B. \enquote{Bezirk}, \enquote{Straftaten\_insgesamt}).
+    \item \textbf{Speicherung in DataFrame}: Pro Sheet entsteht ein bereinigtes und vereinheitlichtes DataFrame.
+\end{enumerate}
+
+\subsection{Testfälle und Vorgehen}
+Insgesamt sind vier Testfälle definiert, die unterschiedliche Aspekte der Datenanalyse abdecken. Für jeden Testfall werden \textbf{15 Ausführungen} erzeugt, wobei drei verschiedene Prompting-Strategien (jeweils fünf Wiederholungen) zum Einsatz kommen:
+\begin{itemize}
+    \item \textbf{Strategie A: Prompt wie ein \enquote{normaler User}}\\
+    Hier wird eine einfache, natürlichsprachliche Anfrage formuliert, ohne viele zusätzliche Informationen.
+    \item \textbf{Strategie B: Prompt mit Metadaten}\\
+    In diesem Ansatz werden neben der eigentlichen Anfrage auch relevante Details wie Spaltennamen oder Strukturhinweise explizit übergeben.
+    \item \textbf{Strategie C: Prompt mit \emph{Chain of Thought}}\\
+    Das Modell erhält schrittweise Gedankenanstöße oder Zwischenlogik (z.\,B. \enquote{Zuerst filtern, dann sortieren, ...}), um den Code schrittweise aufzubauen und zu erklären.
+\end{itemize}
+
+\subsubsection{Testfall 1: Sortierung und Ausgabe der Fallzahlen 2023}
+\label{subsec:tf1}
+\paragraph{Zielsetzung:}
+Die Daten des Jahres 2023 (\texttt{Fallzahlen\_2023}) sollen nach der Spalte \enquote{Straftaten insgesamt} sortiert und anschließend in einem \texttt{pandas}-DataFrame ausgegeben werden.
+
+\paragraph{Vorgehen:}
+\begin{enumerate}
+    \item Einlesen der \texttt{Fallzahlen\_2023}.
+    \item Extraktion der relevanten (Ober-)Bezirke.
+    \item Sortierung nach \texttt{Straftaten\_insgesamt} in absteigender oder aufsteigender Reihenfolge.
+    \item Ausgabe als \texttt{pandas} DataFrame.
+\end{enumerate}
+
+\paragraph{Erwartete Ausgabe:}
+Ein DataFrame mit mindestens folgenden Spalten:
+\begin{center}
+\begin{tabular}{l|l}
+\textbf{Bezirk} & \textbf{Straftaten\_insgesamt} \\
+\hline
+\textit{(z.\,B. Mitte)} & \textit{(z.\,B. 82\,000)} \\
+\textit{(z.\,B. Neukölln)} & \textit{(z.\,B. 50\,000)} \\
+... & ...
+\end{tabular}
+\end{center}
+Zusätzlich können weitere Spalten (z.\,B. Raub, Diebstahl) enthalten sein, sofern sie nicht entfernt wurden.
+
+\subsubsection{Testfall 2: Join aller Tabellen und \enquote{Bezirks-Topwert}}
+\paragraph{Zielsetzung:}
+Alle DataFrames von 2014--2023 sollen \emph{vereint} werden (Join), sodass die \textbf{Summe der Straftaten aller Jahre} pro Bezirk ermittelbar ist. Anschließend werden die Bezirke nach \enquote{den meisten Straftaten insgesamt} sortiert ausgegeben.
+
+\paragraph{Vorgehen:}
+\begin{enumerate}
+    \item Einlesen und Bereinigung der einzelnen DataFrames (2014--2023).
+    \item Zusammenführen nach dem \texttt{Bezirk}-Merkmal.
+    \item Aggregation der \enquote{Straftaten\_insgesamt} pro Jahr zu einer Gesamtzahl über alle Jahre.
+    \item Ermittlung und Ausgabe der \texttt{Bezirke} sortiert nach den Summenwerten.
+\end{enumerate}
+
+\paragraph{Erwartete Ausgabe:}
+Ein DataFrame mit mindestens folgenden Spalten:
+\begin{center}
+\begin{tabular}{l|l}
+\textbf{Bezirk} & \textbf{Straftaten\_insgesamt 2014-2023} \\
+\hline
+\textit{(z.\,B. Mitte)} & \textit{(z.\,B. 820\,000)} \\
+\textit{(z.\,B. Neukölln)} & \textit{(z.\,B. 560\,000)} \\
+... & ...
+\end{tabular}
+\end{center}
+
+\subsubsection{Testfall 3: Prozentuale Verteilung der Straftaten}
+\paragraph{Zielsetzung:}
+Für ein ausgewähltes Jahr (etwa 2023) soll ermittelt werden, welcher Anteil aller Berliner Straftaten auf die jeweiligen Bezirke entfällt.
+
+\paragraph{Vorgehen:}
+\begin{enumerate}
+    \item Einlesen des relevanten Sheets (z.\,B. \texttt{Fallzahlen\_2023}).
+    \item Berechnung des Anteils pro Bezirk: 
+    \[
+       \text{Prozent} = \frac{\text{Straftaten\_insgesamt pro Bezirk}}{\text{Straftaten\_Gesamtsumme}} \times 100 
+    \]
+    \item Ausgabe als DataFrame mit Spalten wie \enquote{Bezirk}, \enquote{Straftaten\_insgesamt}, \enquote{Anteil\_\%}.
+\end{enumerate}
+
+\paragraph{Erwartete Ausgabe:}
+Ein DataFrame, bei dem jede Zeile einen \texttt{Bezirk} darstellt und mindestens folgende Spalten beinhaltet:
+\begin{center}
+\begin{tabular}{l|l|l}
+\textbf{Bezirk} & \textbf{Straftaten\_insgesamt} & \textbf{Anteil\_(\%)} \\
+\hline
+\textit{Mitte} & \textit{82\,000} & \textit{(z.\,B. 24,1\%)} \\
+\textit{Neukölln} & \textit{50\,000} & \textit{(z.\,B. 14,7\%)} \\
+... & ... & ...
+\end{tabular}
+\end{center}
+
+\subsubsection{Testfall 4: Zeitreihe über die Jahre 2014--2023}
+\paragraph{Zielsetzung:}
+Ausgabe der \textbf{prozentualen Entwicklung} (bezogen auf \emph{Berlin insgesamt}) der \texttt{Straftaten\_insgesamt} pro Jahr. Damit soll ersichtlich werden, wie sich das Gesamtaufkommen an Straftaten im Zeitverlauf verändert hat. 
+
+\paragraph{Vorgehen:}
+\begin{enumerate}
+    \item Einlesen sämtlicher Jahres-Sheets.
+    \item Addition sämtlicher Bezirkswerte für jedes Jahr, um die Gesamtzahl an Straftaten je Jahr zu erhalten.
+    \item Direkter Vergleich \enquote{prozentuale Änderung} zum Vorjahr.
+    \item Ausgabe eines \texttt{pandas} DataFrames als Zeitreihe.
+\end{enumerate}
+
+\paragraph{Erwartete Ausgabe:}
+Ein DataFrame mit mindestens zwei Spalten:
+\begin{center}
+\begin{tabular}{l|l}
+\textbf{Jahr} & \textbf{Straftaten\_Veränderung\_(\%)} \\
+\hline
+2014 & 0\% (Basiswert) \\
+2015 & +3,5\% \\
+2016 & -1,2\% \\
+... & ...
+\end{tabular}
+\end{center}
 
 \section{Methodik}
 \label{sec:methodik}
