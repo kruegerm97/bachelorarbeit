@@ -1,0 +1,38 @@
+    LOR-Schlüssel                     Bezirke  Straftaten_insgesamt  Raub  ...  Sachbeschädigung_Graffiti_dup  Rauschgiftdelikte_dup  Kieztaten_dup        Sheet_dup
+0           10000                       Mitte                 91321  1014  ...                           1245                   2638          15078  Fallzahlen_2015
+1           20000    Friedrichshain-Kreuzberg                 62194   940  ...                           1338                   5571          11223  Fallzahlen_2015
+2           40000  Charlottenburg-Wilmersdorf                 53322   641  ...                            653                    885          10407  Fallzahlen_2015
+3           80000                    Neukölln                 44978   580  ...                            670                   1683           9854  Fallzahlen_2015
+4           70000        Tempelhof-Schöneberg                 40184   496  ...                            702                    900           7933  Fallzahlen_2015
+5           30000                      Pankow                 39803   313  ...                           1312                    510          11470  Fallzahlen_2015
+6          120000               Reinickendorf                 29180   340  ...                            649                    869           6959  Fallzahlen_2015
+7           50000                     Spandau                 26499   344  ...                            357                    493           6631  Fallzahlen_2015
+8          110000                 Lichtenberg                 25618   236  ...                            568                    387           5669  Fallzahlen_2015
+9           60000         Steglitz-Zehlendorf                 25072   210  ...                            651                    356           4478  Fallzahlen_2015
+10         100000         Marzahn-Hellersdorf                 24285   260  ...                            505                    367           5720  Fallzahlen_2015
+11          90000            Treptow-Köpenick                 23250   209  ...                            595                    517           4798  Fallzahlen_2015
+
+[12 rows x 38 columns]
+	Command being timed: "python testcase2/prompt2/exec3/script.py"
+	User time (seconds): 4.69
+	System time (seconds): 0.24
+	Percent of CPU this job got: 165%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:02.99
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 153804
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 168209
+	Voluntary context switches: 50
+	Involuntary context switches: 415
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 176
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

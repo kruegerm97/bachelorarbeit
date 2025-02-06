@@ -1,0 +1,88 @@
+Natürlich! Hier ist ein Python-Skript, das die gewünschten Schritte ausführt:
+
+1. **Installiere die notwendigen Bibliotheken** (falls noch nicht geschehen):
+   ```bash
+   pip install pandas openpyxl
+   ```
+
+2. **Python-Skript**:
+
+   ```python
+   import pandas as pd
+
+   # Pfad zur Excel-Datei
+   datei_pfad = 'Fallzahlen.xlsx'
+
+   try:
+       # Einlesen des spezifischen Sheets 'Fallzahlen_2023'
+       df = pd.read_excel(datei_pfad, sheet_name='Fallzahlen_2023')
+
+       # Anzeigen der ersten paar Zeilen zur Überprüfung
+       print("Original DataFrame:")
+       print(df.head())
+
+       # Sortieren nach der Spalte 'Straftaten_insgesamt' in absteigender Reihenfolge
+       df_sortiert = df.sort_values(by='Straftaten_insgesamt', ascending=False)
+
+       # Zurücksetzen des Index (optional)
+       df_sortiert.reset_index(drop=True, inplace=True)
+
+       # Anzeige der sortierten DataFrame
+       print("\nSortierter DataFrame nach 'Straftaten_insgesamt':")
+       print(df_sortiert)
+
+       # Optional: Speichern des sortierten DataFrames in eine neue Excel-Datei
+       sortierte_datei_pfad = 'Fallzahlen_sortiert.xlsx'
+       df_sortiert.to_excel(sortierte_datei_pfad, index=False)
+       print(f"\nDer sortierte DataFrame wurde in '{sortierte_datei_pfad}' gespeichert.")
+
+   except FileNotFoundError:
+       print(f"Die Datei '{datei_pfad}' wurde nicht gefunden.")
+   except ValueError as ve:
+       print(f"Fehler beim Einlesen des Sheets: {ve}")
+   except Exception as e:
+       print(f"Ein unerwarteter Fehler ist aufgetreten: {e}")
+   ```
+
+3. **Erklärung der Schritte**:
+
+   - **Importieren der Bibliotheken**:
+     ```python
+     import pandas as pd
+     ```
+     `pandas` ist eine leistungsstarke Bibliothek zur Datenanalyse in Python.
+
+   - **Einlesen der Excel-Datei**:
+     ```python
+     df = pd.read_excel(datei_pfad, sheet_name='Fallzahlen_2023')
+     ```
+     Hier wird das spezifische Sheet `'Fallzahlen_2023'` aus der Excel-Datei eingelesen.
+
+   - **Sortieren des DataFrames**:
+     ```python
+     df_sortiert = df.sort_values(by='Straftaten_insgesamt', ascending=False)
+     ```
+     Der DataFrame wird basierend auf der Spalte `'Straftaten_insgesamt'` in absteigender Reihenfolge sortiert.
+
+   - **Zurücksetzen des Index**:
+     ```python
+     df_sortiert.reset_index(drop=True, inplace=True)
+     ```
+     Dies entfernt den alten Index und setzt einen neuen, fortlaufenden Index.
+
+   - **Speichern der sortierten Daten** (optional):
+     ```python
+     df_sortiert.to_excel(sortierte_datei_pfad, index=False)
+     ```
+     Der sortierte DataFrame wird in eine neue Excel-Datei `'Fallzahlen_sortiert.xlsx'` gespeichert.
+
+   - **Fehlerbehandlung**:
+     Der `try-except` Block stellt sicher, dass mögliche Fehler beim Einlesen der Datei oder beim Verarbeiten des Sheets abgefangen und verständliche Fehlermeldungen ausgegeben werden.
+
+4. **Ausführen des Skripts**:
+   Speichere das obige Skript in einer `.py` Datei, zum Beispiel `sortiere_fallzahlen.py`, und führe es in deiner Python-Umgebung aus:
+   ```bash
+   python sortiere_fallzahlen.py
+   ```
+
+Dieses Skript liest die Daten aus der Excel-Datei, sortiert sie nach der Gesamtzahl der Straftaten und speichert das Ergebnis in einem neuen DataFrame. Optional kannst du das sortierte Ergebnis auch in eine neue Excel-Datei exportieren.

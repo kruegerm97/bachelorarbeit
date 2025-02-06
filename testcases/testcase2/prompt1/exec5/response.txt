@@ -1,0 +1,117 @@
+Natürlich! Hier ist ein vollständiges Python-Skript, das die beschriebenen Anforderungen erfüllt. Das Skript verwendet die `pandas`-Bibliothek, um alle Sheets der Excel-Datei `'Fallzahlen.xlsx'` zu lesen, die Daten zu kombinieren, nach der Gesamtanzahl der Straftaten pro Bezirk zu sortieren und das Ergebnis in einem `DataFrame` zu speichern.
+
+### Schritt-für-Schritt-Anleitung:
+
+1. **Installiere die benötigten Bibliotheken**: Stelle sicher, dass `pandas` und `openpyxl` installiert sind. `openpyxl` wird von `pandas` verwendet, um Excel-Dateien zu lesen.
+
+    ```bash
+    pip install pandas openpyxl
+    ```
+
+2. **Erstelle das Python-Skript**:
+
+    ```python
+    import pandas as pd
+
+    def lese_und_sortiere_fallzahlen(excel_datei):
+        """
+        Liest alle Sheets aus der gegebenen Excel-Datei, kombiniert die Daten,
+        sortiert sie nach der Gesamtanzahl der Straftaten pro Bezirk und
+        gibt das sortierte DataFrame zurück.
+
+        :param excel_datei: Pfad zur Excel-Datei 'Fallzahlen.xlsx'
+        :return: Sortiertes pandas DataFrame
+        """
+        try:
+            # Alle Sheets lesen; sheet_name=None gibt ein Dictionary zurück
+            alle_sheets = pd.read_excel(excel_datei, sheet_name=None)
+            print(f"Anzahl der gelesenen Sheets: {len(alle_sheets)}")
+        except FileNotFoundError:
+            print(f"Die Datei '{excel_datei}' wurde nicht gefunden.")
+            return None
+        except Exception as e:
+            print(f"Ein Fehler ist aufgetreten: {e}")
+            return None
+
+        # Kombinieren aller DataFrames in einen
+        try:
+            kombiniertes_df = pd.concat(alle_sheets.values(), ignore_index=True)
+            print(f"Anzahl der Zeilen nach dem Kombinieren: {len(kombiniertes_df)}")
+        except ValueError as ve:
+            print(f"Fehler beim Kombinieren der Daten: {ve}")
+            return None
+
+        # Sicherstellen, dass die Spalte 'Straftaten_insgesamt' numerisch ist
+        if not pd.api.types.is_numeric_dtype(kombiniertes_df['Straftaten_insgesamt']):
+            kombiniertes_df['Straftaten_insgesamt'] = pd.to_numeric(
+                kombiniertes_df['Straftaten_insgesamt'], errors='coerce'
+            )
+            kombiniertes_df = kombiniertes_df.dropna(subset=['Straftaten_insgesamt'])
+
+        # Sortieren nach 'Straftaten_insgesamt' absteigend
+        sortiertes_df = kombiniertes_df.sort_values(
+            by='Straftaten_insgesamt', ascending=False
+        ).reset_index(drop=True)
+
+        print("Die Daten wurden erfolgreich sortiert.")
+        return sortiertes_df
+
+    def main():
+        excel_datei = 'Fallzahlen.xlsx'
+        df = lese_und_sortiere_fallzahlen(excel_datei)
+        if df is not None:
+            # Optional: Das sortierte DataFrame anzeigen
+            print(df)
+
+            # Optional: Das sortierte DataFrame speichern
+            # df.to_csv('Sortierte_Fallzahlen.csv', index=False, encoding='utf-8-sig')
+            # print("Das sortierte DataFrame wurde als 'Sortierte_Fallzahlen.csv' gespeichert.")
+
+    if __name__ == "__main__":
+        main()
+    ```
+
+### Erklärung des Skripts:
+
+1. **Importieren der Bibliothek**:
+    - `pandas` wird für die Datenmanipulation und das Lesen der Excel-Datei verwendet.
+
+2. **Funktion `lese_und_sortiere_fallzahlen`**:
+    - **Lesen aller Sheets**: Mit `pd.read_excel()` und `sheet_name=None` werden alle Sheets der Excel-Datei in ein Dictionary geladen.
+    - **Kombinieren der DataFrames**: Mit `pd.concat()` werden alle DataFrames aus den einzelnen Sheets zu einem einzigen DataFrame kombiniert.
+    - **Datenbereinigung**: Es wird sichergestellt, dass die Spalte `'Straftaten_insgesamt'` numerisch ist. Falls nicht, werden nicht konvertierbare Werte entfernt.
+    - **Sortieren**: Das kombinierte DataFrame wird nach der Spalte `'Straftaten_insgesamt'` in absteigender Reihenfolge sortiert.
+
+3. **Funktion `main`**:
+    - Ruft die Funktion zum Lesen und Sortieren auf.
+    - Gibt das sortierte DataFrame aus.
+    - Optional kann das sortierte DataFrame auch in eine CSV-Datei gespeichert werden (auskommentiert im Skript).
+
+4. **Ausführung des Skripts**:
+    - Wenn das Skript direkt ausgeführt wird, startet die `main()`-Funktion.
+
+### Nutzung:
+
+1. **Speichere das Skript** beispielsweise als `sortiere_fallzahlen.py`.
+2. **Stelle sicher**, dass sich die Datei `'Fallzahlen.xlsx'` im gleichen Verzeichnis wie das Skript befindet oder passe den Pfad entsprechend an.
+3. **Führe das Skript aus**:
+
+    ```bash
+    python sortiere_fallzahlen.py
+    ```
+
+4. **Optional**: Wenn du das sortierte Ergebnis auch als CSV-Datei speichern möchtest, entferne das Kommentarzeichen (`#`) vor den entsprechenden Zeilen im Skript.
+
+### Beispielausgabe:
+
+Die Ausgabe wird ein `DataFrame` sein, das nach der Gesamtzahl der Straftaten pro Bezirk sortiert ist, beginnend mit dem Bezirk mit den meisten Straftaten. Hier ist eine vereinfachte Darstellung basierend auf deinem Beispiel:
+
+```
+     LOR-Schlüssel                     Bezirke  Straftaten_insgesamt  Raub  Straßenraub  ...  Rauschgiftdelikte  Kieztaten
+0          999999           Berlin (PKS gesamt)               536695  5389         3333  ...             17502      119737
+1          10000                       Mitte               83611    884          521  ...               3306        19212
+2          80000                    Neukölln               45313    508          294  ...               1869        10253
+...
+```
+
+Dieses Skript sollte dir eine solide Grundlage bieten, um deine Daten effizient zu verarbeiten und nach den gewünschten Kriterien zu sortieren. Wenn du weitere Anpassungen benötigst, lass es mich wissen!

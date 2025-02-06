@@ -1,0 +1,76 @@
+```python
+import pandas as pd
+
+def main():
+    # 1. Excel-Datei einlesen und alle Sheets als DataFrames speichern
+    excel_datei = 'Fallzahlen.xlsx'
+    sheets_dict = pd.read_excel(excel_datei, sheet_name=None)
+    
+    # 2. DataFrames der einzelnen Sheets zusammenführen (joinen)
+    # Alle DataFrames vertikal concatenieren
+    concatenated_df = pd.concat(sheets_dict.values(), ignore_index=True)
+    
+    # Gruppieren nach 'LOR-Schlüssel' und 'Bezirke' und die numerischen Spalten akkumulieren
+    gruppiert_df = concatenated_df.groupby(['LOR-Schlüssel', 'Bezirke'], as_index=False).sum()
+    
+    # 3. DataFrame sortieren nach 'Straftaten_insgesamt', dabei LOR-Schlüssel 999900 und 999999 am Ende lassen
+    # Definieren der auszuschließenden LOR-Schlüssel
+    ausschluss_keys = [999900, 999999]
+    
+    # DataFrame ohne die auszuschließenden LOR-Schlüssel
+    zu_sortieren_df = gruppiert_df[~gruppiert_df['LOR-Schlüssel'].isin(ausschluss_keys)]
+    
+    # DataFrame mit den auszuschließenden LOR-Schlüsseln
+    ausgeschlossen_df = gruppiert_df[gruppiert_df['LOR-Schlüssel'].isin(ausschluss_keys)]
+    
+    # Sortieren nach 'Straftaten_insgesamt' in absteigender Reihenfolge
+    sortiert_df = zu_sortieren_df.sort_values(by='Straftaten_insgesamt', ascending=False)
+    
+    # Ausschließenere Zeilen am Ende des sortierten DataFrames anhängen
+    final_df = pd.concat([sortiert_df, ausgeschlossen_df], ignore_index=True)
+    
+    # 4. Sortiertes DataFrame zurückgeben (hier wird es angezeigt)
+    print(final_df)
+
+if __name__ == '__main__':
+    main()
+```
+
+### Erklärung der Schritte:
+
+1. **Excel-Datei einlesen:**
+   - Mit `pd.read_excel` wird die Excel-Datei `Fallzahlen.xlsx` eingelesen.
+   - `sheet_name=None` liest alle Sheets und speichert sie in einem Dictionary, wobei die Sheet-Namen die Schlüssel sind.
+
+2. **DataFrames zusammenführen:**
+   - Die einzelnen DataFrames werden mit `pd.concat` vertikal zusammengeführt.
+   - Anschließend wird das kombinierte DataFrame nach den Spalten `'LOR-Schlüssel'` und `'Bezirke'` gruppiert.
+   - Mit `.sum()` werden die numerischen Spalten akkumuliert, sodass pro Bezirk die Gesamtwerte der Straftaten stehen.
+
+3. **Sortierung:**
+   - Definiert die LOR-Schlüssel, die nicht sortiert werden sollen (`999900` und `999999`).
+   - Trennt das DataFrame in zwei Teile: Einen Teil, der sortiert werden soll, und einen Teil, der am Ende bleiben soll.
+   - Sortiert den ersten Teil nach `'Straftaten_insgesamt'` in absteigender Reihenfolge.
+   - Fügt die ausgeschlossenen Zeilen am Ende des sortierten DataFrames hinzu.
+
+4. **Ausgabe:**
+   - Das final sortierte DataFrame wird mit `print` ausgegeben. Je nach Bedarf kann dieses DataFrame auch in eine neue Excel-Datei oder ein anderes Format exportiert werden.
+
+### Zusätzliche Hinweise:
+
+- **Installation der notwendigen Bibliothek:**
+  Stellen Sie sicher, dass `pandas` installiert ist. Falls nicht, können Sie es mit folgendem Befehl installieren:
+  ```bash
+  pip install pandas
+  ```
+
+- **Export des finalen DataFrames:**
+  Falls Sie das sortierte DataFrame in eine neue Excel-Datei speichern möchten, können Sie die folgende Zeile am Ende hinzufügen:
+  ```python
+  final_df.to_excel('Sortierte_Fallzahlen.xlsx', index=False)
+  ```
+
+- **Fehlerbehandlung:**
+  Für eine robustere Anwendung könnten Sie zusätzliche Fehlerbehandlungen hinzufügen, z.B. Überprüfen, ob die erwarteten Spalten vorhanden sind.
+
+Dieses Skript erfüllt die von Ihnen beschriebenen Anforderungen und sollte als Ausgangspunkt für weitere Anpassungen dienen, falls zusätzliche Funktionalitäten benötigt werden.

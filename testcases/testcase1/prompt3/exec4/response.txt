@@ -1,0 +1,133 @@
+```python
+import pandas as pd
+
+def sort_fallzahlen_excel(file_path: str, sheet_name: str) -> pd.DataFrame:
+    """
+    Reads the specified sheet from an Excel file, sorts the data by 'Straftaten_insgesamt' 
+    in descending order excluding rows with LOR-Schlüssel 999900 and 999999, which are 
+    appended at the end.
+
+    Parameters:
+    - file_path: Path to the Excel file.
+    - sheet_name: Name of the sheet to read.
+
+    Returns:
+    - A sorted pandas DataFrame.
+    """
+    try:
+        # Read the Excel sheet
+        df = pd.read_excel(file_path, sheet_name=sheet_name)
+        print(f"Successfully read the sheet '{sheet_name}' from '{file_path}'.")
+    except FileNotFoundError:
+        print(f"Error: The file '{file_path}' was not found.")
+        return pd.DataFrame()
+    except ValueError:
+        print(f"Error: The sheet '{sheet_name}' does not exist in '{file_path}'.")
+        return pd.DataFrame()
+    except Exception as e:
+        print(f"An unexpected error occurred while reading the Excel file: {e}")
+        return pd.DataFrame()
+
+    # Check if necessary columns exist
+    required_columns = ['LOR-Schlüssel', 'Straftaten_insgesamt']
+    missing_columns = [col for col in required_columns if col not in df.columns]
+    if missing_columns:
+        print(f"Error: The following required columns are missing from the data: {missing_columns}")
+        return pd.DataFrame()
+
+    # Separate the rows with LOR-Schlüssel 999900 and 999999
+    exclusion_keys = [999900, 999999]
+    excluded_df = df[df['LOR-Schlüssel'].isin(exclusion_keys)]
+    included_df = df[~df['LOR-Schlüssel'].isin(exclusion_keys)]
+
+    if excluded_df.empty:
+        print("Warning: No rows found with LOR-Schlüssel 999900 or 999999.")
+
+    # Sort the included DataFrame by 'Straftaten_insgesamt' in descending order
+    try:
+        included_sorted_df = included_df.sort_values(by='Straftaten_insgesamt', ascending=False)
+        print("Successfully sorted the included data by 'Straftaten_insgesamt' in descending order.")
+    except KeyError:
+        print("Error: The column 'Straftaten_insgesamt' does not exist in the data.")
+        return pd.DataFrame()
+    except Exception as e:
+        print(f"An unexpected error occurred during sorting: {e}")
+        return pd.DataFrame()
+
+    # Concatenate the sorted included data with the excluded data
+    sorted_df = pd.concat([included_sorted_df, excluded_df], ignore_index=True)
+    print("Successfully concatenated the excluded rows at the end of the sorted data.")
+
+    return sorted_df
+
+if __name__ == "__main__":
+    # Define the Excel file path and sheet name
+    excel_file = 'Fallzahlen.xlsx'
+    sheet = 'Fallzahlen_2023'
+
+    # Get the sorted DataFrame
+    sorted_fallzahlen_df = sort_fallzahlen_excel(excel_file, sheet)
+
+    # Check if the DataFrame is not empty before proceeding
+    if not sorted_fallzahlen_df.empty:
+        print("Sorted DataFrame:")
+        print(sorted_fallzahlen_df)
+        # Optionally, you can save the sorted DataFrame to a new Excel file or another format
+        # sorted_fallzahlen_df.to_excel('Sorted_Fallzahlen.xlsx', index=False)
+    else:
+        print("No data to display due to previous errors.")
+```
+
+### Erklärung des Skripts
+
+1. **Importieren der notwendigen Bibliotheken:**
+   - `pandas` wird benötigt, um die Excel-Datei zu lesen und mit DataFrames zu arbeiten.
+
+2. **Funktion `sort_fallzahlen_excel`:**
+   - **Parameter:**
+     - `file_path`: Der Pfad zur Excel-Datei (`'Fallzahlen.xlsx'`).
+     - `sheet_name`: Der Name des Sheets (`'Fallzahlen_2023'`).
+   - **Schritte innerhalb der Funktion:**
+     - **Excel-Datei einlesen:**
+       - Versucht, das angegebene Sheet aus der Excel-Datei zu lesen.
+       - Behandelt mögliche Fehler wie fehlende Datei oder fehlendes Sheet.
+     - **Überprüfen der erforderlichen Spalten:**
+       - Stellt sicher, dass sowohl `'LOR-Schlüssel'` als auch `'Straftaten_insgesamt'` in den Daten vorhanden sind.
+       - Gibt eine Fehlermeldung aus, wenn eine dieser Spalten fehlt.
+     - **Ausschließen der spezifischen Zeilen:**
+       - Trennt die Zeilen mit den `LOR-Schlüssel`-Werten `999900` und `999999` vom Rest des DataFrames.
+       - Diese Zeilen sollen am Ende stehen bleiben.
+     - **Sortieren der verbleibenden Daten:**
+       - Sortiert die verbleibenden Zeilen nach `'Straftaten_insgesamt'` in absteigender Reihenfolge.
+     - **Kombinieren der sortierten Daten:**
+       - Fügt die sortierten Daten und die ausgeschlossenen Zeilen zu einem neuen DataFrame zusammen.
+
+3. **Main-Block (`if __name__ == "__main__":`):**
+   - Definiert den Dateinamen und den Sheet-Namen.
+   - Ruft die Funktion `sort_fallzahlen_excel` auf, um das sortierte DataFrame zu erhalten.
+   - Überprüft, ob das zurückgegebene DataFrame nicht leer ist, bevor es ausgegeben wird.
+   - Optional kann das sortierte DataFrame in eine neue Excel-Datei gespeichert werden (kommentierte Zeile).
+
+### Hinweise zur Robustheit
+
+- **Fehlerbehandlung:**
+  - Das Skript behandelt verschiedene potenzielle Fehler, einschließlich fehlender Dateien, fehlender Sheets und fehlender Spalten.
+  - Informative Fehlermeldungen werden ausgegeben, um dem Benutzer zu helfen, das Problem zu verstehen.
+
+- **Flexibilität:**
+  - Die Funktion `sort_fallzahlen_excel` ist so gestaltet, dass sie für verschiedene Dateien und Sheets wiederverwendet werden kann, indem einfach die Parameter geändert werden.
+
+- **Erweiterbarkeit:**
+  - Weitere Validierungen oder Verarbeitungsschritte können leicht hinzugefügt werden, falls erforderlich.
+
+### Ausführung des Skripts
+
+1. Stellen Sie sicher, dass die Datei `'Fallzahlen.xlsx'` im gleichen Verzeichnis wie das Skript liegt oder geben Sie den vollständigen Pfad zur Datei an.
+
+2. Führen Sie das Skript mit Python aus:
+   ```bash
+   python sort_fallzahlen.py
+   ```
+   (Angenommen, Sie speichern das Skript als `sort_fallzahlen.py`)
+
+3. Das Skript gibt das sortierte DataFrame in der Konsole aus. Optional können Sie das Ergebnis in eine neue Datei speichern, indem Sie die entsprechende Zeile entkommentieren.

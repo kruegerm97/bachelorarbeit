@@ -1,0 +1,143 @@
+Hier ist ein Python-Skript, das die prozentualen Anteile der gesamten Straftaten der einzelnen Bezirke im Vergleich zu den gesamten Straftaten in ganz Berlin berechnet. Das Skript verwendet die `pandas`-Bibliothek, um die Excel-Datei zu verarbeiten.
+
+Stellen Sie sicher, dass Sie `pandas` und `openpyxl` installiert haben. Sie können diese Pakete mit folgendem Befehl installieren, falls sie noch nicht installiert sind:
+
+```bash
+pip install pandas openpyxl
+```
+
+### Python-Skript: `berechne_prozentuale_anteile.py`
+
+```python
+import pandas as pd
+
+def berechne_prozentuale_anteile(dateipfad: str, sheet_name: str = 'Fallzahlen_2023'):
+    """
+    Berechnet den prozentualen Anteil der Straftaten jedes Bezirks an den gesamten Straftaten in Berlin.
+
+    :param dateipfad: Pfad zur Excel-Datei 'Fallzahlen.xlsx'.
+    :param sheet_name: Name des Sheets in der Excel-Datei. Standard ist 'Fallzahlen_2023'.
+    :return: DataFrame mit Bezirken und deren prozentualen Anteilen.
+    """
+    try:
+        # Excel-Datei lesen
+        df = pd.read_excel(dateipfad, sheet_name=sheet_name)
+    except FileNotFoundError:
+        print(f"Die Datei {dateipfad} wurde nicht gefunden.")
+        return
+    except Exception as e:
+        print(f"Ein Fehler ist beim Lesen der Excel-Datei aufgetreten: {e}")
+        return
+
+    # Gesamtstraftaten für Berlin abrufen
+    total_crimes_row = df[df['Bezirke'] == 'Berlin (PKS gesamt)']
+    if not total_crimes_row.empty:
+        total_crimes = total_crimes_row['Straftaten_insgesamt'].values[0]
+    else:
+        # Falls 'Berlin (PKS gesamt)' nicht vorhanden ist, summiere die Bezirke
+        exclude_bezirke = ['Berlin (PKS gesamt)', 'Stadtgebiet Berlin, nicht zuzuordnen']
+        total_crimes = df.loc[~df['Bezirke'].isin(exclude_bezirke), 'Straftaten_insgesamt'].sum()
+
+    # Bezirke filtern (ausschließen: Gesamtdaten und nicht zuordenbare Gebiete)
+    exclude_bezirke = ['Berlin (PKS gesamt)', 'Stadtgebiet Berlin, nicht zuzuordnen']
+    bezirke_df = df.loc[~df['Bezirke'].isin(exclude_bezirke)].copy()
+
+    # Prozentualen Anteil berechnen
+    bezirke_df['Prozentualer_Anteil'] = (bezirke_df['Straftaten_insgesamt'] / total_crimes) * 100
+
+    # Optional: Auf zwei Dezimalstellen runden
+    bezirke_df['Prozentualer_Anteil'] = bezirke_df['Prozentualer_Anteil'].round(2)
+
+    # Ergebnis anzeigen
+    print("Prozentualer Anteil der Straftaten nach Bezirk:")
+    print(bezirke_df[['Bezirke', 'Straftaten_insgesamt', 'Prozentualer_Anteil']])
+
+    # Optional: Ergebnis in eine neue Excel-Datei speichern
+    output_datei = 'Prozentuale_Anteile_Straftaten.xlsx'
+    try:
+        bezirke_df[['Bezirke', 'Straftaten_insgesamt', 'Prozentualer_Anteil']].to_excel(output_datei, index=False)
+        print(f"\nDie Ergebnisse wurden in '{output_datei}' gespeichert.")
+    except Exception as e:
+        print(f"Ein Fehler ist beim Speichern der Ergebnisdatei aufgetreten: {e}")
+
+if __name__ == "__main__":
+    # Pfad zur Excel-Datei
+    dateipfad = 'Fallzahlen.xlsx'
+    
+    # Prozentuale Anteile berechnen
+    berechne_prozentuale_anteile(dateipfad)
+```
+
+### Erklärung des Skripts
+
+1. **Importieren der Bibliothek:**
+   - `pandas` wird verwendet, um die Excel-Datei zu lesen und die Daten zu verarbeiten.
+
+2. **Funktion `berechne_prozentuale_anteile`:**
+   - **Parameter:**
+     - `dateipfad`: Der Pfad zur Excel-Datei `Fallzahlen.xlsx`.
+     - `sheet_name`: Der Name des Sheets, standardmäßig auf `'Fallzahlen_2023'` gesetzt.
+   
+   - **Schritte:**
+     1. **Lesen der Excel-Datei:**
+        - Versucht die Excel-Datei zu lesen. Falls die Datei nicht gefunden wird oder ein anderer Fehler auftritt, wird eine Fehlermeldung ausgegeben.
+     
+     2. **Bestimmen der Gesamtanzahl der Straftaten:**
+        - Sucht nach der Zeile, die den Gesamtwert für Berlin enthält (`'Bezirke' == 'Berlin (PKS gesamt)'`).
+        - Falls diese Zeile nicht gefunden wird, summiert das Skript die Straftaten aller Bezirke, außer denen, die ausgeschlossen werden sollen.
+
+     3. **Filtern der Bezirke:**
+        - Entfernt Zeilen, die nicht einem spezifischen Bezirk zugeordnet werden können (`'Stadtgebiet Berlin, nicht zuzuordnen'` und `'Berlin (PKS gesamt)'`).
+
+     4. **Berechnung des prozentualen Anteils:**
+        - Für jeden Bezirk wird der Anteil der Straftaten an den gesamten Straftaten Berlins berechnet.
+        - Das Ergebnis wird auf zwei Dezimalstellen gerundet.
+
+     5. **Ausgabe und Speicherung:**
+        - Das Ergebnis wird in der Konsole angezeigt.
+        - Optional wird das Ergebnis in eine neue Excel-Datei `Prozentuale_Anteile_Straftaten.xlsx` gespeichert.
+
+3. **Ausführung des Skripts:**
+   - Das Skript wird ausgeführt, wenn es direkt aufgerufen wird.
+   - Der Pfad zur Excel-Datei wird festgelegt und die Funktion zur Berechnung der prozentualen Anteile wird aufgerufen.
+
+### Verwendung
+
+1. **Platzieren Sie die Excel-Datei:**
+   - Stellen Sie sicher, dass sich die Datei `Fallzahlen.xlsx` im gleichen Verzeichnis wie das Skript befindet oder geben Sie den vollständigen Pfad zur Datei an.
+
+2. **Führen Sie das Skript aus:**
+   - Öffnen Sie ein Terminal oder eine Eingabeaufforderung.
+   - Navigieren Sie zu dem Verzeichnis, das das Skript enthält.
+   - Führen Sie das Skript mit folgendem Befehl aus:
+
+     ```bash
+     python berechne_prozentuale_anteile.py
+     ```
+
+3. **Ergebnisse:**
+   - Die prozentualen Anteile der Straftaten pro Bezirk werden in der Konsole angezeigt.
+   - Außerdem wird eine neue Excel-Datei `Prozentuale_Anteile_Straftaten.xlsx` mit den Ergebnissen erstellt.
+
+### Beispielausgabe
+
+```
+Prozentualer Anteil der Straftaten nach Bezirk:
+                     Bezirke  Straftaten_insgesamt  Prozentualer_Anteil
+0                     Mitte                83611                15.58
+1     Friedrichshain-Kreuzberg                55838                10.38
+2                    Pankow                39164                 7.29
+3  Charlottenburg-Wilmersdorf                53630                 9.99
+4                   Spandau                25564                 4.75
+5          Steglitz-Zehlendorf                23719                 4.40
+6      Tempelhof-Schöneberg                41776                 7.78
+7                  Neukölln                45313                 8.45
+8          Treptow-Köpenick                26099                 4.86
+9     Marzahn-Hellersdorf                26649                 4.96
+10              Lichtenberg                31563                 5.88
+11           Reinickendorf                27344                 5.10
+
+Die Ergebnisse wurden in 'Prozentuale_Anteile_Straftaten.xlsx' gespeichert.
+```
+
+Dieses Skript bietet eine einfache und effektive Möglichkeit, die Verteilung der Straftaten auf die Bezirke von Berlin zu analysieren. Sie können das Skript nach Bedarf anpassen, um zusätzliche Analysen durchzuführen oder die Ausgabe zu formatieren.

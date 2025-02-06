@@ -1,0 +1,34 @@
+Excel-Datei erfolgreich eingelesen.
+Sortiertes DataFrame:
+   LOR-Schlüssel                     Bezirke  Straftaten_insgesamt  Raub  Straßenraub  ...  Brandstiftung  Sachbeschädigung_insgesamt  Sachbeschädigung_Graffiti  Rauschgiftdelikte  Kieztaten
+0          10000                       Mitte                 83611   884          521  ...            137                        6172                        976               3306      19212
+1          20000    Friedrichshain-Kreuzberg                 55838   923          606  ...             85                        4906                        801               4455      12724
+2          40000  Charlottenburg-Wilmersdorf                 53630   464          278  ...             79                        4134                        750               1431      12175
+3          80000                    Neukölln                 45313   508          294  ...            145                        4165                        379               1869      10253
+4          70000        Tempelhof-Schöneberg                 41776   328          198  ...             86                        3592                        622               1435      10132
+
+[5 rows x 19 columns]
+Das sortierte DataFrame wurde erfolgreich in 'Fallzahlen_sortiert.xlsx' gespeichert.
+	Command being timed: "python testcase1/prompt3/exec3/script.py"
+	User time (seconds): 2.44
+	System time (seconds): 0.06
+	Percent of CPU this job got: 448%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.56
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 153764
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 32481
+	Voluntary context switches: 34
+	Involuntary context switches: 158
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 176
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

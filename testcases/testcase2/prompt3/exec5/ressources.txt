@@ -1,0 +1,40 @@
+    LOR-Schlüssel                               Bezirke  Straftaten_insgesamt  Raub  ...  Sachbeschädigung_insgesamt  Sachbeschädigung_Graffiti  Rauschgiftdelikte  Kieztaten
+0           10000                                 Mitte                 91321  1014  ...                        5406                       1177               2880      15703
+1           20000              Friedrichshain-Kreuzberg                 62194   940  ...                        5034                       1015               3039      11082
+2           40000            Charlottenburg-Wilmersdorf                 53322   641  ...                        3422                        792               1208      10047
+3           80000                              Neukölln                 44978   580  ...                        4253                        746               1180       9544
+4           70000                  Tempelhof-Schöneberg                 40184   496  ...                        3367                        651               1146       8064
+5           30000                                Pankow                 39803   313  ...                        3994                       1036                500       8463
+6          120000                         Reinickendorf                 29180   340  ...                        2586                        477                829       7076
+7           50000                               Spandau                 26499   344  ...                        2446                        331                549       6408
+8          110000                           Lichtenberg                 25618   236  ...                        2508                        559                378       5708
+9           60000                   Steglitz-Zehlendorf                 25072   210  ...                        2580                        616                433       4695
+10         100000                   Marzahn-Hellersdorf                 24285   260  ...                        2565                        448                344       6181
+11          90000                      Treptow-Köpenick                 23250   209  ...                        2517                        576                392       4729
+12         999900  Stadtgebiet Berlin, nicht zuzuordnen                 57450   114  ...                        2216                        815                587       2663
+13         999999                   Berlin (PKS gesamt)                543156  5697  ...                       42894                       9239              13465     100363
+
+[14 rows x 19 columns]
+	Command being timed: "python testcase2/prompt3/exec5/script.py"
+	User time (seconds): 4.69
+	System time (seconds): 0.23
+	Percent of CPU this job got: 164%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:02.99
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 154232
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 168184
+	Voluntary context switches: 39
+	Involuntary context switches: 542
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

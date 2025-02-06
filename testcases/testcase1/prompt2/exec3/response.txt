@@ -1,0 +1,105 @@
+Natürlich! Hier ist ein Python-Skript, das die beschriebenen Anforderungen erfüllt. Das Skript verwendet die `pandas`-Bibliothek, um die Excel-Datei einzulesen, die Daten zu filtern, zu sortieren und in einem DataFrame zu speichern.
+
+Stellen Sie sicher, dass Sie die `pandas`-Bibliothek installiert haben. Wenn nicht, können Sie sie mit `pip` installieren:
+
+```bash
+pip install pandas
+```
+
+Hier ist das vollständige Skript:
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+dateipfad = 'Fallzahlen.xlsx'
+
+# Name des Sheets
+sheet_name = 'Fallzahlen_2023'
+
+# Einlesen der Excel-Datei
+df = pd.read_excel(dateipfad, sheet_name=sheet_name)
+
+# Anzeigen der ersten Zeilen zur Überprüfung (optional)
+#print(df.head())
+
+# Filtere die Bezirke heraus, indem die unerwünschten LOR-Schlüssel ausgeschlossen werden
+ausgeschlossene_lor = [999900, 999999]
+bezirke_df = df[~df['LOR-Schlüssel'].isin(ausgeschlossene_lor)]
+
+# Sortiere die Bezirke nach 'Straftaten_insgesamt' in absteigender Reihenfolge
+bezirke_sortiert = bezirke_df.sort_values(by='Straftaten_insgesamt', ascending=False)
+
+# Optional: Zurücksetzen des Indexes nach dem Sortieren
+bezirke_sortiert.reset_index(drop=True, inplace=True)
+
+# Anzeigen des sortierten DataFrames (optional)
+print(bezirke_sortiert)
+
+# Wenn Sie den sortierten DataFrame weiter verwenden möchten, steht er als 'bezirke_sortiert' zur Verfügung
+```
+
+### Erklärung der Schritte:
+
+1. **Importieren der Bibliothek:**
+   ```python
+   import pandas as pd
+   ```
+   `pandas` ist eine leistungsstarke Bibliothek für Datenmanipulation und -analyse.
+
+2. **Definieren des Pfads und des Sheets:**
+   ```python
+   dateipfad = 'Fallzahlen.xlsx'
+   sheet_name = 'Fallzahlen_2023'
+   ```
+   Stellen Sie sicher, dass sich die Excel-Datei im gleichen Verzeichnis wie das Skript befindet oder geben Sie den vollständigen Pfad an.
+
+3. **Einlesen der Excel-Datei:**
+   ```python
+   df = pd.read_excel(dateipfad, sheet_name=sheet_name)
+   ```
+   Dies liest das spezifizierte Sheet in einen Pandas DataFrame ein.
+
+4. **Filtern der Bezirke:**
+   ```python
+   ausgeschlossene_lor = [999900, 999999]
+   bezirke_df = df[~df['LOR-Schlüssel'].isin(ausgeschlossene_lor)]
+   ```
+   - `ausgeschlossene_lor` enthält die LOR-Schlüssel, die ausgeschlossen werden sollen.
+   - `~` ist der logische NOT-Operator in Pandas.
+   - `isin` prüft, ob Werte in der Spalte `LOR-Schlüssel` in der Liste `ausgeschlossene_lor` enthalten sind.
+   - Damit bleiben nur die Bezirke übrig.
+
+5. **Sortieren nach 'Straftaten_insgesamt':**
+   ```python
+   bezirke_sortiert = bezirke_df.sort_values(by='Straftaten_insgesamt', ascending=False)
+   ```
+   Sortiert die Bezirke in absteigender Reihenfolge basierend auf der Anzahl der Straftaten insgesamt. Falls Sie aufsteigend sortieren möchten, setzen Sie `ascending=True`.
+
+6. **Zurücksetzen des Indexes (optional):**
+   ```python
+   bezirke_sortiert.reset_index(drop=True, inplace=True)
+   ```
+   Dies setzt den Index neu, sodass er von 0 beginnend fortlaufend ist. `drop=True` verhindert, dass der alte Index als Spalte hinzugefügt wird.
+
+7. **Anzeigen des sortierten DataFrames (optional):**
+   ```python
+   print(bezirke_sortiert)
+   ```
+   Dies gibt den sortierten DataFrame im Terminal oder der Konsole aus.
+
+### Weiterverwendung
+
+Der sortierte DataFrame `bezirke_sortiert` steht Ihnen für weitere Analysen oder Operationen zur Verfügung. Zum Beispiel können Sie ihn in eine neue Excel-Datei speichern:
+
+```python
+bezirke_sortiert.to_excel('Sortierte_Fallzahlen.xlsx', index=False)
+```
+
+### Zusätzliche Hinweise
+
+- **Encoding und weitere Optionen:** Falls Ihre Excel-Datei spezielle Encoding-Anforderungen hat oder zusätzliche Optionen benötigt, können Sie diese im `read_excel`-Befehl angeben.
+  
+- **Fehlerbehandlung:** Es kann sinnvoll sein, Fehlerbehandlungen hinzuzufügen, um sicherzustellen, dass die Datei existiert und das Sheet korrekt benannt ist.
+
+Ich hoffe, das hilft Ihnen weiter! Wenn Sie weitere Fragen haben oder Anpassungen benötigen, lassen Sie es mich wissen.

@@ -1,0 +1,96 @@
+Hier ist ein Python-Skript, das den prozentualen Anteil der gesamten Straftaten (`Straftaten_insgesamt`) für jeden Bezirk in Berlin berechnet. Das Skript verwendet die Bibliotheken `pandas` und `openpyxl`. Stelle sicher, dass beide installiert sind. Du kannst sie mit folgendem Befehl installieren, falls noch nicht geschehen:
+
+```bash
+pip install pandas openpyxl
+```
+
+### Python-Skript: `prozentanteil_straftaten.py`
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei und Name des Sheets
+excel_datei = 'Fallzahlen.xlsx'
+sheet_name = 'Fallzahlen_2023'
+
+# Excel-Datei einlesen
+df = pd.read_excel(excel_datei, sheet_name=sheet_name)
+
+# Gesamtanzahl der Straftaten in Berlin extrahieren
+# Annahme: Der Eintrag für "Berlin (PKS gesamt)" ist eindeutig
+gesamt_strafaten = df.loc[df['Bezirke'] == 'Berlin (PKS gesamt)', 'Straftaten_insgesamt'].values[0]
+
+# Entfernen der Gesamtzeile, um nur die Bezirke zu betrachten
+df_bezirke = df[df['Bezirke'] != 'Berlin (PKS gesamt)'].copy()
+
+# Berechnung des prozentualen Anteils der Straftaten für jeden Bezirk
+df_bezirke['Prozent_Straftaten'] = (df_bezirke['Straftaten_insgesamt'] / gesamt_strafaten) * 100
+
+# Optional: Sortieren nach dem prozentualen Anteil
+df_bezirke.sort_values(by='Prozent_Straftaten', ascending=False, inplace=True)
+
+# Ergebnis anzeigen
+print(df_bezirke[['Bezirke', 'Straftaten_insgesamt', 'Prozent_Straftaten']])
+
+# Optional: Ergebnisse in eine neue Excel-Datei speichern
+ausgabe_datei = 'Fallzahlen_mit_Prozent.xlsx'
+df_bezirke.to_excel(ausgabe_datei, index=False)
+print(f"\nDie Ergebnisse wurden in '{ausgabe_datei}' gespeichert.")
+```
+
+### Erläuterungen zum Skript
+
+1. **Importieren der Bibliotheken:**
+   - `pandas` wird für die Datenverarbeitung verwendet.
+
+2. **Einlesen der Excel-Datei:**
+   - Das Skript liest die Excel-Datei `Fallzahlen.xlsx` und das spezifische Sheet `Fallzahlen_2023`.
+
+3. **Extrahieren der Gesamtanzahl der Straftaten:**
+   - Es sucht die Zeile, in der der Bezirk `Berlin (PKS gesamt)` ist, und extrahiert den Wert aus der Spalte `Straftaten_insgesamt`.
+
+4. **Filtern der Bezirke:**
+   - Die Gesamtzeile wird entfernt, sodass nur die einzelnen Bezirke verbleiben.
+
+5. **Berechnung des prozentualen Anteils:**
+   - Für jeden Bezirk wird der prozentuale Anteil der Straftaten berechnet, indem die Straftaten des Bezirks durch die Gesamtzahl der Straftaten in Berlin geteilt und mit 100 multipliziert wird.
+
+6. **Sortieren der Ergebnisse (optional):**
+   - Die Bezirke werden nach dem prozentualen Anteil der Straftaten absteigend sortiert.
+
+7. **Ausgabe der Ergebnisse:**
+   - Das Skript druckt eine Tabelle mit den Bezirken, den gesamten Straftaten und dem prozentualen Anteil.
+
+8. **Speichern der Ergebnisse (optional):**
+   - Die Ergebnisse werden in eine neue Excel-Datei `Fallzahlen_mit_Prozent.xlsx` gespeichert.
+
+### Beispielhafte Ausgabe
+
+```
+                    Bezirke  Straftaten_insgesamt  Prozent_Straftaten
+0                     Mitte                83611            15.585348
+1    Friedrichshain-Kreuzberg                55838            10.404365
+2                   Pankow                39164             7.295930
+3  Charlottenburg-Wilmersdorf                53630             9.980373
+4                  Spandau                25564             4.763478
+5         Steglitz-Zehlendorf                23719             4.416960
+6    Tempelhof-Schöneberg                41776             7.785106
+7               Neukölln                45313             8.467841
+8         Treptow-Köpenick                26099             4.853939
+9      Marzahn-Hellersdorf                26649             4.976549
+10            Lichtenberg                31563             5.889312
+11           Reinickendorf                27344             5.112226
+12  Stadtgebiet Berlin, nicht zuzuordnen                56425            10.532238
+
+Die Ergebnisse wurden in 'Fallzahlen_mit_Prozent.xlsx' gespeichert.
+```
+
+### Hinweise
+
+- **Spaltennamen überprüfen:** Stelle sicher, dass die Spaltennamen in deinem Excel-Sheet exakt mit denen im Skript übereinstimmen (z.B. `Bezirke` und `Straftaten_insgesamt`). Groß- und Kleinschreibung sowie Leerzeichen müssen genau übereinstimmen.
+
+- **Fehlerbehandlung (optional):** Für eine robustere Anwendung könntest du zusätzliche Fehlerprüfungen hinzufügen, z.B. um sicherzustellen, dass die Gesamtstraftaten-Zeile existiert oder dass keine Division durch Null erfolgt.
+
+- **Anpassungen:** Du kannst das Skript nach Bedarf erweitern, z.B. durch Visualisierungen oder weitere Analysen.
+
+Wenn du Fragen hast oder weitere Anpassungen benötigst, stehe ich gerne zur Verfügung!

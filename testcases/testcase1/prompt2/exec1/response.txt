@@ -1,0 +1,91 @@
+Hier ist ein Python-Skript, das die gewünschten Schritte ausführt:
+
+1. **Installiere die notwendigen Bibliotheken** (falls noch nicht installiert):
+   ```bash
+   pip install pandas openpyxl
+   ```
+
+2. **Python-Skript**:
+
+   ```python
+   import pandas as pd
+
+   # Pfad zur Excel-Datei
+   excel_datei = 'Fallzahlen.xlsx'
+
+   # Name des Sheets
+   sheet_name = 'Fallzahlen_2023'
+
+   # LOR-Schlüssel, die ausgeschlossen werden sollen
+   ausschluss_schluessel = [999900, 999999]
+
+   try:
+       # Excel-Datei einlesen
+       df = pd.read_excel(excel_datei, sheet_name=sheet_name)
+
+       # Anzeige der ersten paar Zeilen zur Überprüfung (optional)
+       print("Originaldaten:")
+       print(df.head())
+
+       # Filter anwenden, um die auszuschließenden LOR-Schlüssel zu entfernen
+       df_filtered = df[~df['LOR-Schlüssel'].isin(ausschluss_schluessel)]
+
+       # Anzeige der gefilterten Daten zur Überprüfung (optional)
+       print("\nGefilterte Daten:")
+       print(df_filtered.head())
+
+       # Sortieren nach 'Straftaten_insgesamt' absteigend (größte zuerst)
+       df_sorted = df_filtered.sort_values(by='Straftaten_insgesamt', ascending=False)
+
+       # Ergebnis anzeigen (optional)
+       print("\nSortierte Daten:")
+       print(df_sorted)
+
+       # Optional: Das sortierte DataFrame speichern
+       # df_sorted.to_excel('Fallzahlen_sortiert.xlsx', index=False)
+
+   except FileNotFoundError:
+       print(f"Die Datei {excel_datei} wurde nicht gefunden.")
+   except Exception as e:
+       print(f"Ein Fehler ist aufgetreten: {e}")
+   ```
+
+3. **Erklärung der Schritte**:
+
+   - **Importieren der Bibliotheken**:
+     ```python
+     import pandas as pd
+     ```
+     Pandas ist eine leistungsstarke Bibliothek zur Datenmanipulation und -analyse.
+
+   - **Einlesen der Excel-Datei**:
+     ```python
+     df = pd.read_excel(excel_datei, sheet_name=sheet_name)
+     ```
+     Liest das spezifizierte Sheet aus der Excel-Datei in ein DataFrame ein.
+
+   - **Filtern der unerwünschten Zeilen**:
+     ```python
+     df_filtered = df[~df['LOR-Schlüssel'].isin(ausschluss_schluessel)]
+     ```
+     Entfernt die Zeilen, bei denen der 'LOR-Schlüssel' entweder 999900 oder 999999 ist.
+
+   - **Sortieren der Daten**:
+     ```python
+     df_sorted = df_filtered.sort_values(by='Straftaten_insgesamt', ascending=False)
+     ```
+     Sortiert das gefilterte DataFrame basierend auf der Spalte 'Straftaten_insgesamt' in absteigender Reihenfolge. Wenn eine aufsteigende Sortierung gewünscht ist, setze `ascending=True`.
+
+   - **Optionales Speichern der sortierten Daten**:
+     ```python
+     df_sorted.to_excel('Fallzahlen_sortiert.xlsx', index=False)
+     ```
+     Speichert das sortierte DataFrame in einer neuen Excel-Datei. Diese Zeile ist auskommentiert, kann aber aktiviert werden, wenn das Ergebnis gespeichert werden soll.
+
+4. **Ausführen des Skripts**:
+   Speichere das Skript in einer `.py`-Datei, z.B. `sortiere_fallzahlen.py`, und führe es mit Python aus:
+   ```bash
+   python sortiere_fallzahlen.py
+   ```
+
+Dieses Skript liest die Daten aus der Excel-Datei, filtert die nicht relevanten Bezirke heraus, sortiert die verbleibenden Daten nach der Gesamtzahl der Straftaten und gibt das sortierte DataFrame aus. Optional kannst du das sortierte Ergebnis in einer neuen Excel-Datei speichern, indem du die entsprechende Zeile entkommentierst.

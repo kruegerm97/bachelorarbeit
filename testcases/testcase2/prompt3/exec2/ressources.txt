@@ -1,0 +1,31 @@
+   LOR-Schlüssel                     Bezirke  Straftaten_insgesamt  Raub  Straßenraub  ...  Brandstiftung  Sachbeschädigung_insgesamt  Sachbeschädigung_Graffiti  Rauschgiftdelikte  Kieztaten
+0          10000                       Mitte                878048  8428         4951  ...           1114                       58297                      13343              34835     162698
+1          20000    Friedrichshain-Kreuzberg                579591  8286         5359  ...            966                       50327                      11883              47259     114395
+2          40000  Charlottenburg-Wilmersdorf                519706  4559         2510  ...            829                       37870                       8244              11836     103582
+3          80000                    Neukölln                436568  4987         2775  ...           1193                       40143                       5873              17797     100781
+4          70000        Tempelhof-Schöneberg                398767  3587         2105  ...            752                       34963                       7521              11880      88085
+
+[5 rows x 19 columns]
+	Command being timed: "python testcase2/prompt3/exec2/script.py"
+	User time (seconds): 4.55
+	System time (seconds): 0.22
+	Percent of CPU this job got: 168%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:02.83
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 153944
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 167997
+	Voluntary context switches: 35
+	Involuntary context switches: 480
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

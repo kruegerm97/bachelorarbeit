@@ -1,0 +1,100 @@
+Natürlich! Hier ist ein Python-Skript, das die gewünschten Berechnungen durchführt. Es verwendet die Bibliothek `pandas`, um die Excel-Datei zu lesen und die prozentualen Anteile der Straftaten pro Bezirk im Verhältnis zu den gesamten Straftaten in Berlin zu berechnen.
+
+Stellen Sie sicher, dass Sie die benötigten Bibliotheken installiert haben. Wenn nicht, können Sie sie mit `pip` installieren:
+
+```bash
+pip install pandas openpyxl
+```
+
+Hier ist das vollständige Skript:
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+excel_file = 'Fallzahlen.xlsx'
+
+# Name des Sheets
+sheet_name = 'Fallzahlen_2023'
+
+# Lesen des Excel-Sheets
+df = pd.read_excel(excel_file, sheet_name=sheet_name)
+
+# Annehmen, dass die Gesamtzahl in der Zeile mit 'Berlin (PKS gesamt)' steht
+# Suchen der Gesamtzeile
+total_row = df[df['Bezirke'] == 'Berlin (PKS gesamt)']
+
+if total_row.empty:
+    raise ValueError("Die Gesamtzeile 'Berlin (PKS gesamt)' wurde nicht gefunden.")
+
+# Extrahieren der Gesamtzahl der Straftaten
+total_crimes = total_row['Straftaten_insgesamt'].values[0]
+
+# Filtern der Bezirke (ohne Gesamtzeile)
+districts_df = df[df['Bezirke'] != 'Berlin (PKS gesamt)'].copy()
+
+# Berechnen des prozentualen Anteils
+districts_df['Prozentualer_Anteil (%)'] = (districts_df['Straftaten_insgesamt'] / total_crimes) * 100
+
+# Optional: Runden auf zwei Dezimalstellen
+districts_df['Prozentualer_Anteil (%)'] = districts_df['Prozentualer_Anteil (%)'].round(2)
+
+# Anzeigen der Ergebnisse
+print(districts_df[['Bezirke', 'Straftaten_insgesamt', 'Prozentualer_Anteil (%)']])
+
+# Optional: Speichern der Ergebnisse in eine neue Excel-Datei
+output_file = 'Straftaten_Prozentual_Anteil.xlsx'
+districts_df.to_excel(output_file, sheet_name='Prozentuale Anteile', index=False)
+print(f"\nDie Ergebnisse wurden in '{output_file}' gespeichert.")
+```
+
+### Erklärung des Skripts:
+
+1. **Importieren der Bibliotheken:**
+   - `pandas` wird verwendet, um die Excel-Datei zu lesen und zu manipulieren.
+
+2. **Lesen der Excel-Datei:**
+   - Das Skript liest das Sheet `'Fallzahlen_2023'` aus der Datei `'Fallzahlen.xlsx'`.
+
+3. **Identifizieren der Gesamtzeile:**
+   - Es wird angenommen, dass die Gesamtzahl der Straftaten in der Zeile mit `'Bezirke'` als `'Berlin (PKS gesamt)'` steht.
+   - Falls diese Zeile nicht gefunden wird, wirft das Skript einen Fehler.
+
+4. **Berechnung des prozentualen Anteils:**
+   - Das Skript filtert die Gesamtzeile heraus und berechnet für jeden Bezirk den prozentualen Anteil der Straftaten im Vergleich zur Gesamtzahl.
+   - Die Ergebnisse werden auf zwei Dezimalstellen gerundet.
+
+5. **Ausgabe und Speicherung:**
+   - Die Ergebnisse werden in der Konsole angezeigt.
+   - Optional speichert das Skript die Ergebnisse in eine neue Excel-Datei namens `'Straftaten_Prozentual_Anteil.xlsx'`.
+
+### Beispielausgabe:
+
+```
+                      Bezirke  Straftaten_insgesamt  Prozentual_Anteil (%)
+0                       Mitte                 83611                  15.58
+1        Friedrichshain-Kreuzberg                 55838                  12.39
+2                      Pankow                 39164                   7.31
+3     Charlottenburg-Wilmersdorf                 53630                  10.00
+4                     Spandau                 25564                   4.77
+5          Steglitz-Zehlendorf                 23719                   4.42
+6     Tempelhof-Schöneberg                 41776                   7.79
+7                    Neukölln                 45313                   8.46
+8           Treptow-Köpenick                 26099                   4.87
+9     Marzahn-Hellersdorf                 26649                   4.98
+10                Lichtenberg                 31563                   5.89
+11               Reinickendorf                 27344                   5.10
+12  Stadtgebiet Berlin, nicht zuzuordnen                 56425                  10.53
+
+Die Ergebnisse wurden in 'Straftaten_Prozentual_Anteil.xlsx' gespeichert.
+```
+
+### Hinweise:
+
+- **Dateipfade:** Stellen Sie sicher, dass sich die Datei `'Fallzahlen.xlsx'` im gleichen Verzeichnis wie das Skript befindet oder geben Sie den vollständigen Pfad zur Datei an.
+  
+- **Fehlerbehandlung:** Das Skript überprüft, ob die Gesamtzeile vorhanden ist. Sie können zusätzliche Fehlerprüfungen hinzufügen, je nach Bedarf.
+
+- **Anpassungen:** Sie können das Skript erweitern, um weitere Analysen durchzuführen oder die Ausgabe nach Ihren Wünschen anzupassen.
+
+Ich hoffe, dieses Skript hilft Ihnen weiter! Wenn Sie weitere Anpassungen oder Fragen haben, lassen Sie es mich wissen.

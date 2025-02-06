@@ -1,0 +1,125 @@
+Natürlich! Hier ist ein Python-Skript, das die beschriebenen Anforderungen erfüllt. Es verwendet die `pandas`-Bibliothek, um die Excel-Datei einzulesen, die unerwünschten Zeilen zu filtern und die verbleibenden Daten nach der Spalte `'Straftaten_insgesamt'` zu sortieren.
+
+### Schritt-für-Schritt Anleitung:
+
+1. **Installation der notwendigen Bibliotheken**:
+   Stelle sicher, dass `pandas` und `openpyxl` (für das Einlesen von `.xlsx`-Dateien) installiert sind. Wenn nicht, kannst du sie mit `pip` installieren:
+
+   ```bash
+   pip install pandas openpyxl
+   ```
+
+2. **Python-Skript erstellen**:
+
+   ```python
+   import pandas as pd
+
+   # Pfad zur Excel-Datei
+   datei_pfad = 'Fallzahlen.xlsx'
+
+   # Namen des Sheets
+   sheet_name = 'Fallzahlen_2023'
+
+   # Einlesen der Excel-Datei
+   try:
+       df = pd.read_excel(datei_pfad, sheet_name=sheet_name)
+       print("Excel-Datei erfolgreich eingelesen.")
+   except FileNotFoundError:
+       print(f"Die Datei {datei_pfad} wurde nicht gefunden.")
+       exit(1)
+   except Exception as e:
+       print(f"Ein Fehler ist aufgetreten beim Einlesen der Datei: {e}")
+       exit(1)
+
+   # Anzeigen der ersten paar Zeilen, um sicherzustellen, dass die Daten korrekt eingelesen wurden
+   print("\nErste 5 Zeilen der Originaldaten:")
+   print(df.head())
+
+   # Filterkriterien: Ausschließen der LOR-Schlüssel 999900 und 999999
+   ausschluss_schluessel = [999900, 999999]
+   df_filtered = df[~df['LOR-Schlüssel'].isin(ausschluss_schluessel)]
+
+   print(f"\nAnzahl der Zeilen nach dem Ausschluss: {len(df_filtered)}")
+
+   # Sortieren nach 'Straftaten_insgesamt' in absteigender Reihenfolge
+   df_sorted = df_filtered.sort_values(by='Straftaten_insgesamt', ascending=False).reset_index(drop=True)
+
+   print("\nErste 5 Zeilen der sortierten Daten:")
+   print(df_sorted.head())
+
+   # Optional: Speichern des sortierten DataFrames in eine neue Excel-Datei
+   ausgabe_pfad = 'Fallzahlen_sortiert.xlsx'
+   try:
+       df_sorted.to_excel(ausgabe_pfad, index=False)
+       print(f"\nSortierte Daten wurden erfolgreich in '{ausgabe_pfad}' gespeichert.")
+   except Exception as e:
+       print(f"Ein Fehler ist aufgetreten beim Speichern der Datei: {e}")
+   ```
+
+### Erklärung des Skripts:
+
+- **Importieren der Bibliothek**:
+  ```python
+  import pandas as pd
+  ```
+  `pandas` ist eine leistungsstarke Bibliothek für Datenmanipulation und -analyse.
+
+- **Einlesen der Excel-Datei**:
+  ```python
+  df = pd.read_excel(datei_pfad, sheet_name=sheet_name)
+  ```
+  Diese Zeile liest das angegebene Sheet der Excel-Datei in einen DataFrame `df` ein.
+
+- **Filtern der unerwünschten Zeilen**:
+  ```python
+  df_filtered = df[~df['LOR-Schlüssel'].isin(ausschluss_schluessel)]
+  ```
+  Hier werden alle Zeilen ausgeschlossen, deren `'LOR-Schlüssel'` entweder `999900` oder `999999` ist. Das `~` Symbol negiert die Bedingung.
+
+- **Sortieren der Daten**:
+  ```python
+  df_sorted = df_filtered.sort_values(by='Straftaten_insgesamt', ascending=False).reset_index(drop=True)
+  ```
+  Diese Zeile sortiert die gefilterten Daten nach der Spalte `'Straftaten_insgesamt'` in absteigender Reihenfolge. Das `reset_index(drop=True)` stellt sicher, dass die Indizes neu gesetzt werden und die alten Indizes verworfen werden.
+
+- **Speichern der sortierten Daten (optional)**:
+  ```python
+  df_sorted.to_excel(ausgabe_pfad, index=False)
+  ```
+  Dies speichert den sortierten DataFrame in eine neue Excel-Datei namens `'Fallzahlen_sortiert.xlsx'`. Der Parameter `index=False` sorgt dafür, dass die DataFrame-Indizes nicht mitgespeichert werden.
+
+### Ausführen des Skripts:
+
+Speichere das oben stehende Skript in einer Datei, z.B. `fallzahlen_sortieren.py`, und führe es mit Python aus:
+
+```bash
+python fallzahlen_sortieren.py
+```
+
+### Beispielausgabe:
+
+```
+Excel-Datei erfolgreich eingelesen.
+
+Erste 5 Zeilen der Originaldaten:
+    LOR-Schlüssel                    Bezirke  Straftaten_insgesamt  Raub  Straßenraub  Körperverletzungen_insgesamt  ...  Branddelikte_insgesamt  Brandstiftung  Sachbeschädigung_insgesamt  Sachbeschädigung_Graffiti  Rauschgiftdelikte  Kieztaten
+0        10000                      Mitte                83611   884          521                          8144  ...                     420            137                        6172                        976               3306              19212
+1        20000       Friedrichshain-Kreuzberg                55838   923          606                          5502  ...                     298             85                        4906                        801               4455              12724
+...        ...                         ...                  ...   ...          ...                           ...  ...                     ...            ...                          ...                        ...                 ...                 ...
+
+[14 rows x 19 columns]
+
+Anzahl der Zeilen nach dem Ausschluss: 12
+
+Erste 5 Zeilen der sortierten Daten:
+    LOR-Schlüssel                    Bezirke  Straftaten_insgesamt  Raub  Straßenraub  Körperverletzungen_insgesamt  ...  Branddelikte_insgesamt  Brandstiftung  Sachbeschädigung_insgesamt  Sachbeschädigung_Graffiti  Rauschgiftdelikte  Kieztaten
+0        10000                      Mitte                83611   884          521                          8144  ...                     420            137                        6172                        976               3306              19212
+1        20000       Friedrichshain-Kreuzberg                55838   923          606                          5502  ...                     298             85                        4906                        801               4455              12724
+...        ...                         ...                  ...   ...          ...                           ...  ...                     ...            ...                          ...                        ...                 ...                 ...
+
+[12 rows x 19 columns]
+
+Sortierte Daten wurden erfolgreich in 'Fallzahlen_sortiert.xlsx' gespeichert.
+```
+
+Dieses Skript liest die Excel-Datei ein, filtert die unerwünschten Zeilen heraus, sortiert die verbleibenden Daten nach der Gesamtzahl der Straftaten und speichert das Ergebnis in einer neuen Excel-Datei. Du kannst das Skript nach Bedarf anpassen, z.B. die Sortierreihenfolge ändern oder weitere Analysen hinzufügen.

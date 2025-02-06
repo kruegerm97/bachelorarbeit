@@ -1,0 +1,93 @@
+Hier ist ein vollständiges Python-Skript, das die von dir beschriebenen Anforderungen erfüllt. Das Skript verwendet die Bibliothek `pandas`, um die Excel-Datei zu verarbeiten. Stelle sicher, dass du `pandas` installiert hast (`pip install pandas openpyxl`), bevor du das Skript ausführst.
+
+```python
+import pandas as pd
+
+def main():
+    # 1. Die Excel-Datei einlesen
+    try:
+        df = pd.read_excel('Fallzahlen.xlsx', sheet_name='Fallzahlen_2023')
+    except FileNotFoundError:
+        print("Die Datei 'Fallzahlen.xlsx' wurde nicht gefunden.")
+        return
+    except Exception as e:
+        print(f"Ein Fehler ist beim Einlesen der Excel-Datei aufgetreten: {e}")
+        return
+
+    # 2. Die Tabelle als Pandas DataFrame gespeichert (bereits in 'df')
+
+    # 3. Überprüfen, ob die notwendigen Spalten vorhanden sind
+    notwendige_spalten = ['Bezirke', 'Straftaten_insgesamt']
+    fehlende_spalten = [spalte for spalte in notwendige_spalten wenn spalte nicht in df.columns]
+    wenn fehlende_spalten:
+        print(f"Die folgenden notwendigen Spalten fehlen: {', '.join(fehlende_spalten)}")
+        return
+
+    # 4. Finde die Gesamtzahl der Straftaten für ganz Berlin
+    gesamt_row = df[df['Bezirke'] == 'Berlin (PKS gesamt)']
+    wenn gesamt_row.empty:
+        print("Die Zeile mit Bezirk 'Berlin (PKS gesamt)' wurde nicht gefunden.")
+        return
+    gesamt_straftaten = gesamt_row['Straftaten_insgesamt'].values[0]
+
+    # 5. Berechne den prozentualen Anteil der einzelnen Bezirke von ganz Berlin
+    # Exkludiere die Gesamtzeile aus der Berechnung
+    bezirke_df = df[df['Bezirke'] != 'Berlin (PKS gesamt)'].copy()
+    bezirke_df['Prozentualer_Anteil'] = (bezirke_df['Straftaten_insgesamt'] / gesamt_straftaten) * 100
+
+    # Optional: Runden auf zwei Dezimalstellen
+    bezirke_df['Prozentualer_Anteil'] = bezirke_df['Prozentualer_Anteil'].round(2)
+
+    # 6. Das Ergebnis als DataFrame zurückgeben
+    ergebnis_df = bezirke_df[['Bezirke', 'Straftaten_insgesamt', 'Prozentualer_Anteil']]
+
+    # Ergebnis anzeigen
+    print(ergebnis_df)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Erklärung der Schritte:
+
+1. **Excel-Datei einlesen**:
+   - Das Skript versucht, die Excel-Datei `Fallzahlen.xlsx` aus dem Sheet `Fallzahlen_2023` zu lesen.
+   - Fehler beim Einlesen werden abgefangen und entsprechende Meldungen ausgegeben.
+
+2. **Überprüfung der notwendigen Spalten**:
+   - Es wird geprüft, ob die Spalten `Bezirke` und `Straftaten_insgesamt` im DataFrame vorhanden sind.
+   - Falls eine der Spalten fehlt, wird eine Fehlermeldung ausgegeben und das Skript beendet.
+
+3. **Gesamtzahl der Straftaten bestimmen**:
+   - Die Zeile mit dem Bezirk `Berlin (PKS gesamt)` wird gesucht, um die Gesamtzahl der Straftaten in ganz Berlin zu erhalten.
+   - Falls diese Zeile nicht gefunden wird, wird eine Fehlermeldung ausgegeben.
+
+4. **Prozentualen Anteil berechnen**:
+   - Die Gesamtzeile wird aus dem DataFrame entfernt, um nur die einzelnen Bezirke zu betrachten.
+   - Für jeden Bezirk wird der prozentuale Anteil der Straftaten am Gesamtwert berechnet.
+   - Optional wird der prozentuale Anteil auf zwei Dezimalstellen gerundet.
+
+5. **Ergebnis darstellen**:
+   - Es wird ein neues DataFrame erstellt, das die Bezirke, die Gesamtzahl der Straftaten und den prozentualen Anteil enthält.
+   - Das Ergebnis wird in der Konsole ausgegeben.
+
+### Beispielausgabe:
+
+```
+                    Bezirke  Straftaten_insgesamt  Prozentualer_Anteil
+0                     Mitte                 83611               15.60
+1       Friedrichshain-Kreuzberg                 55838               10.40
+2                    Pankow                 39164                7.30
+3    Charlottenburg-Wilmersdorf                 53630               10.00
+4                   Spandau                 25564                4.80
+5        Steglitz-Zehlendorf                 23719                4.40
+6     Tempelhof-Schöneberg                 41776                7.80
+7                   Neukölln                 45313                8.50
+8         Treptow-Köpenick                 26099                4.90
+9     Marzahn-Hellersdorf                 26649                5.00
+10              Lichtenberg                 31563                5.90
+11            Reinickendorf                 27344                5.10
+12  Stadtgebiet Berlin, nicht zuzuordnen                 56425               10.50
+```
+
+Dieses Skript sollte genau das tun, was du benötigst. Passe gegebenenfalls den Pfad zur Excel-Datei oder den Sheet-Namen an, falls diese abweichen.

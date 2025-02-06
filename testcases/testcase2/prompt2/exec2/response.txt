@@ -1,0 +1,131 @@
+Natürlich! Hier ist ein Python-Skript, das die von Ihnen beschriebenen Anforderungen erfüllt. Das Skript verwendet die `pandas`-Bibliothek, um die Excel-Datei zu lesen, die Daten aus allen Sheets zusammenzuführen, unerwünschte Zeilen zu entfernen, die Daten nach der Spalte `"Straftaten_insgesamt"` zu sortieren und das Ergebnis in einem DataFrame zu speichern.
+
+### Voraussetzungen
+
+Stellen Sie sicher, dass Sie die notwendigen Bibliotheken installiert haben. Sie können dies mit `pip` tun:
+
+```bash
+pip install pandas openpyxl
+```
+
+### Python-Skript
+
+```python
+import pandas as pd
+
+def load_and_process_excel(file_path):
+    """
+    Lädt alle Sheets aus der angegebenen Excel-Datei, fügt sie zusammen,
+    filtert unerwünschte Zeilen, sortiert die Daten und gibt einen DataFrame zurück.
+    
+    Parameters:
+        file_path (str): Der Pfad zur Excel-Datei.
+    
+    Returns:
+        pd.DataFrame: Der verarbeitete DataFrame.
+    """
+    try:
+        # Lade alle Sheets in ein Dictionary von DataFrames
+        all_sheets = pd.read_excel(file_path, sheet_name=None, dtype={'LOR-Schlüssel': str})
+        
+        # Liste zum Speichern der DataFrames
+        df_list = []
+        
+        for sheet_name, df in all_sheets.items():
+            print(f"Lade Sheet: {sheet_name} mit {len(df)} Zeilen.")
+            df_list.append(df)
+        
+        # Kombiniere alle DataFrames in einen einzigen DataFrame
+        combined_df = pd.concat(df_list, ignore_index=True)
+        print(f"Gesamtanzahl der Zeilen nach dem Zusammenführen: {len(combined_df)}")
+        
+        # Entferne Zeilen mit LOR-Schlüssel 999900 und 999999
+        filtered_df = combined_df[~combined_df['LOR-Schlüssel'].isin([999900, 999999])]
+        print(f"Anzahl der Zeilen nach dem Filtern: {len(filtered_df)}")
+        
+        # Sortiere nach 'Straftaten_insgesamt' absteigend
+        sorted_df = filtered_df.sort_values(by='Straftaten_insgesamt', ascending=False)
+        print("Daten wurden nach 'Straftaten_insgesamt' sortiert.")
+        
+        # Optional: Setze den Index zurück
+        sorted_df.reset_index(drop=True, inplace=True)
+        
+        return sorted_df
+    
+    except FileNotFoundError:
+        print(f"Die Datei {file_path} wurde nicht gefunden.")
+    except Exception as e:
+        print(f"Ein Fehler ist aufgetreten: {e}")
+
+if __name__ == "__main__":
+    # Pfad zur Excel-Datei
+    excel_file = 'Fallzahlen.xlsx'
+    
+    # Verarbeite die Excel-Datei
+    final_df = load_and_process_excel(excel_file)
+    
+    if final_df is not None:
+        # Zeige die ersten paar Zeilen des finalen DataFrames
+        print("\nErgebnis:")
+        print(final_df.head())
+        
+        # Optional: Speichere den DataFrame in eine neue Excel- oder CSV-Datei
+        # final_df.to_excel('Zusammengefuegte_Fallzahlen.xlsx', index=False)
+        # final_df.to_csv('Zusammengefuegte_Fallzahlen.csv', index=False)
+```
+
+### Erklärung der Schritte
+
+1. **Importieren der Bibliotheken**:
+   - `pandas` wird verwendet, um Excel-Dateien zu lesen und Daten zu verarbeiten.
+
+2. **Funktion `load_and_process_excel`**:
+   - **Laden aller Sheets**: Mit `pd.read_excel` und `sheet_name=None` werden alle Sheets der Excel-Datei in ein Dictionary geladen, wobei die Sheet-Namen die Schlüssel sind.
+   - **Zusammenführen der DataFrames**: Alle einzelnen DataFrames werden mit `pd.concat` zu einem großen DataFrame zusammengeführt.
+   - **Filtern der unerwünschten Zeilen**: Mit `isin` werden die Zeilen mit den `LOR-Schlüssel`-Werten `999900` und `999999` entfernt.
+   - **Sortieren der Daten**: Der DataFrame wird nach der Spalte `"Straftaten_insgesamt"` in absteigender Reihenfolge sortiert.
+   - **Zurücksetzen des Index**: Der Index wird zurückgesetzt, um konsistente Indizes im finalen DataFrame zu gewährleisten.
+
+3. **Ausführen des Skripts**:
+   - Das Skript wird direkt ausgeführt, wenn es als Hauptprogramm gestartet wird.
+   - Nach der Verarbeitung werden die ersten paar Zeilen des finalen DataFrames angezeigt.
+   - Optional können Sie den finalen DataFrame in eine neue Excel- oder CSV-Datei speichern, indem Sie die entsprechenden Zeilen entkommentieren.
+
+### Zusätzliche Hinweise
+
+- **Datentypen**: Ich habe `dtype={'LOR-Schlüssel': str}` beim Laden der Excel-Datei hinzugefügt, um sicherzustellen, dass der `LOR-Schlüssel` als String behandelt wird. Falls dieser als numerisch behandelt werden soll, können Sie dies entsprechend anpassen.
+  
+- **Fehlerbehandlung**: Das Skript enthält grundlegende Fehlerbehandlungen für den Fall, dass die Datei nicht gefunden wird oder andere Fehler auftreten.
+
+- **Performance**: Bei sehr großen Excel-Dateien kann das Zusammenführen und Verarbeiten eine Weile dauern. Stellen Sie sicher, dass Ihr System genügend Ressourcen hat.
+
+### Beispielausgabe
+
+Nach dem Ausführen des Skripts sollte eine ähnliche Ausgabe wie folgt angezeigt werden:
+
+```
+Lade Sheet: Sheet1 mit 14 Zeilen.
+Lade Sheet: Sheet2 mit 14 Zeilen.
+...
+Gesamtanzahl der Zeilen nach dem Zusammenführen: 140
+Anzahl der Zeilen nach dem Filtern: 138
+Daten wurden nach 'Straftaten_insgesamt' sortiert.
+
+Ergebnis:
+   LOR-Schlüssel                         Bezirke  Straftaten_insgesamt  ...  Rauschgiftdelikte  Kieztaten
+0        10000                             Mitte                83611  ...               3306       19212
+1        20000              Friedrichshain-Kreuzberg                55838  ...               4455       12724
+2        80000                              Neukölln                45313  ...               1869       10253
+3        70000                  Tempelhof-Schöneberg                41776  ...               1435       10132
+4        100000                   Marzahn-Hellersdorf                26649  ...                424        8203
+```
+
+*Bitte beachten Sie, dass die tatsächlichen Werte je nach Ihren Daten variieren.*
+
+### Anpassungen nach Bedarf
+
+- **Speichern des DataFrames**: Falls Sie den finalen DataFrame speichern möchten, können Sie die entsprechenden Zeilen im Skript entkommentieren.
+  
+- **Weitere Filterungen oder Transformationen**: Je nach Ihren Anforderungen können Sie weitere Filterbedingungen oder Datenmanipulationen hinzufügen.
+
+Ich hoffe, dieses Skript hilft Ihnen weiter! Wenn Sie weitere Fragen haben oder Anpassungen benötigen, lassen Sie es mich gerne wissen.

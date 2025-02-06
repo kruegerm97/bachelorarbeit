@@ -1,0 +1,141 @@
+Natürlich, ich helfe dir gerne dabei, ein Python-Skript zu erstellen, das deine Excel-Datei einliest, die Daten nach der Spalte **"Straftaten_insgesamt"** sortiert und in einem DataFrame speichert. Wir werden dafür die **pandas** Bibliothek verwenden, die sich hervorragend für die Datenanalyse eignet. Falls du **pandas** und **openpyxl** noch nicht installiert hast, kannst du dies mit `pip` tun.
+
+### Schritt 1: Installation der benötigten Bibliotheken
+
+Öffne dein Terminal oder die Eingabeaufforderung und führe die folgenden Befehle aus:
+
+```bash
+pip install pandas openpyxl
+```
+
+### Schritt 2: Python-Skript erstellen
+
+Erstelle eine neue Python-Datei (z.B. `sortiere_fallzahlen.py`) und füge den folgenden Code ein:
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+excel_datei = 'Fallzahlen.xlsx'
+
+# Name des Sheets
+sheet_name = 'Fallzahlen_2023'
+
+# Einlesen der Excel-Datei
+df = pd.read_excel(excel_datei, sheet_name=sheet_name)
+
+# Anzeigen der ersten paar Zeilen (optional)
+print("Unsortierte Daten:")
+print(df.head())
+
+# Sortieren nach 'Straftaten_insgesamt' in absteigender Reihenfolge
+df_sortiert = df.sort_values(by='Straftaten_insgesamt', ascending=False)
+
+# Anzeigen der sortierten Daten (optional)
+print("\nSortierte Daten nach 'Straftaten_insgesamt':")
+print(df_sortiert.head())
+
+# Optional: Speichern des sortierten DataFrames in einer neuen Excel-Datei
+df_sortiert.to_excel('Fallzahlen_sortiert.xlsx', index=False)
+
+print("\nDie sortierten Daten wurden in 'Fallzahlen_sortiert.xlsx' gespeichert.")
+```
+
+### Erklärung des Codes
+
+1. **Import der pandas-Bibliothek:**
+   ```python
+   import pandas as pd
+   ```
+   Dadurch kannst du die pandas-Funktionen verwenden, um mit den Daten zu arbeiten.
+
+2. **Pfad und Sheet-Name festlegen:**
+   ```python
+   excel_datei = 'Fallzahlen.xlsx'
+   sheet_name = 'Fallzahlen_2023'
+   ```
+   Stelle sicher, dass sich die Excel-Datei im gleichen Verzeichnis wie dein Python-Skript befindet. Andernfalls musst du den vollständigen Pfad angeben.
+
+3. **Einlesen der Excel-Datei:**
+   ```python
+   df = pd.read_excel(excel_datei, sheet_name=sheet_name)
+   ```
+   Dies liest das angegebene Sheet in einen pandas DataFrame ein.
+
+4. **Anzeigen der unsortierten Daten (optional):**
+   ```python
+   print("Unsortierte Daten:")
+   print(df.head())
+   ```
+   Dies hilft dir, zu überprüfen, ob die Daten korrekt eingelesen wurden.
+
+5. **Sortieren der Daten:**
+   ```python
+   df_sortiert = df.sort_values(by='Straftaten_insgesamt', ascending=False)
+   ```
+   Hier werden die Daten nach der Spalte **"Straftaten_insgesamt"** in absteigender Reihenfolge sortiert. Wenn du in aufsteigender Reihenfolge sortieren möchtest, setze `ascending=True`.
+
+6. **Anzeigen der sortierten Daten (optional):**
+   ```python
+   print("\nSortierte Daten nach 'Straftaten_insgesamt':")
+   print(df_sortiert.head())
+   ```
+   Dadurch kannst du die oberen Einträge der sortierten Daten überprüfen.
+
+7. **Speichern der sortierten Daten in einer neuen Excel-Datei (optional):**
+   ```python
+   df_sortiert.to_excel('Fallzahlen_sortiert.xlsx', index=False)
+   ```
+   Dies speichert den sortierten DataFrame in einer neuen Excel-Datei namens **"Fallzahlen_sortiert.xlsx"**. Der Parameter `index=False` verhindert, dass der DataFrame-Index in die Excel-Datei geschrieben wird.
+
+8. **Abschlussnachricht:**
+   ```python
+   print("\nDie sortierten Daten wurden in 'Fallzahlen_sortiert.xlsx' gespeichert.")
+   ```
+
+### Ausführen des Skripts
+
+Nachdem du das Skript erstellt hast, kannst du es ausführen, indem du im Terminal oder der Eingabeaufforderung in das Verzeichnis navigierst, in dem sich dein Skript befindet, und den folgenden Befehl eingibst:
+
+```bash
+python sortiere_fallzahlen.py
+```
+
+Nach der Ausführung solltest du eine neue Excel-Datei namens **"Fallzahlen_sortiert.xlsx"** in deinem Verzeichnis finden, die die sortierten Daten enthält.
+
+### Zusätzliche Hinweise
+
+- **Überprüfen der Spaltennamen:** Stelle sicher, dass die Spaltennamen in deiner Excel-Datei genau mit den im Skript verwendeten Namen übereinstimmen. Groß- und Kleinschreibung sowie Leerzeichen müssen exakt passen. Andernfalls erhältst du möglicherweise einen Fehler.
+
+- **Fehlerbehandlung:** Für eine robustere Anwendung kannst du Fehlerbehandlung hinzufügen, um Probleme wie das Nichtfinden der Datei oder fehlende Spalten abzufangen.
+
+Hier ist ein erweitertes Beispiel mit einfacher Fehlerbehandlung:
+
+```python
+import pandas as pd
+import sys
+
+excel_datei = 'Fallzahlen.xlsx'
+sheet_name = 'Fallzahlen_2023'
+
+try:
+    df = pd.read_excel(excel_datei, sheet_name=sheet_name)
+except FileNotFoundError:
+    print(f"Fehler: Die Datei '{excel_datei}' wurde nicht gefunden.")
+    sys.exit(1)
+except ValueError:
+    print(f"Fehler: Das Sheet '{sheet_name}' wurde nicht gefunden.")
+    sys.exit(1)
+
+if 'Straftaten_insgesamt' not in df.columns:
+    print("Fehler: Die Spalte 'Straftaten_insgesamt' wurde in der Excel-Datei nicht gefunden.")
+    sys.exit(1)
+
+df_sortiert = df.sort_values(by='Straftaten_insgesamt', ascending=False)
+df_sortiert.to_excel('Fallzahlen_sortiert.xlsx', index=False)
+print("Die sortierten Daten wurden erfolgreich gespeichert in 'Fallzahlen_sortiert.xlsx'.")
+```
+
+Dieses erweiterte Skript überprüft, ob die Datei und das angegebene Sheet existieren und ob die benötigte Spalte vorhanden ist, bevor es die Sortierung durchführt.
+
+Ich hoffe, das hilft dir weiter! Wenn du weitere Fragen hast, stehe ich gerne zur Verfügung.

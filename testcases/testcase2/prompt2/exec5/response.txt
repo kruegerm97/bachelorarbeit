@@ -1,0 +1,141 @@
+Natürlich! Hier ist ein Python-Skript, das die beschriebenen Anforderungen erfüllt. Es verwendet die `pandas`-Bibliothek, um die Excel-Datei zu verarbeiten, die Daten aus allen Sheets zusammenzuführen, die nicht relevanten `LOR-Schlüssel` zu entfernen, die Daten nach der akkumulierten Spalte `Straftaten_insgesamt` pro Bezirk zu sortieren und das Ergebnis in einen `DataFrame` zu speichern.
+
+### Schritt-für-Schritt-Anleitung:
+
+1. **Importiere die notwendigen Bibliotheken**:
+   - `pandas` für die Datenverarbeitung.
+   - `openpyxl` oder `xlrd` als Engine für das Lesen von Excel-Dateien (abhängig von der Excel-Version).
+
+2. **Lese alle Sheets der Excel-Datei ein**:
+   - Nutze `pd.ExcelFile`, um die Sheet-Namen zu erhalten.
+   - Iteriere über alle Sheets, lese sie ein und filtere die unerwünschten Zeilen.
+
+3. **Daten bereinigen und zusammenführen**:
+   - Entferne Zeilen mit den `LOR-Schlüsseln` 999900 und 999999.
+   - Wähle relevante Spalten aus.
+   - Füge die Daten aus allen Sheets zusammen.
+
+4. **Sortiere die Daten**:
+   - Gruppiere nach `LOR-Schlüssel` und `Bezirke`.
+   - Summiere die `Straftaten_insgesamt` für jeden Bezirk.
+   - Sortiere die Bezirke basierend auf der summierten `Straftaten_insgesamt`-Spalte.
+
+5. **Speichere das Ergebnis in einem DataFrame**.
+
+### Python-Skript:
+
+```python
+import pandas as pd
+
+def process_fallzahlen_excel(file_path):
+    """
+    Liest die Excel-Datei 'Fallzahlen.xlsx', verarbeitet die Daten aus allen Sheets,
+    entfernt bestimmte LOR-Schlüssel, fasst die Daten zusammen, sortiert sie nach
+    'Straftaten_insgesamt' und gibt den finalen DataFrame zurück.
+    
+    :param file_path: Pfad zur Excel-Datei
+    :return: Gefilterter und sortierter Pandas DataFrame
+    """
+    # Lese die Excel-Datei
+    try:
+        xls = pd.ExcelFile(file_path)
+    except FileNotFoundError:
+        print(f"Die Datei {file_path} wurde nicht gefunden.")
+        return None
+    except Exception as e:
+        print(f"Ein Fehler ist aufgetreten: {e}")
+        return None
+
+    # Liste zur Speicherung der einzelnen DataFrames
+    df_list = []
+
+    # Iteriere über alle Sheets
+    for sheet_name in xls.sheet_names:
+        try:
+            df = pd.read_excel(xls, sheet_name=sheet_name)
+            
+            # Überprüfe, ob die notwendigen Spalten vorhanden sind
+            required_columns = ['LOR-Schlüssel', 'Bezirke', 'Straftaten_insgesamt']
+            if not all(col in df.columns for col in required_columns):
+                print(f"Ein oder mehrere erforderliche Spalten fehlen im Sheet '{sheet_name}'.")
+                continue
+
+            # Entferne die Zeilen mit unerwünschten LOR-Schlüsseln
+            df_filtered = df[~df['LOR-Schlüssel'].isin([999900, 999999])]
+
+            # Wähle nur die benötigten Spalten
+            df_selected = df_filtered[required_columns]
+
+            # Füge eine neue Spalte für das Sheet hinzu (optional, falls benötigt)
+            df_selected['Sheet'] = sheet_name
+
+            # Füge den DataFrame der Liste hinzu
+            df_list.append(df_selected)
+        
+        except Exception as e:
+            print(f"Fehler beim Verarbeiten des Sheets '{sheet_name}': {e}")
+            continue
+
+    if not df_list:
+        print("Keine Daten zum Verarbeiten gefunden.")
+        return None
+
+    # Füge alle DataFrames zusammen
+    combined_df = pd.concat(df_list, ignore_index=True)
+
+    # Gruppiere nach 'LOR-Schlüssel' und 'Bezirke' und summiere 'Straftaten_insgesamt'
+    grouped_df = combined_df.groupby(['LOR-Schlüssel', 'Bezirke'], as_index=False)['Straftaten_insgesamt'].sum()
+
+    # Sortiere nach 'Straftaten_insgesamt' absteigend
+    sorted_df = grouped_df.sort_values(by='Straftaten_insgesamt', ascending=False).reset_index(drop=True)
+
+    return sorted_df
+
+if __name__ == "__main__":
+    # Pfad zur Excel-Datei
+    excel_file_path = 'Fallzahlen.xlsx'
+    
+    # Verarbeite die Excel-Datei und erhalte den finalen DataFrame
+    final_df = process_fallzahlen_excel(excel_file_path)
+    
+    if final_df is not None:
+        # Zeige die ersten paar Zeilen des finalen DataFrames an
+        print(final_df)
+        
+        # Optional: Speichere den finalen DataFrame in einer neuen Excel- oder CSV-Datei
+        # final_df.to_excel('Zusammengefasste_Fallzahlen.xlsx', index=False)
+        # final_df.to_csv('Zusammengefasste_Fallzahlen.csv', index=False)
+```
+
+### Erklärung des Skripts:
+
+1. **Funktion `process_fallzahlen_excel`**:
+   - **Parameter**: `file_path` – der Pfad zur Excel-Datei.
+   - **Rückgabe**: Ein `DataFrame`, das die zusammengeführten und sortierten Daten enthält.
+   - **Fehlerbehandlung**: Das Skript überprüft, ob die Datei existiert und ob die erforderlichen Spalten in jedem Sheet vorhanden sind.
+
+2. **Hauptteil des Skripts (`if __name__ == "__main__":`)**:
+   - Definiert den Pfad zur Excel-Datei.
+   - Ruft die Verarbeitungsfunktion auf.
+   - Gibt den finalen `DataFrame` aus.
+   - Optional: Speichert das Ergebnis in einer neuen Excel- oder CSV-Datei.
+
+### Zusätzliche Hinweise:
+
+- **Installation der benötigten Bibliotheken**:
+  Stelle sicher, dass du die `pandas`-Bibliothek installiert hast. Falls nicht, kannst du sie mit folgendem Befehl installieren:
+
+  ```bash
+  pip install pandas openpyxl
+  ```
+
+  Das Paket `openpyxl` wird benötigt, um `.xlsx`-Dateien zu lesen.
+
+- **Anpassungen**:
+  - Wenn du zusätzliche Spalten aus den Sheets benötigst, kannst du diese in der Liste `required_columns` hinzufügen.
+  - Die optionale Spalte `'Sheet'` kann entfernt werden, wenn sie nicht benötigt wird.
+
+- **Ausgabe speichern**:
+  - Die letzten beiden Zeilen im Hauptteil des Skripts zeigen, wie du den finalen `DataFrame` in eine neue Datei speichern kannst. Du kannst diese auskommentieren, falls du dies wünschst.
+
+Dieses Skript bietet eine robuste Möglichkeit, die gewünschten Daten aus der Excel-Datei zu extrahieren, zu verarbeiten und nach den Kriterien zu sortieren, die du angegeben hast.

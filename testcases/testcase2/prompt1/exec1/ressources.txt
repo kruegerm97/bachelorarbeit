@@ -1,0 +1,37 @@
+     LOR-Schlüssel              Bezirke  Straftaten_insgesamt  Raub  Straßenraub  ...  Brandstiftung  Sachbeschädigung_insgesamt  Sachbeschädigung_Graffiti  Rauschgiftdelikte  Kieztaten
+0           999999  Berlin (PKS gesamt)                569549  5407         2951  ...            841                       41954                       9894              15753     102589
+1           999999  Berlin (PKS gesamt)                568860  5156         3015  ...           1039                       44066                      10501              14880     102793
+2           999999  Berlin (PKS gesamt)                543156  5697         3287  ...            917                       42894                       9239              13465     100363
+3           999999  Berlin (PKS gesamt)                536695  5389         3333  ...           1125                       45434                       7448              17502     119737
+4           999999  Berlin (PKS gesamt)                520437  4242         2354  ...            874                       41804                      10913              16077      96416
+..             ...                  ...                   ...   ...          ...  ...            ...                         ...                        ...                ...        ...
+135          90000     Treptow-Köpenick                 23250   209          132  ...             72                        2517                        576                392       4729
+136         100000  Marzahn-Hellersdorf                 23245   222          121  ...             44                        2655                        505                367       5720
+137          60000  Steglitz-Zehlendorf                 22879   178          116  ...             61                        2969                        877                495       5417
+138         100000  Marzahn-Hellersdorf                 22830   289          174  ...             81                        2791                        540                588       6089
+139         100000  Marzahn-Hellersdorf                 22413   233          169  ...             52                        2865                        470                488       6035
+
+[140 rows x 19 columns]
+	Command being timed: "python testcase2/prompt1/exec1/script.py"
+	User time (seconds): 4.66
+	System time (seconds): 0.25
+	Percent of CPU this job got: 165%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:02.96
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 154176
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 167789
+	Voluntary context switches: 35
+	Involuntary context switches: 377
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

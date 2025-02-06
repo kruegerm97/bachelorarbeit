@@ -1,0 +1,38 @@
+                                 Bezirke  Straftaten_insgesamt
+0                    Berlin (PKS gesamt)               5269896
+1                                  Mitte                878048
+2               Friedrichshain-Kreuzberg                579591
+3             Charlottenburg-Wilmersdorf                519706
+4   Stadtgebiet Berlin, nicht zuzuordnen                512158
+5                               Neukölln                436568
+6                   Tempelhof-Schöneberg                398767
+7                                 Pankow                393574
+8                          Reinickendorf                284193
+9                            Lichtenberg                279018
+10                               Spandau                257757
+11                      Treptow-Köpenick                247383
+12                   Marzahn-Hellersdorf                241928
+13                   Steglitz-Zehlendorf                241205
+	Command being timed: "python testcase2/prompt1/exec3/script.py"
+	User time (seconds): 4.79
+	System time (seconds): 0.22
+	Percent of CPU this job got: 160%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:03.13
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 154584
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 168796
+	Voluntary context switches: 35
+	Involuntary context switches: 281
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

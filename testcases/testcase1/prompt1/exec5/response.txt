@@ -1,0 +1,79 @@
+Hier ist ein Python-Skript, das die Excel-Datei `Fallzahlen.xlsx` einliest, die Daten nach der Spalte `Straftaten_insgesamt` sortiert und in einem DataFrame speichert. Anschließend wird das sortierte DataFrame angezeigt.
+
+**Voraussetzungen:**
+- Installiere die benötigten Bibliotheken, falls noch nicht geschehen. Du kannst dies mit `pip` tun:
+
+```bash
+pip install pandas openpyxl
+```
+
+**Python-Skript:**
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+dateipfad = 'Fallzahlen.xlsx'
+
+# Name des Sheets
+sheet_name = 'Fallzahlen_2023'
+
+# Einlesen der Excel-Datei
+try:
+    df = pd.read_excel(dateipfad, sheet_name=sheet_name)
+    print("Daten erfolgreich eingelesen.")
+except FileNotFoundError:
+    print(f"Die Datei {dateipfad} wurde nicht gefunden.")
+    exit()
+except ValueError:
+    print(f"Das Sheet '{sheet_name}' existiert nicht in der Datei.")
+    exit()
+
+# Überprüfen der Spaltennamen (optional)
+print("Verfügbare Spalten:")
+print(df.columns.tolist())
+
+# Sortieren nach 'Straftaten_insgesamt' in absteigender Reihenfolge
+# Falls aufsteigend gewünscht ist, setze ascending=True
+try:
+    df_sortiert = df.sort_values(by='Straftaten_insgesamt', ascending=False)
+    print("Daten erfolgreich sortiert.")
+except KeyError:
+    print("Die Spalte 'Straftaten_insgesamt' wurde nicht gefunden.")
+    exit()
+
+# Zurücksetzen des Indexes (optional)
+df_sortiert.reset_index(drop=True, inplace=True)
+
+# Anzeigen des sortierten DataFrames
+print("Sortiertes DataFrame:")
+print(df_sortiert)
+```
+
+**Erklärung der Schritte:**
+
+1. **Importieren der Bibliothek:**
+   - `pandas` wird für die Datenmanipulation verwendet.
+
+2. **Definieren des Pfads und Sheet-Namens:**
+   - Stelle sicher, dass der Dateipfad korrekt ist. Wenn sich die Excel-Datei im selben Verzeichnis wie das Skript befindet, reicht der Dateiname.
+
+3. **Einlesen der Excel-Datei:**
+   - `pd.read_excel` liest die Excel-Datei ein. Es wird das spezifische Sheet `Fallzahlen_2023` ausgewählt.
+   - Fehlerbehandlung ist integriert, um sicherzustellen, dass die Datei und das Sheet existieren.
+
+4. **Überprüfen der Spaltennamen:**
+   - Dies ist optional, hilft aber sicherzustellen, dass die gewünschte Spalte vorhanden ist.
+
+5. **Sortieren der Daten:**
+   - Die Daten werden nach der Spalte `Straftaten_insgesamt` sortiert. Standardmäßig geschieht dies in absteigender Reihenfolge (`ascending=False`), sodass die Bezirke mit den meisten Straftaten oben stehen.
+   - Falls eine aufsteigende Sortierung gewünscht ist, setze `ascending=True`.
+
+6. **Zurücksetzen des Indexes:**
+   - Dies ist optional, sorgt aber dafür, dass der Index des sortierten DataFrames konsistent ist.
+
+7. **Anzeigen des sortierten DataFrames:**
+   - Das sortierte DataFrame wird ausgegeben, sodass du die sortierten Daten sehen kannst.
+
+**Hinweis:**
+Stelle sicher, dass die Spaltennamen exakt mit den in deiner Excel-Datei übereinstimmen, einschließlich Groß- und Kleinschreibung und etwaiger Leerzeichen. Falls die Spalte `Straftaten_insgesamt` anders benannt ist, passe den `by`-Parameter entsprechend an.

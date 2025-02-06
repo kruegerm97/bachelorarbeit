@@ -1,0 +1,123 @@
+Natürlich! Hier ist ein Python-Skript, das die beschriebenen Anforderungen erfüllt. Das Skript liest die Excel-Datei ein, filtert die unerwünschten Zeilen heraus, sortiert die verbleibenden Daten nach der Spalte `'Straftaten_insgesamt'` und speichert das Ergebnis in einem Pandas DataFrame.
+
+### Voraussetzungen
+
+Stellen Sie sicher, dass Sie die benötigten Python-Bibliotheken installiert haben. Sie benötigen `pandas` und `openpyxl`. Falls diese noch nicht installiert sind, können Sie sie mit `pip` installieren:
+
+```bash
+pip install pandas openpyxl
+```
+
+### Python-Skript
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+excel_datei = 'Fallzahlen.xlsx'
+
+# Name des Sheets
+sheet_name = 'Fallzahlen_2023'
+
+# LOR-Schlüssel, die ausgeschlossen werden sollen
+ausgeschlossene_lor_schluessel = [999900, 999999]
+
+# Einlesen der Excel-Datei
+try:
+    df = pd.read_excel(excel_datei, sheet_name=sheet_name, engine='openpyxl')
+    print("Excel-Datei erfolgreich eingelesen.")
+except FileNotFoundError:
+    print(f"Die Datei {excel_datei} wurde nicht gefunden.")
+    exit(1)
+except Exception as e:
+    print(f"Ein Fehler ist aufgetreten beim Einlesen der Excel-Datei: {e}")
+    exit(1)
+
+# Filtern der Zeilen, die nicht zu Bezirken gehören
+df_filtered = df[~df['LOR-Schlüssel'].isin(ausgeschlossene_lor_schluessel)]
+
+# Sortieren nach 'Straftaten_insgesamt' in absteigender Reihenfolge
+df_sorted = df_filtered.sort_values(by='Straftaten_insgesamt', ascending=False).reset_index(drop=True)
+
+# Anzeige des sortierten DataFrames
+print("Sortierte Daten nach 'Straftaten_insgesamt':")
+print(df_sorted)
+
+# Optional: Speichern des sortierten DataFrames in eine neue Excel-Datei
+# df_sorted.to_excel('Fallzahlen_sortiert.xlsx', index=False)
+```
+
+### Erklärung der Schritte
+
+1. **Importieren der Bibliotheken:**
+   ```python
+   import pandas as pd
+   ```
+
+2. **Definieren der Variablen:**
+   - `excel_datei`: Der Name der Excel-Datei.
+   - `sheet_name`: Der Name des Sheets, das eingelesen werden soll.
+   - `ausgeschlossene_lor_schluessel`: Eine Liste der `LOR-Schlüssel`, die ausgeschlossen werden sollen.
+
+3. **Einlesen der Excel-Datei:**
+   ```python
+   df = pd.read_excel(excel_datei, sheet_name=sheet_name, engine='openpyxl')
+   ```
+   - Verwendet die `read_excel`-Funktion von Pandas mit dem angegebenen Sheet.
+   - Der `engine='openpyxl'` Parameter stellt sicher, dass die `.xlsx` Datei korrekt gelesen wird.
+
+4. **Filtern der unerwünschten Zeilen:**
+   ```python
+   df_filtered = df[~df['LOR-Schlüssel'].isin(ausgeschlossene_lor_schluessel)]
+   ```
+   - `isin` prüft, ob der `LOR-Schlüssel` in der Ausschlussliste ist.
+   - Das `~` Symbol negiert die Bedingung, sodass nur die Zeilen behalten werden, die **nicht** in der Ausschlussliste sind.
+
+5. **Sortieren der Daten:**
+   ```python
+   df_sorted = df_filtered.sort_values(by='Straftaten_insgesamt', ascending=False).reset_index(drop=True)
+   ```
+   - Sortiert die gefilterten Daten nach `'Straftaten_insgesamt'` in absteigender Reihenfolge (`ascending=False`).
+   - `reset_index(drop=True)` setzt den Index des DataFrames zurück, sodass er fortlaufend von 0 beginnt.
+
+6. **Anzeige des Ergebnisses:**
+   ```python
+   print(df_sorted)
+   ```
+   - Gibt den sortierten DataFrame in der Konsole aus.
+
+7. **Optional: Speichern in eine neue Excel-Datei:**
+   ```python
+   df_sorted.to_excel('Fallzahlen_sortiert.xlsx', index=False)
+   ```
+   - Speichert den sortierten DataFrame in eine neue Excel-Datei namens `Fallzahlen_sortiert.xlsx`.
+   - `index=False` vermeidet, dass der DataFrame-Index in der Excel-Datei gespeichert wird.
+
+### Ausführen des Skripts
+
+Speichern Sie das Skript in einer Datei, z.B. `sortiere_fallzahlen.py`, und führen Sie es in Ihrer Python-Umgebung aus:
+
+```bash
+python sortiere_fallzahlen.py
+```
+
+Nach der Ausführung sollten die sortierten Daten im Terminal angezeigt werden. Wenn Sie die Option zum Speichern aktiviert haben, finden Sie die sortierten Daten auch in der neuen Excel-Datei `Fallzahlen_sortiert.xlsx`.
+
+### Beispielausgabe
+
+Nach dem Ausführen des Skripts sollte eine sortierte Tabelle angezeigt werden, zum Beispiel:
+
+```
+Sortierte Daten nach 'Straftaten_insgesamt':
+   LOR-Schlüssel                 Bezirke  Straftaten_insgesamt  Raub  Straßenraub  ...  Sachbeschädigung_Graffiti  Rauschgiftdelikte  Kieztaten
+0          10000                   Mitte                 83611   884          521  ...                       976               3306      19212
+1          20000      Friedrichshain-Kreuzberg                 55838   923          606  ...                        801               4455      12724
+2          80000                Neukölln                 45313   508          294  ...                        379               1869      10253
+...
+```
+
+*(Die tatsächliche Ausgabe hängt von den Daten in Ihrer Excel-Datei ab.)*
+
+---
+
+Falls Sie weitere Anpassungen oder Funktionen benötigen, lassen Sie es mich wissen!

@@ -1,0 +1,138 @@
+Hier ist ein Python-Skript, das den prozentualen Anteil der **`Straftaten_insgesamt`** für jeden Bezirk von ganz Berlin berechnet. Das Skript liest die Excel-Datei **`Fallzahlen.xlsx`**, verarbeitet die Daten im Sheet **`Fallzahlen_2023`** und speichert die Ergebnisse in einer neuen Excel-Datei.
+
+## Voraussetzungen
+
+Stelle sicher, dass du Python installiert hast. Außerdem benötigst du die Bibliotheken **`pandas`** und **`openpyxl`**. Du kannst sie mit folgendem Befehl installieren:
+
+```bash
+pip install pandas openpyxl
+```
+
+## Python-Skript
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei und Name des Sheets
+excel_datei = 'Fallzahlen.xlsx'
+blatt_name = 'Fallzahlen_2023'
+
+# Lade die Daten aus der Excel-Datei
+df = pd.read_excel(excel_datei, sheet_name=blatt_name)
+
+# Finde die Gesamtzahl der Straftaten für ganz Berlin
+berlin_gesamtreihe = df[df['Bezirke'] == 'Berlin (PKS gesamt)']
+if berlin_gesamtreihe.empty:
+    raise ValueError("Die Zeile 'Berlin (PKS gesamt)' wurde in den Daten nicht gefunden.")
+
+berlin_gesamt = berlin_gesamtreihe['Straftaten_insgesamt'].iloc[0]
+
+# Entferne die Gesamtzeile aus dem DataFrame
+bezirke_df = df[df['Bezirke'] != 'Berlin (PKS gesamt)'].copy()
+
+# Berechne den prozentualen Anteil der Straftaten für jeden Bezirk
+bezirke_df['Prozentualer_Anteil'] = ((bezirke_df['Straftaten_insgesamt'] / berlin_gesamt) * 100).round(2)
+
+# Ausgabe der Ergebnisse
+print(bezirke_df[['Bezirke', 'Straftaten_insgesamt', 'Prozentualer_Anteil']])
+
+# Speichere das Ergebnis in eine neue Excel-Datei
+bezirke_df.to_excel('Fallzahlen_mit_Prozentanteilen.xlsx', index=False)
+```
+
+## Erklärung des Skripts
+
+1. **Import der Bibliothek:**
+   ```python
+   import pandas as pd
+   ```
+
+2. **Definition von Datei- und Blattnamen:**
+   ```python
+   excel_datei = 'Fallzahlen.xlsx'
+   blatt_name = 'Fallzahlen_2023'
+   ```
+
+3. **Laden der Excel-Daten:**
+   ```python
+   df = pd.read_excel(excel_datei, sheet_name=blatt_name)
+   ```
+   Dies liest die Daten aus dem angegebenen Sheet in ein Pandas DataFrame ein.
+
+4. **Ermittlung der Gesamtanzahl der Straftaten für ganz Berlin:**
+   ```python
+   berlin_gesamtreihe = df[df['Bezirke'] == 'Berlin (PKS gesamt)']
+   if berlin_gesamtreihe.empty:
+       raise ValueError("Die Zeile 'Berlin (PKS gesamt)' wurde in den Daten nicht gefunden.")
+
+   berlin_gesamt = berlin_gesamtreihe['Straftaten_insgesamt'].iloc[0]
+   ```
+   Hier wird nach der Zeile gesucht, die die Gesamtanzahl der Straftaten für Berlin enthält. Falls diese Zeile nicht gefunden wird, gibt das Skript einen Fehler aus.
+
+5. **Ausschluss der Gesamtzeile aus den Bezirksdaten:**
+   ```python
+   bezirke_df = df[df['Bezirke'] != 'Berlin (PKS gesamt)'].copy()
+   ```
+   Dies filtert die Zeile mit den Gesamtdaten heraus, sodass nur die einzelnen Bezirke übrig bleiben.
+
+6. **Berechnung des prozentualen Anteils:**
+   ```python
+   bezirke_df['Prozentualer_Anteil'] = ((bezirke_df['Straftaten_insgesamt'] / berlin_gesamt) * 100).round(2)
+   ```
+   Für jeden Bezirk wird der Anteil der Straftaten an der Gesamtanzahl berechnet und auf zwei Dezimalstellen gerundet.
+
+7. **Ausgabe der Ergebnisse:**
+   ```python
+   print(bezirke_df[['Bezirke', 'Straftaten_insgesamt', 'Prozentualer_Anteil']])
+   ```
+   Dies zeigt eine Tabelle mit den Bezirken, der Anzahl der Straftaten und dem prozentualen Anteil an.
+
+8. **Speichern der Ergebnisse in einer neuen Excel-Datei:**
+   ```python
+   bezirke_df.to_excel('Fallzahlen_mit_Prozentanteilen.xlsx', index=False)
+   ```
+   Die berechneten Daten werden in einer neuen Excel-Datei gespeichert.
+
+## Ausführung des Skripts
+
+1. **Speichere das Skript:**
+   Speichere den obigen Code in einer Datei, zum Beispiel **`berechne_prozente.py`**.
+
+2. **Führe das Skript aus:**
+   Öffne ein Terminal oder eine Eingabeaufforderung und navigiere zum Verzeichnis, in dem sich das Skript befindet. Führe dann folgenden Befehl aus:
+
+   ```bash
+   python berechne_prozente.py
+   ```
+
+3. **Ergebnis:**
+   Das Skript gibt die Bezirke mit deren **`Straftaten_insgesamt`** und dem **`Prozentualer_Anteil`** aus und erstellt eine neue Excel-Datei **`Fallzahlen_mit_Prozentanteilen.xlsx`** mit den berechneten Daten.
+
+## Beispielausgabe
+
+Nach der Ausführung des Skripts könnte die Ausgabe ungefähr wie folgt aussehen:
+
+```
+                   Bezirke  Straftaten_insgesamt  Prozentualer_Anteil
+0                    Mitte                 83611               15.58
+1      Friedrichshain-Kreuzberg                 55838               10.41
+2                  Pankow                 39164                7.30
+3  Charlottenburg-Wilmersdorf                 53630               10.00
+4                 Spandau                 25564                4.77
+5       Steglitz-Zehlendorf                 23719                4.42
+6     Tempelhof-Schöneberg                 41776                7.79
+7                Neukölln                 45313                8.48
+8          Treptow-Köpenick                 26099                4.87
+9       Marzahn-Hellersdorf                 26649                4.97
+10             Lichtenberg                 31563                5.89
+11           Reinickendorf                 27344                5.10
+12  Stadtgebiet Berlin, nicht zuzuordnen                 56425               10.54
+```
+
+## Hinweise
+
+- **Fehlende Daten:** Stelle sicher, dass die Zeile **`Berlin (PKS gesamt)`** in deinem Excel-Sheet vorhanden ist. Andernfalls wirft das Skript einen Fehler.
+- **Dateipfade:** Falls sich die Excel-Datei oder das Skript in unterschiedlichen Verzeichnissen befinden, musst du die Pfade entsprechend anpassen.
+- **Erweiterungen:** Du kannst das Skript erweitern, um weitere Analysen durchzuführen oder die Ausgabe weiter zu formatieren.
+
+Bei Fragen oder Problemen stehe ich gerne zur Verfügung!

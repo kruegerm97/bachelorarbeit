@@ -1,0 +1,91 @@
+Gerne! Hier ist ein Python-Skript, das alle Sheets aus der Excel-Datei `Fallzahlen.xlsx` liest, die Daten nach der Anzahl der Straftaten pro Bezirk aggregiert, sortiert und in einem Pandas DataFrame speichert.
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+excel_file = 'Fallzahlen.xlsx'
+
+# Schritt 1: Alle Sheets der Excel-Datei einlesen
+# Das Argument sheet_name=None liest alle Sheets und gibt ein Dictionary zurück
+all_sheets = pd.read_excel(excel_file, sheet_name=None)
+
+# Schritt 2: Daten aus allen Sheets zusammenführen
+# Wir gehen davon aus, dass alle Sheets die gleiche Struktur haben
+# Daher können wir sie einfach mit pd.concat zusammenfügen
+combined_df = pd.concat(all_sheets.values(), ignore_index=True)
+
+# Schritt 3: Daten nach 'Bezirke' gruppieren und 'Straftaten_insgesamt' summieren
+# Dies aggregiert die Straftaten pro Bezirk über alle Sheets hinweg
+grouped_df = combined_df.groupby('Bezirke')['Straftaten_insgesamt'].sum().reset_index()
+
+# Schritt 4: Die aggregierten Daten nach 'Straftaten_insgesamt' sortieren (absteigend)
+sorted_df = grouped_df.sort_values(by='Straftaten_insgesamt', ascending=False).reset_index(drop=True)
+
+# Optional: Anzeigen des sortierten DataFrames
+print(sorted_df)
+
+# Optional: Den sortierten DataFrame in eine neue Excel-Datei speichern
+sorted_df.to_excel('Aggregierte_Straftaten_pro_Bezirk.xlsx', index=False)
+```
+
+### Erklärung der einzelnen Schritte:
+
+1. **Import der notwendigen Bibliothek:**
+   ```python
+   import pandas as pd
+   ```
+   Wir verwenden die `pandas`-Bibliothek, die leistungsstarke Datenstrukturen und Datenanalysetools bietet.
+
+2. **Einlesen aller Sheets der Excel-Datei:**
+   ```python
+   all_sheets = pd.read_excel(excel_file, sheet_name=None)
+   ```
+   - `sheet_name=None` sorgt dafür, dass alle Sheets als ein Dictionary eingelesen werden, wobei die Schlüssel die Sheet-Namen und die Werte die entsprechenden DataFrames sind.
+
+3. **Zusammenführen der Daten aus allen Sheets:**
+   ```python
+   combined_df = pd.concat(all_sheets.values(), ignore_index=True)
+   ```
+   - `pd.concat` verbindet alle DataFrames vertikal (also untereinander).
+   - `ignore_index=True` stellt sicher, dass die Indizes im kombinierten DataFrame neu nummeriert werden.
+
+4. **Gruppieren und Aggregieren der Straftaten pro Bezirk:**
+   ```python
+   grouped_df = combined_df.groupby('Bezirke')['Straftaten_insgesamt'].sum().reset_index()
+   ```
+   - `groupby('Bezirke')` gruppiert die Daten nach dem Bezirk.
+   - `['Straftaten_insgesamt'].sum()` summiert die Straftaten innerhalb jeder Gruppe.
+   - `reset_index()` wandelt das Ergebnis zurück in ein reguläres DataFrame.
+
+5. **Sortieren der aggregierten Daten:**
+   ```python
+   sorted_df = grouped_df.sort_values(by='Straftaten_insgesamt', ascending=False).reset_index(drop=True)
+   ```
+   - `sort_values` sortiert die DataFrame-Zeilen basierend auf der angegebenen Spalte.
+   - `ascending=False` sortiert die Daten in absteigender Reihenfolge.
+   - `reset_index(drop=True)` entfernt den alten Index und ersetzt ihn durch einen neuen fortlaufenden Index.
+
+6. **Optional: Anzeige und Speicherung des Ergebnisses:**
+   ```python
+   print(sorted_df)
+   sorted_df.to_excel('Aggregierte_Straftaten_pro_Bezirk.xlsx', index=False)
+   ```
+   - `print(sorted_df)` zeigt den finalen DataFrame an.
+   - `to_excel` speichert den DataFrame in einer neuen Excel-Datei ohne den Index.
+
+### Hinweise:
+
+- **Abhängigkeiten installieren:** Stelle sicher, dass `pandas` installiert ist. Falls nicht, kannst du es mit `pip` installieren:
+  ```bash
+  pip install pandas
+  ```
+  
+- **Excel-Engine:** Standardmäßig verwendet `pandas` die `openpyxl`-Engine für `.xlsx`-Dateien. Falls du eine ältere Excel-Version verwendest oder Probleme auftreten, kannst du die Engine explizit angeben:
+  ```python
+  all_sheets = pd.read_excel(excel_file, sheet_name=None, engine='openpyxl')
+  ```
+
+- **Fehlerbehandlung:** Für eine robuste Anwendung könntest du zusätzliche Fehlerprüfungen einbauen, z.B. ob die Datei existiert, ob die erwarteten Spalten vorhanden sind usw.
+
+Dieses Skript sollte deinen Anforderungen entsprechen und dir eine aggregierte Übersicht der Straftaten pro Bezirk aus allen Sheets deiner Excel-Datei liefern.

@@ -1,0 +1,45 @@
+Daten erfolgreich eingelesen.
+Verfügbare Spalten:
+['LOR-Schlüssel (Bezirksregion)', 'Bezirke', 'Straftaten_insgesamt', 'Raub', 'Straßenraub', 'Körperverletzungen_insgesamt', 'schwere_ Körperverletzung', 'Freiheitsberaubung_Nötigung', 'Diebstahl_insgesamt', 'Diebstahl_Kraftwagen', 'Diebstahl_Kfz', 'Fahrraddiebstahl', 'Wohnraumeinbruch', 'Branddelikte_insgesamt', 'Brandstiftung', 'Sachbeschädigung_insgesamt', 'Sachbeschädigung_Graffiti', 'Rauschgiftdelikte', 'Kieztaten']
+Daten erfolgreich sortiert.
+Sortiertes DataFrame:
+    LOR-Schlüssel (Bezirksregion)                               Bezirke  Straftaten_insgesamt  Raub  ...  Sachbeschädigung_insgesamt  Sachbeschädigung_Graffiti  Rauschgiftdelikte  Kieztaten
+0                          999999                   Berlin (PKS gesamt)                536695  5389  ...                       45434                       7448              17502     119737
+1                           10000                                 Mitte                 83611   884  ...                        6172                        976               3306      19212
+2                          999900  Stadtgebiet Berlin, nicht zuzuordnen                 56425    98  ...                        1065                        490                734       2558
+3                           20000              Friedrichshain-Kreuzberg                 55838   923  ...                        4906                        801               4455      12724
+4                           40000            Charlottenburg-Wilmersdorf                 53630   464  ...                        4134                        750               1431      12175
+5                           80000                              Neukölln                 45313   508  ...                        4165                        379               1869      10253
+6                           70000                  Tempelhof-Schöneberg                 41776   328  ...                        3592                        622               1435      10132
+7                           30000                                Pankow                 39164   529  ...                        4576                        942                910      10043
+8                          110000                           Lichtenberg                 31563   362  ...                        3206                        628                663       8499
+9                          120000                         Reinickendorf                 27344   311  ...                        2481                        203                553       7323
+10                         100000                   Marzahn-Hellersdorf                 26649   315  ...                        2908                        392                424       8203
+11                          90000                      Treptow-Köpenick                 26099   207  ...                        3152                        558                680       6720
+12                          50000                               Spandau                 25564   247  ...                        2379                        226                645       6473
+13                          60000                   Steglitz-Zehlendorf                 23719   213  ...                        2698                        481                397       5422
+
+[14 rows x 19 columns]
+	Command being timed: "python testcase1/prompt1/exec5/script.py"
+	User time (seconds): 2.36
+	System time (seconds): 0.06
+	Percent of CPU this job got: 478%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.50
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 153112
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 32480
+	Voluntary context switches: 34
+	Involuntary context switches: 269
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

@@ -1,0 +1,108 @@
+Hier ist ein Python-Skript, das die von dir beschriebenen Anforderungen erfüllt. Das Skript verwendet die Bibliothek `pandas`, um die Excel-Datei zu verarbeiten. Stelle sicher, dass du `pandas` und `openpyxl` installiert hast. Du kannst sie mit `pip` installieren, falls noch nicht geschehen:
+
+```bash
+pip install pandas openpyxl
+```
+
+### Python-Skript: `process_fallzahlen.py`
+
+```python
+import pandas as pd
+
+def process_fallzahlen(excel_file):
+    # 1. Die Excel-Datei einlesen und die Sheets als DataFrames speichern.
+    # Alle Sheets werden in einem Dictionary gespeichert, wobei der Sheet-Name der Schlüssel ist.
+    xls = pd.ExcelFile(excel_file)
+    sheets_dict = {}
+    for sheet_name in xls.sheet_names:
+        df = pd.read_excel(xls, sheet_name=sheet_name)
+        sheets_dict[sheet_name] = df
+
+    # 2. Die DataFrames der einzelnen Sheets zusammen joinen,
+    # sodass pro Zeile der akkumulierte Wert der einzelnen Straftaten steht.
+    # Annahme: Alle DataFrames haben die selben 'LOR-Schlüssel' und 'Bezirke'.
+    # Wir setzen 'LOR-Schlüssel' und 'Bezirke' als Index und summieren die numerischen Spalten.
+    
+    # Liste der DataFrames
+    df_list = []
+    for df in sheets_dict.values():
+        # Setze 'LOR-Schlüssel' und 'Bezirke' als Index
+        df = df.set_index(['LOR-Schlüssel', 'Bezirke'])
+        df_list.append(df)
+
+    # Addiere alle DataFrames
+    # Dabei werden numerische Spalten summiert, nicht-numerische ignoriert
+    joined_df = pd.concat(df_list).groupby(['LOR-Schlüssel', 'Bezirke']).sum().reset_index()
+
+    # 3. Das neue gejointe DataFrame nach der Spalte "Straftaten_insgesamt" sortieren.
+    # Zeilen mit den LOR-Schlüsseln 999900 und 999999 werden nicht in die Sortierung einbezogen
+    # und am Ende des DataFrames angehängt.
+    
+    # Trenne die speziellen LOR-Schlüssel
+    special_keys = [999900, 999999]
+    normal_df = joined_df[~joined_df['LOR-Schlüssel'].isin(special_keys)]
+    special_df = joined_df[joined_df['LOR-Schlüssel'].isin(special_keys)]
+
+    # Sortiere das normale DataFrame nach 'Straftaten_insgesamt' absteigend
+    sorted_normal_df = normal_df.sort_values(by='Straftaten_insgesamt', ascending=False)
+
+    # Füge die speziellen Zeilen am Ende hinzu
+    final_df = pd.concat([sorted_normal_df, special_df], ignore_index=True)
+
+    # 4. Das sortierte Pandas DataFrame zurückgeben.
+    return final_df
+
+if __name__ == "__main__":
+    # Pfad zur Excel-Datei
+    excel_file = 'Fallzahlen.xlsx'
+    
+    # Verarbeite die Excel-Datei
+    sorted_df = process_fallzahlen(excel_file)
+    
+    # Optional: Zeige die ersten Zeilen des sortierten DataFrames an
+    print(sorted_df.head())
+
+    # Optional: Speichere das sortierte DataFrame in eine neue Excel-Datei
+    sorted_df.to_excel('Fallzahlen_sortiert.xlsx', index=False)
+```
+
+### Erklärung der Schritte
+
+1. **Excel-Datei einlesen und Sheets speichern:**
+   - Das Skript verwendet `pd.ExcelFile`, um alle Sheet-Namen der Excel-Datei zu ermitteln.
+   - Jedes Sheet wird einzeln in ein DataFrame eingelesen und in einem Dictionary `sheets_dict` gespeichert.
+
+2. **DataFrames zusammenführen:**
+   - Alle DataFrames werden so vorbereitet, dass `'LOR-Schlüssel'` und `'Bezirke'` als Index gesetzt werden.
+   - Die DataFrames werden mit `pd.concat` zusammengeführt und anschließend mit `groupby` nach den Index-Spalten gruppiert.
+   - Die numerischen Spalten werden summiert, sodass pro Bezirk die akkumulierten Werte der Straftaten vorliegen.
+
+3. **Sortierung:**
+   - Die Zeilen mit den LOR-Schlüsseln `999900` und `999999` werden separat behandelt und nach der Sortierung wieder ans Ende des DataFrames angehängt.
+   - Das restliche DataFrame wird nach der Spalte `'Straftaten_insgesamt'` in absteigender Reihenfolge sortiert.
+
+4. **Rückgabe und Speicherung:**
+   - Das sortierte DataFrame wird zurückgegeben.
+   - Im Hauptteil des Skripts (`if __name__ == "__main__":`) wird das Ergebnis optional angezeigt und in eine neue Excel-Datei `Fallzahlen_sortiert.xlsx` gespeichert.
+
+### Nutzung
+
+1. **Speichere das Skript:** Erstelle eine Python-Datei, z.B. `process_fallzahlen.py`, und füge den obigen Code ein.
+
+2. **Führe das Skript aus:** Stelle sicher, dass sich die Excel-Datei `Fallzahlen.xlsx` im selben Verzeichnis wie das Skript befindet oder passe den Pfad entsprechend an. Führe dann das Skript aus:
+
+   ```bash
+   python process_fallzahlen.py
+   ```
+
+3. **Ergebnis:** Das Skript zeigt die ersten Zeilen des sortierten DataFrames an und speichert das gesamte sortierte DataFrame in der Datei `Fallzahlen_sortiert.xlsx`.
+
+### Anmerkungen
+
+- **Annahmen:** Das Skript geht davon aus, dass alle Sheets in der Excel-Datei ähnliche Strukturen haben, insbesondere die Spalten `'LOR-Schlüssel'` und `'Bezirke'`. Außerdem werden alle numerischen Spalten summiert; nicht-numerische Spalten außer `'LOR-Schlüssel'` und `'Bezirke'` werden ignoriert.
+
+- **Fehlerbehandlung:** Für eine produktive Nutzung solltest du zusätzliche Fehlerbehandlungen einbauen, z.B. Überprüfung, ob die benötigten Spalten vorhanden sind, und Umgang mit fehlenden Werten.
+
+- **Performance:** Bei sehr großen Excel-Dateien könnte die Performance eine Rolle spielen. In solchen Fällen könnten optimierte Lese- und Verarbeitungsmethoden notwendig sein.
+
+Ich hoffe, dieses Skript erfüllt deine Anforderungen! Wenn du weitere Anpassungen benötigst, lass es mich wissen.

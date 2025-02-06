@@ -1,0 +1,114 @@
+Natürlich, ich helfe dir gerne dabei, ein Python-Skript zu erstellen, das deine Anforderungen erfüllt. Das Skript wird die Daten aus allen Sheets der Excel-Datei `Fallzahlen.xlsx` zusammenführen, die unerwünschten `LOR-Schlüssel`-Zeilen entfernen, die Daten nach der Spalte `Straftaten_insgesamt` sortieren und das Ergebnis in einem Pandas DataFrame speichern.
+
+Hier ist ein vollständiges Python-Skript, das diese Schritte ausführt:
+
+```python
+import pandas as pd
+
+def zusammenfuegen_und_sortieren(excel_datei):
+    """
+    Liest alle Sheets einer Excel-Datei, fügt sie zusammen,
+    entfernt bestimmte LOR-Schlüssel, sortiert nach 'Straftaten_insgesamt'
+    und gibt den resultierenden DataFrame zurück.
+    
+    Parameters:
+    - excel_datei: str, Pfad zur Excel-Datei.
+    
+    Returns:
+    - pd.DataFrame: Gefilterter und sortierter DataFrame.
+    """
+    
+    # Laden Sie die Excel-Datei und holen Sie alle Sheet-Namen
+    xls = pd.ExcelFile(excel_datei)
+    sheet_namen = xls.sheet_names
+    
+    # Liste zur Speicherung der DataFrames aus jedem Sheet
+    df_list = []
+    
+    # Durchlaufen Sie jede Sheet und lesen Sie die Daten
+    for sheet in sheet_namen:
+        df = pd.read_excel(excel_datei, sheet_name=sheet)
+        df_list.append(df)
+        print(f"Gesheet '{sheet}' erfolgreich geladen.")
+    
+    # Verbinden Sie alle DataFrames zu einem einzigen DataFrame
+    kombiniert_df = pd.concat(df_list, ignore_index=True)
+    print("Alle Sheets wurden erfolgreich zusammengeführt.")
+    
+    # Entfernen Sie die Zeilen mit den LOR-Schlüsseln 999900 und 999999
+    filtered_df = kombiniert_df[~kombiniert_df['LOR-Schlüssel'].isin([999900, 999999])]
+    print("Unerwünschte LOR-Schlüssel wurden entfernt.")
+    
+    # Sortieren Sie den DataFrame nach 'Straftaten_insgesamt' in absteigender Reihenfolge
+    sorted_df = filtered_df.sort_values(by='Straftaten_insgesamt', ascending=False).reset_index(drop=True)
+    print("DataFrame wurde nach 'Straftaten_insgesamt' sortiert.")
+    
+    return sorted_df
+
+if __name__ == "__main__":
+    # Pfad zur Excel-Datei
+    excel_pfad = 'Fallzahlen.xlsx'
+    
+    # Rufen Sie die Funktion auf und speichern Sie das Ergebnis in 'final_df'
+    final_df = zusammenfuegen_und_sortieren(excel_pfad)
+    
+    # Optional: Zeigen Sie die ersten paar Zeilen des finalen DataFrames an
+    print(final_df.head())
+    
+    # Optional: Speichern Sie den finalen DataFrame als neue Excel-Datei
+    # final_df.to_excel('Zusammengefuegte_Fallzahlen.xlsx', index=False)
+```
+
+### Erklärung der Schritte:
+
+1. **Importieren der notwendigen Bibliothek:**
+   ```python
+   import pandas as pd
+   ```
+
+2. **Definieren einer Funktion `zusammenfuegen_und_sortieren`:**
+   - Diese Funktion übernimmt den Pfad zur Excel-Datei als Parameter.
+   - Sie liest alle Sheets der Excel-Datei und speichert sie in einer Liste von DataFrames.
+   - Anschließend werden alle DataFrames zu einem einzigen DataFrame kombiniert.
+
+3. **Entfernen der unerwünschten `LOR-Schlüssel`:**
+   ```python
+   filtered_df = kombiniert_df[~kombiniert_df['LOR-Schlüssel'].isin([999900, 999999])]
+   ```
+   - Diese Zeile filtert alle Zeilen heraus, deren `LOR-Schlüssel` entweder `999900` oder `999999` ist.
+
+4. **Sortieren des DataFrames:**
+   ```python
+   sorted_df = filtered_df.sort_values(by='Straftaten_insgesamt', ascending=False).reset_index(drop=True)
+   ```
+   - Sortiert den DataFrame basierend auf der Spalte `Straftaten_insgesamt` in absteigender Reihenfolge.
+   - `reset_index(drop=True)` setzt den Index zurück, sodass er fortlaufend von 0 beginnt.
+
+5. **Hauptblock des Skripts:**
+   - Definiert den Pfad zur Excel-Datei.
+   - Ruft die oben definierte Funktion auf und speichert das Ergebnis in `final_df`.
+   - Optional zeigt es die ersten paar Zeilen des finalen DataFrames an.
+   - Optional kann der finale DataFrame in eine neue Excel-Datei gespeichert werden (die entsprechende Zeile ist auskommentiert).
+
+### Hinweise:
+
+- **Abhängigkeiten installieren:**
+  Stelle sicher, dass du die benötigten Bibliotheken installiert hast. Du kannst `pandas` mit folgendem Befehl installieren:
+  ```bash
+  pip install pandas
+  ```
+  Falls deine Excel-Datei im `.xlsx`-Format ist, wird `openpyxl` automatisch von `pandas` verwendet. Falls nicht, installiere es mit:
+  ```bash
+  pip install openpyxl
+  ```
+
+- **Anpassen des Pfades:**
+  Stelle sicher, dass der Pfad zur Excel-Datei (`'Fallzahlen.xlsx'`) korrekt ist. Wenn die Datei sich in einem anderen Verzeichnis befindet, gib den vollständigen Pfad an.
+
+- **Speichern des Ergebnisses:**
+  Falls du das Ergebnis in eine neue Excel-Datei speichern möchtest, entferne den Kommentar (`#`) vor der entsprechenden Zeile:
+  ```python
+  final_df.to_excel('Zusammengefuegte_Fallzahlen.xlsx', index=False)
+  ```
+
+Dieses Skript sollte deinen Anforderungen entsprechen und die gewünschten Daten verarbeiten. Bei weiteren Fragen oder Anpassungswünschen stehe ich gerne zur Verfügung!

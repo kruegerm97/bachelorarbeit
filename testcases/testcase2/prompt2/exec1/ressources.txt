@@ -1,0 +1,44 @@
+Gesheet 'Fallzahlen_2014' erfolgreich geladen.
+Gesheet 'Fallzahlen_2015' erfolgreich geladen.
+Gesheet 'Fallzahlen_2016' erfolgreich geladen.
+Gesheet 'Fallzahlen_2017' erfolgreich geladen.
+Gesheet 'Fallzahlen_2018' erfolgreich geladen.
+Gesheet 'Fallzahlen_2019' erfolgreich geladen.
+Gesheet 'Fallzahlen_2020' erfolgreich geladen.
+Gesheet 'Fallzahlen_2021' erfolgreich geladen.
+Gesheet 'Fallzahlen_2022' erfolgreich geladen.
+Gesheet 'Fallzahlen_2023' erfolgreich geladen.
+Alle Sheets wurden erfolgreich zusammengeführt.
+Unerwünschte LOR-Schlüssel wurden entfernt.
+DataFrame wurde nach 'Straftaten_insgesamt' sortiert.
+   LOR-Schlüssel Bezirke  Straftaten_insgesamt  Raub  Straßenraub  ...  Brandstiftung  Sachbeschädigung_insgesamt  Sachbeschädigung_Graffiti  Rauschgiftdelikte  Kieztaten
+0          10000   Mitte                106006   976          611  ...            112                        5598                       1330               3350      16015
+1          10000   Mitte                 98046  1040          589  ...            110                        5256                       1245               2638      15078
+2          10000   Mitte                 96716   763          465  ...            113                        5625                       1488               3839      15900
+3          10000   Mitte                 91321  1014          521  ...            125                        5406                       1177               2880      15703
+4          10000   Mitte                 85227   733          449  ...             75                        5528                       1510               3792      14899
+
+[5 rows x 19 columns]
+	Command being timed: "python testcase2/prompt2/exec1/script.py"
+	User time (seconds): 4.68
+	System time (seconds): 0.24
+	Percent of CPU this job got: 162%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:03.03
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 155928
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 168420
+	Voluntary context switches: 38
+	Involuntary context switches: 687
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

@@ -1,0 +1,106 @@
+Hier ist ein vollständiges Python-Skript, das Ihre Anforderungen erfüllt. Das Skript verwendet die `pandas`-Bibliothek, um die Excel-Datei zu verarbeiten. Stellen Sie sicher, dass Sie `pandas` installiert haben (`pip install pandas`), bevor Sie das Skript ausführen.
+
+```python
+import pandas as pd
+
+def process_fallzahlen_excel(file_path='Fallzahlen.xlsx'):
+    """
+    Liest die Excel-Datei ein, verbindet die Sheets, sortiert das Ergebnis nach
+    'Straftaten_insgesamt' und platziert die nicht zuordenbaren Einträge am Ende.
+    
+    Parameters:
+    - file_path: Pfad zur Excel-Datei (Standard: 'Fallzahlen.xlsx')
+    
+    Returns:
+    - final_df: Sortiertes Pandas DataFrame
+    """
+    # Schritt 1: Alle Sheets der Excel-Datei einlesen
+    try:
+        excel_sheets = pd.read_excel(file_path, sheet_name=None)
+    except FileNotFoundError:
+        print(f"Datei '{file_path}' wurde nicht gefunden.")
+        return
+    except Exception as e:
+        print(f"Fehler beim Einlesen der Datei: {e}")
+        return
+    
+    # Liste zur Speicherung der DataFrames
+    df_list = []
+    
+    for sheet_name, df in excel_sheets.items():
+        # Sicherstellen, dass 'LOR-Schlüssel' und 'Bezirke' als Schlüssel vorhanden sind
+        if 'LOR-Schlüssel' not in df.columns or 'Bezirke' not in df.columns:
+            print(f"Sheet '{sheet_name}' enthält nicht die notwendigen Spalten.")
+            continue
+        df_list.append(df)
+    
+    if not df_list:
+        print("Keine gültigen Sheets gefunden.")
+        return
+    
+    # Schritt 2: DataFrames zusammenführen (joinen) auf 'LOR-Schlüssel' und 'Bezirke'
+    merged_df = df_list[0]
+    for df in df_list[1:]:
+        merged_df = pd.merge(merged_df, df, on=['LOR-Schlüssel', 'Bezirke'], how='outer', suffixes=('', '_dup'))
+        
+        # Entfernen von doppelten Spalten, falls vorhanden
+        dup_columns = [col for col in merged_df.columns if col.endswith('_dup')]
+        if dup_columns:
+            merged_df.drop(columns=dup_columns, inplace=True)
+    
+    # Schritt 3: Sortieren nach 'Straftaten_insgesamt', wobei 999900 und 999999 am Ende stehen
+    # Zuerst sicherstellen, dass 'Straftaten_insgesamt' numerisch ist
+    merged_df['Straftaten_insgesamt'] = pd.to_numeric(merged_df['Straftaten_insgesamt'], errors='coerce')
+    
+    # Trennen der DataFrames
+    districts_df = merged_df[~merged_df['LOR-Schlüssel'].isin([999900, 999999])]
+    non_districts_df = merged_df[merged_df['LOR-Schlüssel'].isin([999900, 999999])]
+    
+    # Sortieren der Bezirke
+    sorted_districts_df = districts_df.sort_values(by='Straftaten_insgesamt', ascending=False)
+    
+    # Kombinieren der sortierten Bezirke mit den nicht zuordenbaren Einträgen
+    final_df = pd.concat([sorted_districts_df, non_districts_df], ignore_index=True)
+    
+    return final_df
+
+if __name__ == "__main__":
+    # Pfad zur Excel-Datei
+    excel_file = 'Fallzahlen.xlsx'
+    
+    # Verarbeitung der Excel-Datei
+    sorted_df = process_fallzahlen_excel(excel_file)
+    
+    if sorted_df is not None:
+        # Ausgabe des sortierten DataFrames
+        print(sorted_df)
+        
+        # Optional: Speichern des Ergebnisses in einer neuen Excel-Datei
+        # sorted_df.to_excel('Sorted_Fallzahlen.xlsx', index=False)
+```
+
+### Erklärung der Schritte:
+
+1. **Einlesen der Excel-Datei:**
+   - Das Skript liest alle Sheets der angegebenen Excel-Datei mit `pd.read_excel` ein. Jeder Sheet wird als separates DataFrame gespeichert.
+   - Es wird überprüft, ob die notwendigen Spalten `'LOR-Schlüssel'` und `'Bezirke'` in jedem Sheet vorhanden sind.
+
+2. **Zusammenführen der DataFrames:**
+   - Die DataFrames werden sequenziell auf den Schlüsselspalten `'LOR-Schlüssel'` und `'Bezirke'` mit einem äußeren Join (`how='outer'`) zusammengeführt.
+   - Doppelte Spalten, die durch den Merge entstehen könnten (z.B. gleiche Spalten aus verschiedenen Sheets), werden entfernt.
+
+3. **Sortieren des DataFrames:**
+   - Das Skript trennt die Bezirke (mit gültigen `LOR-Schlüssel`) von den nicht zuordenbaren Einträgen (`999900` und `999999`).
+   - Die Bezirke werden absteigend nach `'Straftaten_insgesamt'` sortiert.
+   - Die nicht zuordenbaren Einträge werden anschließend an das Ende des DataFrames angehängt.
+
+4. **Ausgabe:**
+   - Das sortierte DataFrame wird ausgegeben. Optional kann es auch in eine neue Excel-Datei gespeichert werden, indem die Kommentarzeile am Ende des Skripts aktiviert wird.
+
+### Hinweise:
+
+- **Fehlerbehandlung:** Das Skript enthält grundlegende Fehlerbehandlungen, um sicherzustellen, dass die Datei existiert und die notwendigen Spalten in den Sheets vorhanden sind.
+- **Anpassungen:** Falls die Struktur Ihrer Excel-Sheets anders ist oder zusätzliche Verarbeitungsschritte erforderlich sind, passen Sie das Skript entsprechend an.
+- **Leistung:** Bei sehr großen Excel-Dateien könnte die Leistung beeinträchtigt werden. In solchen Fällen können Optimierungen notwendig sein.
+
+Stellen Sie sicher, dass die Excel-Datei `'Fallzahlen.xlsx'` im gleichen Verzeichnis wie das Skript liegt oder geben Sie den vollständigen Pfad zur Datei an.

@@ -1,0 +1,140 @@
+Natürlich! Hier ist ein Python-Skript, das die beschriebenen Anforderungen erfüllt. Dieses Skript verwendet die `pandas`-Bibliothek, um die Excel-Datei zu lesen, die unerwünschten Zeilen zu entfernen, die verbleibenden Bezirke nach der Spalte `'Straftaten_insgesamt'` zu sortieren und das Ergebnis in einem DataFrame zu speichern.
+
+### Voraussetzungen
+
+Stelle sicher, dass du die benötigten Bibliotheken installiert hast. Falls nicht, kannst du sie mit `pip` installieren:
+
+```bash
+pip install pandas openpyxl
+```
+
+### Python-Skript
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+excel_datei = 'Fallzahlen.xlsx'
+
+# Namen des Sheets
+sheet_name = 'Fallzahlen_2023'
+
+# LOR-Schlüssel der Zeilen, die ausgeschlossen werden sollen
+ausschluss_lor_schluessel = [999900, 999999]
+
+# Excel-Datei einlesen
+df = pd.read_excel(excel_datei, sheet_name=sheet_name)
+
+# Anzeigen der ursprünglichen Daten (optional)
+print("Ursprüngliche Daten:")
+print(df)
+
+# Filtern der Bezirke, indem die ausgeschlossenen LOR-Schlüssel entfernt werden
+df_gefiltert = df[~df['LOR-Schlüssel'].isin(ausschluss_lor_schluessel)]
+
+# Anzeigen der gefilterten Daten (optional)
+print("\nGefilterte Daten (ohne nicht zuzuordnende Bezirke):")
+print(df_gefiltert)
+
+# Sortieren nach 'Straftaten_insgesamt' in absteigender Reihenfolge
+df_sortiert = df_gefiltert.sort_values(by='Straftaten_insgesamt', ascending=False)
+
+# Zurücksetzen des Index (optional, für sauberere Anzeige)
+df_sortiert.reset_index(drop=True, inplace=True)
+
+# Anzeigen der sortierten Daten (optional)
+print("\nSortierte Daten nach 'Straftaten_insgesamt':")
+print(df_sortiert)
+
+# Optional: Speichern des sortierten DataFrames in eine neue Excel-Datei
+# df_sortiert.to_excel('Sortierte_Fallzahlen.xlsx', index=False)
+```
+
+### Erklärung der Schritte
+
+1. **Importieren der Bibliothek:**
+   ```python
+   import pandas as pd
+   ```
+   Wir verwenden `pandas` für die Datenmanipulation und das Einlesen der Excel-Datei.
+
+2. **Festlegen des Dateipfades und des Sheet-Namens:**
+   ```python
+   excel_datei = 'Fallzahlen.xlsx'
+   sheet_name = 'Fallzahlen_2023'
+   ```
+
+3. **Definieren der auszuschließenden LOR-Schlüssel:**
+   ```python
+   ausschluss_lor_schluessel = [999900, 999999]
+   ```
+   Diese Schlüssel entsprechen den Zeilen, die nicht zu Bezirken gehören und daher bei der Sortierung ignoriert werden sollen.
+
+4. **Einlesen der Excel-Datei:**
+   ```python
+   df = pd.read_excel(excel_datei, sheet_name=sheet_name)
+   ```
+   Hiermit wird das Sheet `'Fallzahlen_2023'` aus der Datei `'Fallzahlen.xlsx'` in ein DataFrame `df` geladen.
+
+5. **Filtern der unerwünschten Zeilen:**
+   ```python
+   df_gefiltert = df[~df['LOR-Schlüssel'].isin(ausschluss_lor_schluessel)]
+   ```
+   - `df['LOR-Schlüssel'].isin(ausschluss_lor_schluessel)` überprüft, welche Zeilen einen der auszuschließenden LOR-Schlüssel haben.
+   - Das `~` negiert das Ergebnis, sodass nur die Zeilen behalten werden, die **nicht** in der Ausschlussliste sind.
+
+6. **Sortieren nach `'Straftaten_insgesamt'`:**
+   ```python
+   df_sortiert = df_gefiltert.sort_values(by='Straftaten_insgesamt', ascending=False)
+   ```
+   Das DataFrame `df_gefiltert` wird basierend auf der Spalte `'Straftaten_insgesamt'` in absteigender Reihenfolge sortiert.
+
+7. **Zurücksetzen des Index (optional):**
+   ```python
+   df_sortiert.reset_index(drop=True, inplace=True)
+   ```
+   Dies ist hilfreich, um einen sauberen, fortlaufenden Index im sortierten DataFrame zu haben.
+
+8. **Speichern des sortierten DataFrames (optional):**
+   ```python
+   # df_sortiert.to_excel('Sortierte_Fallzahlen.xlsx', index=False)
+   ```
+   Falls du das Ergebnis in eine neue Excel-Datei speichern möchtest, kannst du diese Zeile entkommentieren.
+
+### Beispielausgabe
+
+Das Skript enthält `print`-Anweisungen, die die Daten in den verschiedenen Schritten anzeigen. Dies ist nützlich für die Überprüfung, kann aber bei großen Datensätzen entfernt oder angepasst werden.
+
+```plaintext
+Ursprüngliche Daten:
+    LOR-Schlüssel                   Bezirke  Straftaten_insgesamt  Raub  Straßenraub  Körperverletzungen_insgesamt  ...  Branddelikte_insgesamt  Brandstiftung  Sachbeschädigung_insgesamt  Sachbeschädigung_Graffiti  Rauschgiftdelikte  Kieztaten
+0        10000                     Mitte               83611   884          521                          8144  ...                     420            137                        6172                        976               3306             19212
+1        20000      Friedrichshain-Kreuzberg               55838   923          606                          5502  ...                     298             85                        4906                        801               4455             12724
+...        ...                        ...                  ...   ...          ...                           ...  ...                     ...            ...                          ...                          ...                ...                ...
+
+Gefilterte Daten (ohne nicht zuzuordnende Bezirke):
+    LOR-Schlüssel                   Bezirke  Straftaten_insgesamt  Raub  Straßenraub  Körperverletzungen_insgesamt  ...  Branddelikte_insgesamt  Brandstiftung  Sachbeschädigung_insgesamt  Sachbeschädigung_Graffiti  Rauschgiftdelikte  Kieztaten
+0        10000                     Mitte               83611   884          521                          8144  ...                     420            137                        6172                        976               3306             19212
+1        20000      Friedrichshain-Kreuzberg               55838   923          606                          5502  ...                     298             85                        4906                        801               4455             12724
+...        ...                        ...                  ...   ...          ...                           ...  ...                     ...            ...                          ...                          ...                ...                ...
+
+Sortierte Daten nach 'Straftaten_insgesamt':
+    LOR-Schlüssel                   Bezirke  Straftaten_insgesamt  Raub  Straßenraub  Körperverletzungen_insgesamt  ...  Branddelikte_insgesamt  Brandstiftung  Sachbeschädigung_insgesamt  Sachbeschädigung_Graffiti  Rauschgiftdelikte  Kieztaten
+0        10000                     Mitte               83611   884          521                          8144  ...                     420            137                        6172                        976               3306             19212
+1        20000      Friedrichshain-Kreuzberg               55838   923          606                          5502  ...                     298             85                        4906                        801               4455             12724
+...        ...                        ...                  ...   ...          ...                           ...  ...                     ...            ...                          ...                          ...                ...                ...
+```
+
+### Anpassungen nach Bedarf
+
+- **Dateipfad anpassen:** Stelle sicher, dass der Pfad zur Excel-Datei korrekt ist. Wenn sich die Datei in einem anderen Verzeichnis befindet, gib den vollständigen Pfad an, z.B. `'./daten/Fallzahlen.xlsx'`.
+  
+- **Erweiterte Filterbedingungen:** Falls du weitere Filterkriterien hinzufügen möchtest, kannst du die Filterlogik entsprechend erweitern.
+  
+- **Speichern in anderen Formaten:** Neben Excel kannst du das DataFrame auch in andere Formate wie CSV speichern, indem du `df_sortiert.to_csv('Sortierte_Fallzahlen.csv', index=False)` verwendest.
+
+### Zusammenfassung
+
+Dieses Skript liest die Excel-Datei ein, entfernt die Zeilen, die keine Bezirke darstellen, sortiert die verbleibenden Bezirke nach der Gesamtzahl der Straftaten und speichert das Ergebnis in einem Pandas DataFrame. Du kannst das sortierte DataFrame weiter analysieren, visualisieren oder in andere Formate exportieren, je nach deinen Bedürfnissen.
+
+Wenn du weitere Anpassungen oder Erweiterungen benötigst, lass es mich wissen!

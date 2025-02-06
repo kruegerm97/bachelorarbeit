@@ -1,0 +1,96 @@
+Hier ist ein Python-Skript, das alle Sheets aus der Excel-Datei `Fallzahlen.xlsx` einliest, die Daten kombiniert, nach der Anzahl der insgesamt erfassten Straftaten (`Straftaten_insgesamt`) sortiert und in einem Pandas DataFrame speichert.
+
+### Voraussetzungen
+
+Stelle sicher, dass du die benötigten Bibliotheken installiert hast. Du kannst sie mit `pip` installieren:
+
+```bash
+pip install pandas openpyxl
+```
+
+### Python-Skript
+
+```python
+import pandas as pd
+
+def lese_und_sortiere_fallzahlen(excel_datei):
+    """
+    Liest alle Sheets aus der angegebenen Excel-Datei, kombiniert die Daten,
+    sortiert sie nach 'Straftaten_insgesamt' in absteigender Reihenfolge
+    und gibt den sortierten DataFrame zurück.
+    
+    :param excel_datei: Pfad zur Excel-Datei (z.B. 'Fallzahlen.xlsx')
+    :return: Sortierter Pandas DataFrame
+    """
+    try:
+        # Alle Sheets der Excel-Datei lesen. sheet_name=None liest alle Sheets als Dict.
+        alle_sheets = pd.read_excel(excel_datei, sheet_name=None)
+        
+        # Liste zur Speicherung aller DataFrames
+        dataframe_liste = []
+        
+        # Durch alle Sheets iterieren und die DataFrames zur Liste hinzufügen
+        for sheet_name, df in alle_sheets.items():
+            # Optional: Hinzufügen einer Spalte mit dem Sheet-Namen, falls nötig
+            # df['Sheet_Name'] = sheet_name
+            dataframe_liste.append(df)
+        
+        # Alle DataFrames zu einem einzigen DataFrame kombinieren
+        kombiniertes_df = pd.concat(dataframe_liste, ignore_index=True)
+        
+        # Prüfen, ob die Spalte 'Straftaten_insgesamt' existiert
+        if 'Straftaten_insgesamt' not in kombiniertes_df.columns:
+            raise ValueError("Die Spalte 'Straftaten_insgesamt' wurde in den Daten nicht gefunden.")
+        
+        # Sortieren nach 'Straftaten_insgesamt' in absteigender Reihenfolge
+        sortiertes_df = kombiniertes_df.sort_values(by='Straftaten_insgesamt', ascending=False).reset_index(drop=True)
+        
+        return sortiertes_df
+    
+    except FileNotFoundError:
+        print(f"Die Datei {excel_datei} wurde nicht gefunden.")
+    except Exception as e:
+        print(f"Ein Fehler ist aufgetreten: {e}")
+
+if __name__ == "__main__":
+    # Pfad zur Excel-Datei
+    dateipfad = 'Fallzahlen.xlsx'
+    
+    # Funktion aufrufen und sortierten DataFrame erhalten
+    df_sortiert = lese_und_sortiere_fallzahlen(dateipfad)
+    
+    if df_sortiert is not None:
+        # Sortierten DataFrame anzeigen
+        print(df_sortiert)
+        
+        # Optional: Sortierten DataFrame in eine neue Excel-Datei speichern
+        # df_sortiert.to_excel('Fallzahlen_sortiert.xlsx', index=False)
+```
+
+### Erklärung des Skripts
+
+1. **Importieren der Bibliotheken**: Das Skript verwendet `pandas` zum Verarbeiten der Excel-Daten.
+
+2. **Funktion `lese_und_sortiere_fallzahlen`**:
+    - **Lesen aller Sheets**: Mit `pd.read_excel(excel_datei, sheet_name=None)` werden alle Sheets der Excel-Datei als ein Dictionary eingelesen, wobei die Schlüssel die Sheet-Namen sind und die Werte die entsprechenden DataFrames.
+    - **Kombinieren der DataFrames**: Alle einzelnen DataFrames werden in eine Liste (`dataframe_liste`) gesammelt und anschließend mit `pd.concat` zu einem großen DataFrame (`kombiniertes_df`) kombiniert.
+    - **Sortieren**: Der kombinierte DataFrame wird nach der Spalte `Straftaten_insgesamt` in absteigender Reihenfolge sortiert.
+    - **Fehlerbehandlung**: Es gibt grundlegende Fehlerprüfungen, um sicherzustellen, dass die Datei existiert und die erforderliche Spalte vorhanden ist.
+
+3. **Ausführen der Funktion**: Im `__main__`-Block wird die Funktion aufgerufen, und der sortierte DataFrame wird angezeigt. Optional kann der sortierte DataFrame auch in eine neue Excel-Datei gespeichert werden (der entsprechende Code ist auskommentiert).
+
+### Weitere Anpassungen
+
+- **Sheet-Namen beibehalten**: Falls du den Ursprung der Daten aus den einzelnen Sheets nachvollziehen möchtest, könntest du eine zusätzliche Spalte mit dem Sheet-Namen hinzufügen (siehe auskommentierte Zeile im Skript).
+  
+- **Datenbereinigung**: Je nach Datenqualität kannst du weitere Bereinigungen oder Transformationen vornehmen, bevor du die Daten kombinierst oder sortierst.
+
+### Ausführen des Skripts
+
+Speichere das Skript in einer Datei, z.B. `sortiere_fallzahlen.py`, und führe es in deinem Terminal oder deiner IDE aus:
+
+```bash
+python sortiere_fallzahlen.py
+```
+
+Das Skript wird die kombinierten und sortierten Daten in der Konsole anzeigen. Wenn du die sortierten Daten in eine neue Excel-Datei speichern möchtest, entferne den Kommentar vor der entsprechenden Zeile im Skript.
