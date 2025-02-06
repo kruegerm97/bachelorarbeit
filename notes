@@ -1,4 +1,5 @@
 TODO notes: Section 4 ChatGPT als Quelle angeben
+Zero-Shot Prompt, Instruction-based Prompt, Chain of Thought Prompt
 
 Korrektheit des Codes und der Ergebnisse (Spaltenanzahl und Reihenfolge richtig?), Performance des Codes im Bezug
 auf Laufzeit und Ressourcennutzung, Qualität des Codes (Struktur des
@@ -33,7 +34,6 @@ nicht volle Sheets als csv geben, sondern nur erste Zeilen (oder gar nicht csv s
 eine prompt nur aus augen des normalen users, eine mit metadaten und eine mit chain of thought.
 (Ein Testfall mit neuer Excel mit nur einem Sheet fuer verschiedenen Aufwand) entfaellt weil Benutzung von Pandas Dataframe
 Nur die Oberbezirke benutzen, alle Unterbezirke aus der Excel loeschen.
-ein testfall alle sheets joinen aber nicht sortieren.
 
 Keine Visualisierung (Testfall 4 raus.)
 Testfall 5 prozentuale Veraenderung der Straftaten insgesamt pro Bezirk (auch in Tabelle)

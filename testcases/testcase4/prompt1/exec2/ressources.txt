@@ -1,0 +1,34 @@
+Sheet 'Fallzahlen_2014' entspricht nicht dem erwarteten Jahresformat und wird übersprungen.
+Sheet 'Fallzahlen_2015' entspricht nicht dem erwarteten Jahresformat und wird übersprungen.
+Sheet 'Fallzahlen_2016' entspricht nicht dem erwarteten Jahresformat und wird übersprungen.
+Sheet 'Fallzahlen_2017' entspricht nicht dem erwarteten Jahresformat und wird übersprungen.
+Sheet 'Fallzahlen_2018' entspricht nicht dem erwarteten Jahresformat und wird übersprungen.
+Sheet 'Fallzahlen_2019' entspricht nicht dem erwarteten Jahresformat und wird übersprungen.
+Sheet 'Fallzahlen_2020' entspricht nicht dem erwarteten Jahresformat und wird übersprungen.
+Sheet 'Fallzahlen_2021' entspricht nicht dem erwarteten Jahresformat und wird übersprungen.
+Sheet 'Fallzahlen_2022' entspricht nicht dem erwarteten Jahresformat und wird übersprungen.
+Sheet 'Fallzahlen_2023' entspricht nicht dem erwarteten Jahresformat und wird übersprungen.
+Keine gültigen Daten gefunden.
+	Command being timed: "python testcase4/prompt1/exec2/script.py"
+	User time (seconds): 4.84
+	System time (seconds): 0.21
+	Percent of CPU this job got: 159%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:03.16
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 157716
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 170264
+	Voluntary context switches: 34
+	Involuntary context switches: 334
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

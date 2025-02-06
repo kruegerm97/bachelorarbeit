@@ -51,4 +51,4 @@ if __name__ == "__main__":
         print(df_sortiert)
         
         # Optional: Sortierten DataFrame in eine neue Excel-Datei speichern
-        # df_sortiert.to_excel('Fallzahlen_sortiert.xlsx', index=False)
+        df_sortiert.to_excel('Fallzahlen_sortiert.xlsx', index=False)

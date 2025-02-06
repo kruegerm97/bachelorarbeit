@@ -1,0 +1,110 @@
+Hier ist ein Python-Skript, das die von Ihnen beschriebenen Schritte ausführt. Das Skript verwendet die Bibliothek `pandas`, um die Excel-Datei zu verarbeiten und die erforderlichen Berechnungen durchzuführen.
+
+Stellen Sie sicher, dass Sie `pandas` installiert haben. Falls nicht, können Sie es mit `pip` installieren:
+
+```bash
+pip install pandas
+```
+
+Hier ist das vollständige Python-Skript:
+
+```python
+import pandas as pd
+
+# 1. Lesen Sie alle Sheets der Excel-Datei ein
+excel_file = 'Fallzahlen.xlsx'
+all_sheets = pd.read_excel(excel_file, sheet_name=None)
+
+# Liste zur Speicherung der Ergebnisse
+daten_liste = []
+
+# 2. Extrahieren Sie den Wert der Spalte 'Straftaten_insgesamt' für 'Berlin (PKS gesamt)'
+for sheet_name, df in all_sheets.items():
+    # Extrahieren Sie das Jahr aus dem Sheet-Namen, z.B. 'Fallzahlen_2014' -> 2014
+    try:
+        jahr = int(sheet_name.split('_')[-1])
+    except ValueError:
+        print(f"Das Sheet '{sheet_name}' hat keinen gültigen Jahresnamen und wird übersprungen.")
+        continue
+    
+    # Suche nach der Zeile 'Berlin (PKS gesamt)'
+    berlin_data = df[df['Bezirke'] == 'Berlin (PKS gesamt)']
+    
+    if berlin_data.empty:
+        print(f"'Berlin (PKS gesamt)' wurde im Sheet '{sheet_name}' nicht gefunden.")
+        continue
+    
+    # Extrahiere den Wert der Spalte 'Straftaten_insgesamt'
+    strftaten_insgesamt = berlin_data['Straftaten_insgesamt'].values[0]
+    
+    daten_liste.append({'Jahr': jahr, 'Straftaten_insgesamt': strftaten_insgesamt})
+
+# 3. Erstellen Sie ein DataFrame aus den gesammelten Daten
+daten_df = pd.DataFrame(daten_liste)
+
+# Sortieren Sie das DataFrame nach Jahr aufsteigend
+daten_df = daten_df.sort_values('Jahr').reset_index(drop=True)
+
+# 4. Berechnen Sie die prozentuale Veränderung zum Vorjahr
+daten_df['Prozentuale_Veraenderung'] = daten_df['Straftaten_insgesamt'].pct_change() * 100
+
+# Optional: Runden Sie die Prozentsätze auf zwei Dezimalstellen
+daten_df['Prozentuale_Veraenderung'] = daten_df['Prozentuale_Veraenderung'].round(2)
+
+# 5. Erstellen Sie das Endergebnis DataFrame
+ergebnis_df = daten_df[['Jahr', 'Prozentuale_Veraenderung']]
+
+# Optional: Benennen Sie die Spalten auf Deutsch um
+ergebnis_df.columns = ['Jahr', 'Prozentuale Veränderung (%)']
+
+# 6. Anzeigen des Ergebnisses
+print(ergebnis_df)
+
+# 7. Speichern Sie das Ergebnis in einer neuen Excel-Datei (optional)
+ergebnis_df.to_excel('Prozentuale_Veraenderung_Fallzahlen.xlsx', index=False)
+```
+
+### Erläuterung der Schritte:
+
+1. **Einlesen aller Sheets:**
+   - Das Skript verwendet `pd.read_excel` mit `sheet_name=None`, um alle Sheets der Excel-Datei in ein Dictionary zu laden, wobei die Schlüssel die Sheet-Namen und die Werte die jeweiligen DataFrames sind.
+
+2. **Extrahieren der relevanten Daten:**
+   - Für jedes Sheet wird das Jahr aus dem Sheet-Namen extrahiert.
+   - Es wird nach der Zeile gesucht, in der die Spalte 'Bezirke' den Wert 'Berlin (PKS gesamt)' hat.
+   - Der Wert der Spalte 'Straftaten_insgesamt' wird extrahiert und in einer Liste gespeichert.
+
+3. **Erstellen und Sortieren des DataFrames:**
+   - Die gesammelten Daten werden in ein neues DataFrame `daten_df` umgewandelt.
+   - Das DataFrame wird nach dem Jahr aufsteigend sortiert, um sicherzustellen, dass die prozentuale Veränderung korrekt berechnet wird.
+
+4. **Berechnung der prozentualen Veränderung:**
+   - Die Funktion `pct_change()` von pandas berechnet die prozentuale Veränderung zwischen den aufeinanderfolgenden Jahren.
+   - Das Ergebnis wird mit 100 multipliziert, um es in Prozent darzustellen.
+   - Optional werden die Prozentsätze auf zwei Dezimalstellen gerundet.
+
+5. **Erstellen des Endergebnis-DataFrames:**
+   - Ein neues DataFrame `ergebnis_df` wird erstellt, das nur die Spalten 'Jahr' und 'Prozentuale_Veraenderung' enthält.
+   - Die Spalten werden optional auf Deutsch umbenannt.
+
+6. **Anzeige und Speicherung des Ergebnisses:**
+   - Das Endergebnis wird in der Konsole ausgegeben.
+   - Optional kann das Ergebnis auch in eine neue Excel-Datei gespeichert werden.
+
+### Beispielausgabe:
+
+Angenommen, die Daten enthalten die Jahre von 2014 bis 2016 mit entsprechenden 'Straftaten_insgesamt' Werten. Die Ausgabe könnte wie folgt aussehen:
+
+```
+   Jahr  Prozentuale Veränderung (%)
+0  2014                      NaN
+1  2015                    5.23
+2  2016                   -3.45
+```
+
+**Hinweis:**
+- Der erste Eintrag hat keinen Vorjahr-Wert, daher ist die prozentuale Veränderung `NaN`.
+- Stellen Sie sicher, dass die Excel-Datei `Fallzahlen.xlsx` im gleichen Verzeichnis wie das Skript liegt oder geben Sie den vollständigen Pfad zur Datei an.
+- Passen Sie gegebenenfalls die Spaltennamen an, falls diese in der Excel-Datei anders lauten.
+
+Falls Sie weitere Anpassungen benötigen oder Fragen haben, lassen Sie es mich wissen!

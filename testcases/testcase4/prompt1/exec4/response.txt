@@ -1,0 +1,131 @@
+Natürlich! Hier ist ein Python-Skript, das die beschriebenen Anforderungen erfüllt. Dieses Skript verwendet die `pandas` Bibliothek, um alle Sheets in der Excel-Datei zu lesen, die Gesamtzahl der Straftaten für ganz Berlin zu aggregieren und die prozentuale Veränderung zum Vorjahr zu berechnen.
+
+### Voraussetzungen:
+- Installiere die benötigten Bibliotheken, falls noch nicht geschehen:
+  ```bash
+  pip install pandas openpyxl
+  ```
+
+### Python-Skript:
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+excel_file = 'Fallzahlen.xlsx'
+
+# Lese alle Sheets in der Excel-Datei
+# sheet_name=None lädt alle Sheets und gibt ein Dictionary zurück
+sheets_dict = pd.read_excel(excel_file, sheet_name=None)
+
+# Liste zur Speicherung der jährlichen Gesamtstraftaten
+data = []
+
+# Iteriere über alle Sheets
+for sheet_name, df in sheets_dict.items():
+    # Überprüfe, ob 'LOR-Schlüssel' und 'Straftaten_insgesamt' in den Spalten vorhanden sind
+    if 'LOR-Schlüssel' in df.columns and 'Straftaten_insgesamt' in df.columns:
+        # Suche die Zeile, die die Gesamtzahl für Berlin enthält
+        # Annahme: 'LOR-Schlüssel' 999999 oder 'Berlin (PKS gesamt)' repräsentiert die Gesamtdaten
+        total_row = df[df['LOR-Schlüssel'] == 999999]
+        
+        # Falls nicht gefunden, versuche mit dem Namen
+        if total_row.empty:
+            total_row = df[df['LOR-Schlüssel'].astype(str).str.contains('Berlin \(PKS gesamt\)', regex=True)]
+        
+        # Falls immer noch nicht gefunden, überspringe das Sheet
+        if total_row.empty:
+            print(f"Warnung: Gesamtdaten nicht in Sheet '{sheet_name}' gefunden.")
+            continue
+        
+        # Extrahiere das Jahr aus dem Sheet-Namen
+        # Annahme: Der Sheet-Name enthält das Jahr, z.B. "2020", "Jahr 2020", etc.
+        # Hier wird versucht, eine vierstellige Zahl zu extrahieren
+        import re
+        match = re.search(r'\b(19|20)\d{2}\b', sheet_name)
+        if match:
+            year = int(match.group())
+        else:
+            print(f"Warnung: Jahr konnte nicht aus dem Sheet-Namen '{sheet_name}' extrahiert werden. Überspringe dieses Sheet.")
+            continue
+        
+        # Extrahiere die Gesamtzahl der Straftaten
+        total_crimes = total_row['Straftaten_insgesamt'].values[0]
+        
+        # Füge die Daten zur Liste hinzu
+        data.append({'Jahr': year, 'Straftaten_insgesamt': total_crimes})
+    else:
+        print(f"Warnung: Erforderliche Spalten nicht in Sheet '{sheet_name}' vorhanden.")
+
+# Erstelle einen DataFrame aus den gesammelten Daten
+df_total = pd.DataFrame(data)
+
+# Sortiere den DataFrame nach dem Jahr
+df_total = df_total.sort_values('Jahr').reset_index(drop=True)
+
+# Berechne die prozentuale Veränderung zum Vorjahr
+df_total['Prozentuale_Veraenderung_zum_Vorjahr (%)'] = df_total['Straftaten_insgesamt'].pct_change() * 100
+
+# Optional: Rundung der prozentualen Veränderung auf zwei Dezimalstellen
+df_total['Prozentuale_Veraenderung_zum_Vorjahr (%)'] = df_total['Prozentuale_Veraenderung_zum_Vorjahr (%)'].round(2)
+
+# Setze das Jahr als Index (optional)
+df_total.set_index('Jahr', inplace=True)
+
+# Anzeige des Ergebnis-DataFrames
+print(df_total)
+
+# Optional: Speichere das Ergebnis in eine neue Excel-Datei
+df_total.to_excel('Zeitreihe_Straftaten_Berlin.xlsx')
+```
+
+### Erklärung der Schritte:
+
+1. **Importieren der Bibliotheken:**
+   - `pandas` zum Datenmanipulieren.
+   - `re` zum Extrahieren des Jahres aus dem Sheet-Namen.
+
+2. **Lesen aller Sheets:**
+   - `pd.read_excel` mit `sheet_name=None` lädt alle Sheets und speichert sie in einem Dictionary.
+
+3. **Datenextraktion:**
+   - Für jedes Sheet wird nach der Zeile gesucht, die die Gesamtzahl der Straftaten für Berlin enthält (`LOR-Schlüssel` 999999 oder entsprechendem Namen).
+   - Das Jahr wird aus dem Sheet-Namen extrahiert. Es wird angenommen, dass der Sheet-Name das Jahr enthält (z.B. "2020", "Jahr 2020").
+
+4. **Aggregation:**
+   - Die Gesamtzahl der Straftaten für jedes Jahr wird in einer Liste gesammelt.
+
+5. **Erstellung des DataFrames:**
+   - Die gesammelten Daten werden in einen DataFrame umgewandelt, nach Jahr sortiert und die prozentuale Veränderung zum Vorjahr berechnet.
+
+6. **Ausgabe:**
+   - Der resultierende DataFrame wird angezeigt und optional in eine neue Excel-Datei gespeichert.
+
+### Hinweise:
+
+- **Sheet-Namen:** Das Skript geht davon aus, dass die Sheet-Namen das Jahr enthalten. Falls die Sheet-Namen ein anderes Format haben, muss die Regex-Anpassung (`re.search`) entsprechend geändert werden.
+  
+- **Fehlerbehandlung:** Das Skript gibt Warnungen aus, wenn bestimmte Sheets nicht die erwarteten Daten enthalten. Dies hilft, Probleme bei der Datenqualität zu identifizieren.
+
+- **Flexibilität:** Falls die Gesamtdaten anders identifiziert werden müssen (z.B. andere `LOR-Schlüssel`), passe die Bedingung entsprechend an.
+
+### Beispiel-Ausgabe:
+
+Angenommen, die Excel-Datei enthält Daten für die Jahre 2018 bis 2023, könnte die Ausgabe wie folgt aussehen:
+
+```
+      Straftaten_insgesamt  Prozentuale_Veraenderung_zum_Vorjahr (%)
+Jahr                                                          
+2018              500000                                      NaN
+2019              510000                                     2.00
+2020              495000                                    -2.94
+2021              530000                                     7.07
+2022              550000                                     3.77
+2023              540000                                    -1.82
+```
+
+Diese Tabelle zeigt die Gesamtzahl der Straftaten pro Jahr sowie die prozentuale Veränderung im Vergleich zum Vorjahr.
+
+---
+
+Ich hoffe, dieses Skript hilft dir bei der Analyse deiner Daten! Falls du weitere Anpassungen benötigst oder Fragen hast, stehe ich gerne zur Verfügung.

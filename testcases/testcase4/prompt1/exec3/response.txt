@@ -1,0 +1,159 @@
+Hier ist ein Python-Skript, das deine Anforderungen erfüllt. Das Skript liest alle Sheets der Excel-Datei `Fallzahlen.xlsx`, extrahiert die Gesamtzahl der Straftaten für Berlin aus jedem Sheet, berechnet die prozentuale Veränderung zum Vorjahr und erstellt einen Pandas DataFrame mit der Zeitreihe.
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+excel_datei = 'Fallzahlen.xlsx'
+
+# Lade alle Sheets in ein Dictionary
+alle_sheets = pd.read_excel(excel_datei, sheet_name=None)
+
+# Liste zur Speicherung der jährlichen Straftaten
+jahrliche_straftaten = []
+
+for sheet_name, df in alle_sheets.items():
+    try:
+        # Versuche, das Jahr aus dem Sheetnamen zu extrahieren
+        jahr = int(sheet_name)
+    except ValueError:
+        # Wenn der Sheetname kein Jahr ist, überspringe dieses Sheet
+        print(f"Sheet '{sheet_name}' übersprungen (kein gültiges Jahr).")
+        continue
+    
+    # Finde die Zeile für 'Berlin (PKS gesamt)'
+    berlin_gesamt = df[df['Bezirke'] == 'Berlin (PKS gesamt)']
+    
+    if nicht berlin_gesamt.empty:
+        # Extrahiere die Gesamtzahl der Straftaten
+        gesamt_straftaten = berlin_gesamt['Straftaten_insgesamt'].values[0]
+        jahrliche_straftaten.append({'Jahr': jahr, 'Straftaten_insgesamt': gesamt_straftaten})
+    else:
+        print(f"Keine Daten für 'Berlin (PKS gesamt)' in Sheet '{sheet_name}' gefunden.")
+
+# Erstelle einen DataFrame aus den gesammelten Daten
+df_jahrlich = pd.DataFrame(jahrliche_straftaten)
+
+# Sortiere den DataFrame nach Jahr
+df_jahrlich = df_jahrlich.sort_values('Jahr').reset_index(drop=True)
+
+# Berechne die prozentuale Veränderung zum Vorjahr
+df_jahrlich['Veränderung_prozent'] = df_jahrlich['Straftaten_insgesamt'].pct_change() * 100
+
+# Runde die Veränderungen auf zwei Dezimalstellen
+df_jahrlich['Veränderung_prozent'] = df_jahrlich['Veränderung_prozent'].round(2)
+
+# Anzeige des resultierenden DataFrames
+print(df_jahrlich)
+```
+
+### Erklärung des Skripts
+
+1. **Import der Bibliotheken**:
+    ```python
+    import pandas as pd
+    ```
+    Wir verwenden `pandas` für die Datenverarbeitung.
+
+2. **Laden der Excel-Datei**:
+    ```python
+    excel_datei = 'Fallzahlen.xlsx'
+    alle_sheets = pd.read_excel(excel_datei, sheet_name=None)
+    ```
+    Mit `sheet_name=None` werden alle Sheets in ein Dictionary geladen, wobei die Schlüssel die Sheetnamen sind.
+
+3. **Extrahieren der jährlichen Straftaten**:
+    ```python
+    for sheet_name, df in alle_sheets.items():
+        try:
+            jahr = int(sheet_name)
+        except ValueError:
+            print(f"Sheet '{sheet_name}' übersprungen (kein gültiges Jahr).")
+            continue
+        
+        berlin_gesamt = df[df['Bezirke'] == 'Berlin (PKS gesamt)']
+        
+        if not berlin_gesamt.empty:
+            gesamt_straftaten = berlin_gesamt['Straftaten_insgesamt'].values[0]
+            jahrliche_straftaten.append({'Jahr': jahr, 'Straftaten_insgesamt': gesamt_straftaten})
+        else:
+            print(f"Keine Daten für 'Berlin (PKS gesamt)' in Sheet '{sheet_name}' gefunden.")
+    ```
+    - Es wird angenommen, dass jeder Sheetname ein Jahr darstellt (z.B. '2020', '2021', etc.).
+    - Das Skript sucht in jedem Sheet nach der Zeile, in der die Bezirke 'Berlin (PKS gesamt)' sind, und extrahiert die Gesamtzahl der Straftaten.
+
+4. **Erstellen des DataFrames**:
+    ```python
+    df_jahrlich = pd.DataFrame(jahrliche_straftaten)
+    df_jahrlich = df_jahrlich.sort_values('Jahr').reset_index(drop=True)
+    ```
+    Die gesammelten Daten werden in einen DataFrame umgewandelt und nach Jahr sortiert.
+
+5. **Berechnung der prozentualen Veränderung**:
+    ```python
+    df_jahrlich['Veränderung_prozent'] = df_jahrlich['Straftaten_insgesamt'].pct_change() * 100
+    df_jahrlich['Veränderung_prozent'] = df_jahrlich['Veränderung_prozent'].round(2)
+    ```
+    - `pct_change()` berechnet die prozentuale Veränderung zum Vorjahr.
+    - Die Ergebnisse werden auf zwei Dezimalstellen gerundet.
+
+6. **Ausgabe des Ergebnisses**:
+    ```python
+    print(df_jahrlich)
+    ```
+    Dies gibt den finalen DataFrame mit den jährlichen Straftaten und der prozentualen Veränderung zum Vorjahr aus.
+
+### Beispielhafte Ausgabe
+
+Angenommen, deine Excel-Datei enthält die Daten für die Jahre 2018 bis 2022, könnte die Ausgabe wie folgt aussehen:
+
+```
+    Jahr  Straftaten_insgesamt  Veränderung_prozent
+0  2018               50000                  NaN
+1  2019               52000                4.00
+2  2020               51000               -1.92
+3  2021               53000                3.92
+4  2022               55000                3.77
+```
+
+- **Hinweis**: Für das erste Jahr (`2018` in diesem Beispiel) gibt es keine Veränderung zum Vorjahr, daher ist der Wert `NaN`.
+
+### Anpassungen
+
+Falls deine Sheets nicht direkt das Jahr im Namen enthalten, sondern ein anderes Format haben (z.B. 'Daten_2020'), musst du die Methode zur Extraktion des Jahres aus dem Sheetnamen anpassen. Hier ein Beispiel, wie du das Jahr extrahieren könntest, wenn der Sheetname das Jahr enthält:
+
+```python
+import re
+
+# Beispiel: Sheetname ist 'Daten_2020'
+match = re.search(r'(\d{4})', sheet_name)
+if match:
+    jahr = int(match.group(1))
+else:
+    print(f"Jahr in Sheet '{sheet_name}' nicht gefunden.")
+    continue
+```
+
+Dieses Snippet verwendet reguläre Ausdrücke, um eine vierstellige Jahreszahl im Sheetnamen zu finden.
+
+### Fehlerbehandlung
+
+Das Skript enthält grundlegende Fehlerbehandlungen, wie das Überspringen von Sheets, die kein gültiges Jahr als Namen haben, und das Informieren, wenn die Zeile für 'Berlin (PKS gesamt)' nicht gefunden wird. Du kannst diese erweitern, um spezifischere Anforderungen oder Datenstrukturen zu unterstützen.
+
+### Abhängigkeiten
+
+Stelle sicher, dass du die erforderlichen Python-Pakete installiert hast. Du kannst `pandas` mit folgendem Befehl installieren:
+
+```bash
+pip install pandas
+```
+
+### Ausführung
+
+Speichere das Skript in einer `.py`-Datei, z.B. `analyse_straftaten.py`, und führe es in deinem Terminal oder deiner Kommandozeile aus:
+
+```bash
+python analyse_straftaten.py
+```
+
+Dieses Skript sollte dir eine klare Übersicht über die jährlichen Veränderungen der Straftaten in Berlin geben.

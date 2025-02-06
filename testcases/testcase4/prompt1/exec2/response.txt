@@ -1,0 +1,165 @@
+Natürlich! Unten findest du ein Python-Skript, das deine Anforderungen erfüllt. Dieses Skript verwendet die `pandas`-Bibliothek, um die Excel-Datei zu lesen, die relevanten Daten aus allen Sheets zu extrahieren, die jährliche Gesamtstraftatenzahl für ganz Berlin zu berechnen und schließlich die prozentuale Veränderung zum Vorjahr darzustellen.
+
+Stelle sicher, dass du die notwendigen Bibliotheken installiert hast. Du kannst dies mit `pip` tun, falls sie noch nicht installiert sind:
+
+```bash
+pip install pandas openpyxl
+```
+
+### Python-Skript: `analyse_fallzahlen.py`
+
+```python
+import pandas as pd
+
+def extract_berlin_total(df):
+    """
+    Extrahiert die Gesamtzahl der Straftaten für Berlin aus dem DataFrame.
+
+    Es wird entweder nach dem `LOR-Schlüssel` 999999 oder nach dem Bezirksnamen
+    'Berlin (PKS gesamt)' gesucht.
+
+    Args:
+        df (pd.DataFrame): Der DataFrame des aktuellen Sheets.
+
+    Returns:
+        int oder float: Die Gesamtzahl der Straftaten in Berlin.
+    """
+    # Versuch 1: Nach LOR-Schlüssel 999999 filtern
+    berlin_row = df[df['LOR-Schlüssel'] == 999999]
+    
+    if not berlin_row.empty:
+        return berlin_row['Straftaten_insgesamt'].values[0]
+    
+    # Versuch 2: Nach Bezirksnamen 'Berlin (PKS gesamt)' filtern
+    berlin_row = df[df['Bezirke'] == 'Berlin (PKS gesamt)']
+    
+    if not berlin_row.empty:
+        return berlin_row['Straftaten_insgesamt'].values[0]
+    
+    # Wenn nichts gefunden wurde, gebe NaN zurück
+    return float('nan')
+
+def main():
+    # Pfad zur Excel-Datei
+    excel_file = 'Fallzahlen.xlsx'
+    
+    try:
+        # Lade alle Sheets der Excel-Datei
+        xls = pd.ExcelFile(excel_file)
+    except FileNotFoundError:
+        print(f"Die Datei {excel_file} wurde nicht gefunden.")
+        return
+    except Exception as e:
+        print(f"Fehler beim Laden der Excel-Datei: {e}")
+        return
+    
+    # Liste zur Speicherung der Daten
+    data = []
+    
+    for sheet_name in xls.sheet_names:
+        try:
+            # Lese das aktuelle Sheet
+            df = pd.read_excel(xls, sheet_name=sheet_name)
+            
+            # Extrahiere die Gesamtzahl der Straftaten für Berlin
+            total_crimes = extract_berlin_total(df)
+            
+            # Versuche, das Jahr aus dem Sheet-Namen zu extrahieren
+            try:
+                year = int(sheet_name)
+            except ValueError:
+                # Wenn der Sheet-Name kein Jahr ist, überspringe dieses Sheet
+                print(f"Sheet '{sheet_name}' entspricht nicht dem erwarteten Jahresformat und wird übersprungen.")
+                continue
+            
+            # Füge die Daten zur Liste hinzu
+            data.append({'Jahr': year, 'Straftaten_insgesamt': total_crimes})
+        
+        except Exception as e:
+            print(f"Fehler beim Verarbeiten des Sheets '{sheet_name}': {e}")
+            continue
+    
+    # Erstelle einen DataFrame aus den gesammelten Daten
+    df_totals = pd.DataFrame(data)
+    
+    if df_totals.empty:
+        print("Keine gültigen Daten gefunden.")
+        return
+    
+    # Sortiere den DataFrame nach Jahr
+    df_totals.sort_values('Jahr', inplace=True)
+    
+    # Setze das Jahr als Index
+    df_totals.set_index('Jahr', inplace=True)
+    
+    # Berechne die prozentuale Veränderung zum Vorjahr
+    df_totals['Prozentuale_Veraenderung'] = df_totals['Straftaten_insgesamt'].pct_change() * 100
+    
+    # Optional: Runde die Prozentwerte auf zwei Dezimalstellen
+    df_totals['Prozentuale_Veraenderung'] = df_totals['Prozentuale_Veraenderung'].round(2)
+    
+    # Anzeige des resultierenden DataFrames
+    print(df_totals)
+    
+    # Optional: Speichere das Ergebnis in eine neue Excel-Datei
+    output_file = 'Straftaten_Zeitreihe.xlsx'
+    try:
+        df_totals.to_excel(output_file)
+        print(f"Das Ergebnis wurde erfolgreich in '{output_file}' gespeichert.")
+    except Exception as e:
+        print(f"Fehler beim Speichern der Ergebnisdatei: {e}")
+
+if __name__ == "__main__":
+    main()
+```
+
+### Erklärung des Skripts
+
+1. **Importieren der Bibliotheken**:
+    - `pandas` wird für die Datenmanipulation verwendet.
+
+2. **Funktion `extract_berlin_total`**:
+    - Diese Funktion durchsucht den gegebenen DataFrame nach der Gesamtzahl der Straftaten für ganz Berlin.
+    - Sie sucht zuerst nach dem `LOR-Schlüssel` `999999`. Wenn dieser nicht gefunden wird, sucht sie nach dem Bezirksnamen `'Berlin (PKS gesamt)'`.
+    - Wenn beide Suchen fehlschlagen, gibt sie `NaN` zurück.
+
+3. **Funktion `main`**:
+    - Lädt die Excel-Datei und iteriert über alle Sheets.
+    - Extrahiert für jedes Sheet die Gesamtzahl der Straftaten in Berlin.
+    - Versucht, das Jahr aus dem Sheet-Namen zu extrahieren. Wenn der Sheet-Name kein gültiges Jahr ist, wird das Sheet übersprungen.
+    - Speichert die gesammelten Daten in einem DataFrame.
+    - Sortiert die Daten nach Jahr und berechnet die prozentuale Veränderung zum Vorjahr.
+    - Gibt den resultierenden DataFrame aus und speichert ihn optional in eine neue Excel-Datei namens `'Straftaten_Zeitreihe.xlsx'`.
+
+4. **Ausführen des Skripts**:
+    - Das Skript kann direkt ausgeführt werden, indem du es speicherst (z.B. als `analyse_fallzahlen.py`) und über die Kommandozeile startest:
+      ```bash
+      python analyse_fallzahlen.py
+      ```
+
+### Beispielausgabe
+
+Nach dem Ausführen des Skripts erhältst du einen DataFrame ähnlich dem folgenden:
+
+```
+      Straftaten_insgesamt  Prozentuale_Veraenderung
+Jahr                                                            
+2018               500000                    NaN
+2019               520000                   4.00
+2020               510000                  -1.92
+2021               530000                   3.92
+2022               550000                   3.77
+2023               580000                   5.45
+```
+
+Hierbei zeigt die Spalte `Prozentuale_Veraenderung` die jährliche Veränderung der Gesamtstraftaten in Berlin im Vergleich zum Vorjahr.
+
+### Anmerkungen
+
+- **Sheet-Namen**: Das Skript geht davon aus, dass die Sheet-Namen ausschließlich aus dem Jahr bestehen (z.B. `'2020'`, `'2021'`, etc.). Wenn deine Sheet-Namen ein anderes Format haben (z.B. `'Daten_2020'`), musst du die Logik zur Extraktion des Jahres entsprechend anpassen.
+
+- **Fehlerbehandlung**: Das Skript enthält grundlegende Fehlerbehandlungen, um sicherzustellen, dass fehlende Dateien oder unerwartete Sheet-Namen nicht zu einem Absturz führen, sondern entsprechende Meldungen ausgeben.
+
+- **Anpassungen**: Je nach genauer Struktur deiner Excel-Datei und den Sheet-Namen könnte es notwendig sein, kleinere Anpassungen am Skript vorzunehmen.
+
+Ich hoffe, dieses Skript hilft dir bei der Analyse deiner Fallzahlen! Wenn du weitere Fragen hast oder Anpassungen benötigst, lass es mich wissen.

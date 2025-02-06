@@ -1,0 +1,45 @@
+/home/mauke/Documents/Uni/Bachelorarbeit/testcases/testcase4/prompt1/exec4/script.py:23: SyntaxWarning: invalid escape sequence '\('
+  total_row = df[df['LOR-Schlüssel'].astype(str).str.contains('Berlin \(PKS gesamt\)', regex=True)]
+Warnung: Jahr konnte nicht aus dem Sheet-Namen 'Fallzahlen_2014' extrahiert werden. Überspringe dieses Sheet.
+Warnung: Jahr konnte nicht aus dem Sheet-Namen 'Fallzahlen_2015' extrahiert werden. Überspringe dieses Sheet.
+Warnung: Jahr konnte nicht aus dem Sheet-Namen 'Fallzahlen_2016' extrahiert werden. Überspringe dieses Sheet.
+Warnung: Jahr konnte nicht aus dem Sheet-Namen 'Fallzahlen_2017' extrahiert werden. Überspringe dieses Sheet.
+Warnung: Jahr konnte nicht aus dem Sheet-Namen 'Fallzahlen_2018' extrahiert werden. Überspringe dieses Sheet.
+Warnung: Jahr konnte nicht aus dem Sheet-Namen 'Fallzahlen_2019' extrahiert werden. Überspringe dieses Sheet.
+Warnung: Jahr konnte nicht aus dem Sheet-Namen 'Fallzahlen_2020' extrahiert werden. Überspringe dieses Sheet.
+Warnung: Jahr konnte nicht aus dem Sheet-Namen 'Fallzahlen_2021' extrahiert werden. Überspringe dieses Sheet.
+Warnung: Jahr konnte nicht aus dem Sheet-Namen 'Fallzahlen_2022' extrahiert werden. Überspringe dieses Sheet.
+Warnung: Jahr konnte nicht aus dem Sheet-Namen 'Fallzahlen_2023' extrahiert werden. Überspringe dieses Sheet.
+Traceback (most recent call last):
+  File "/home/mauke/Documents/Uni/Bachelorarbeit/testcases/testcase4/prompt1/exec4/script.py", line 53, in <module>
+    df_total = df_total.sort_values('Jahr').reset_index(drop=True)
+               ~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "/home/mauke/Documents/Uni/Bachelorarbeit/venv/lib/python3.13/site-packages/pandas/core/frame.py", line 7189, in sort_values
+    k = self._get_label_or_level_values(by[0], axis=axis)
+  File "/home/mauke/Documents/Uni/Bachelorarbeit/venv/lib/python3.13/site-packages/pandas/core/generic.py", line 1911, in _get_label_or_level_values
+    raise KeyError(key)
+KeyError: 'Jahr'
+Command exited with non-zero status 1
+	Command being timed: "python testcase4/prompt1/exec4/script.py"
+	User time (seconds): 4.57
+	System time (seconds): 0.23
+	Percent of CPU this job got: 164%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:02.93
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 155724
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 168787
+	Voluntary context switches: 34
+	Involuntary context switches: 421
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 1

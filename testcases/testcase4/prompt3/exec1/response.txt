@@ -1,0 +1,125 @@
+Gerne erstelle ich dir ein Python-Skript, das die beschriebenen Schritte durchführt. Wir verwenden dabei die Bibliotheken `pandas` und `openpyxl`. Stelle sicher, dass du diese Bibliotheken installiert hast. Du kannst sie mit `pip` installieren, falls noch nicht geschehen:
+
+```bash
+pip install pandas openpyxl
+```
+
+Hier ist das vollständige Skript:
+
+```python
+import pandas as pd
+
+# Schritt 1: Alle Sheets der Excel-Datei einlesen
+excel_datei = 'Fallzahlen.xlsx'
+xls = pd.ExcelFile(excel_datei)
+
+# Dictionary zum Speichern der DataFrames
+dataframes = {}
+
+# Extrahiere die Jahreszahlen aus den Sheet-Namen und sortiere sie
+sheet_jahre = []
+for sheet in xls.sheet_names:
+    try:
+        # Annahme: Sheetnamen sind im Format 'Fallzahlen_Jahr', z.B. 'Fallzahlen_2014'
+        jahr = int(sheet.split('_')[-1])
+        sheet_jahre.append((jahr, sheet))
+    except ValueError:
+        print(f"Sheet '{sheet}' hat kein gültiges Jahresformat und wird übersprungen.")
+
+# Sortiere die Sheets nach Jahr
+sheet_jahre.sort()
+
+# Lade die DataFrames und speichere sie im Dictionary
+for jahr, sheet in sheet_jahre:
+    df = pd.read_excel(xls, sheet_name=sheet)
+    dataframes[jahr] = df
+
+# Schritt 2: Extrahiere 'Straftaten_insgesamt' für 'Berlin (PKS gesamt)'
+straftaten_gesamt = {}
+
+for jahr, df in dataframes.items():
+    # Filtern der Zeile 'Berlin (PKS gesamt)'
+    berlin_row = df[df['Bezirke'] == 'Berlin (PKS gesamt)']
+    if not berlin_row.empty:
+        wert = berlin_row.iloc[0]['Straftaten_insgesamt']
+        straftaten_gesamt[jahr] = wert
+    else:
+        print(f"Die Zeile 'Berlin (PKS gesamt)' wurde im Jahr {jahr} nicht gefunden.")
+
+# Schritt 3: Berechne die prozentuale Veränderung zum Vorjahr
+jahre = sorted(straftaten_gesamt.keys())
+prozentuale_veraenderung = {}
+
+for i in range(1, len(jahre)):
+    aktuelles_jahr = jahre[i]
+    vorheriges_jahr = jahre[i-1]
+    wert_aktuell = straftaten_gesamt[aktuelles_jahr]
+    wert_vorher = straftaten_gesamt[vorheriges_jahr]
+    veraenderung = ((wert_aktuell - wert_vorher) / wert_vorher) * 100
+    prozentuale_veraenderung[aktuelles_jahr] = veraenderung
+
+# Schritt 4: Ergebnisse in einem neuen DataFrame speichern
+ergebnisse = pd.DataFrame({
+    'Jahr': list(prozentuale_veraenderung.keys()),
+    'Prozentuale Veränderung (%)': list(prozentuale_veraenderung.values())
+})
+
+# Optional: Prozentuale Veränderung mit zwei Dezimalstellen formatieren
+ergebnisse['Prozentuale Veränderung (%)'] = ergebnisse['Prozentuale Veränderung (%)'].round(2)
+
+# Ergebnisse anzeigen
+print(ergebnisse)
+
+# Optional: Ergebnisse in eine neue Excel-Datei speichern
+ergebnisse.to_excel('Prozentuale_Veraenderung_Fallzahlen.xlsx', index=False)
+```
+
+### Erklärung der Schritte:
+
+1. **Einlesen aller Sheets:**
+   - Das Skript lädt die Excel-Datei `Fallzahlen.xlsx` und liest alle Sheet-Namen.
+   - Es extrahiert die Jahreszahlen aus den Sheet-Namen, um sicherzustellen, dass die Daten chronologisch verarbeitet werden.
+   - Jeder Sheet wird in ein eigenes `DataFrame` geladen und in einem Dictionary `dataframes` gespeichert, wobei das Jahr als Schlüssel dient.
+
+2. **Extraktion der 'Straftaten_insgesamt' für 'Berlin (PKS gesamt)':**
+   - Für jedes Jahr wird das entsprechende `DataFrame` durchsucht, um die Zeile mit `Bezirke` gleich `'Berlin (PKS gesamt)'` zu finden.
+   - Der Wert aus der Spalte `Straftaten_insgesamt` wird extrahiert und in dem Dictionary `straftaten_gesamt` gespeichert.
+
+3. **Berechnung der prozentualen Veränderung:**
+   - Die Jahreszahlen werden sortiert, um die chronologische Reihenfolge sicherzustellen.
+   - Für jedes Jahr ab dem zweiten wird die prozentuale Veränderung im Vergleich zum Vorjahr berechnet:
+     \[
+     \text{Veränderung} = \left( \frac{\text{Wert aktuell} - \text{Wert vorher}}{\text{Wert vorher}} \right) \times 100
+     \]
+   - Die Ergebnisse werden im Dictionary `prozentuale_veraenderung` gespeichert.
+
+4. **Speichern der Ergebnisse:**
+   - Ein neues `DataFrame` namens `ergebnisse` wird erstellt, das die Jahre und die entsprechenden prozentualen Veränderungen enthält.
+   - Die Ergebnisse werden auf der Konsole angezeigt.
+   - Optional wird das Ergebnis auch in eine neue Excel-Datei `Prozentuale_Veraenderung_Fallzahlen.xlsx` gespeichert.
+
+### Hinweise:
+
+- **Fehlerbehandlung:** Das Skript enthält grundlegende Fehlerbehandlungen, z.B. für Sheets, die nicht dem erwarteten Format entsprechen, oder wenn die Zeile `'Berlin (PKS gesamt)'` nicht gefunden wird.
+  
+- **Anpassungen:** Falls die Excel-Datei weitere Sonderfälle enthält oder die Struktur variiert, müssen eventuell zusätzliche Anpassungen am Skript vorgenommen werden.
+
+- **Sprachunterstützung:** Obwohl der Benutzer deutschsprachige Daten bereitstellt, werden die Spaltennamen im Skript entsprechend der bereitgestellten Daten verwendet. Stelle sicher, dass die Spaltennamen exakt übereinstimmen.
+
+### Beispielausgabe:
+
+Angenommen, die Datei enthält Daten von 2014 bis 2020, könnte die Ausgabe wie folgt aussehen:
+
+```
+   Jahr  Prozentuale Veränderung (%)
+0  2015                      5.23
+1  2016                     -2.15
+2  2017                      3.50
+3  2018                      4.10
+4  2019                      1.75
+5  2020                     -0.85
+```
+
+Diese Tabelle zeigt die prozentuale Veränderung der Straftaten insamt in Berlin im Vergleich zum Vorjahr für jedes Jahr.
+
+Ich hoffe, dieses Skript hilft dir weiter! Falls du weitere Anpassungen benötigst oder Fragen hast, stehe ich gerne zur Verfügung.

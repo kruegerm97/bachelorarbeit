@@ -1,0 +1,132 @@
+Hier ist ein vollständiges Python-Skript, das die von dir gewünschte Analyse durchführt. Das Skript liest alle relevanten Sheets aus der Excel-Datei `Fallzahlen.xlsx`, extrahiert die `Straftaten_insgesamt`-Werte für "Berlin (PKS gesamt)" und berechnet die prozentuale Veränderung zum Vorjahr. Das Ergebnis wird als Pandas DataFrame ausgegeben.
+
+## Voraussetzungen
+
+Stelle sicher, dass du die benötigten Bibliotheken installiert hast. Du kannst sie mit `pip` installieren, falls sie noch nicht vorhanden sind:
+
+```bash
+pip install pandas openpyxl
+```
+
+## Python-Skript
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+excel_file = 'Fallzahlen.xlsx'
+
+# Lade alle Sheet-Namen
+xls = pd.ExcelFile(excel_file)
+sheets = xls.sheet_names
+
+# Extrahiere das Jahr aus den Sheet-Namen und sortiere die Sheets nach Jahr
+sheet_years = []
+for sheet in sheets:
+    try:
+        # Erwartetes Format: 'Fallzahlen_2014', 'Fallzahlen_2015', etc.
+        year = int(sheet.split('_')[-1])
+        sheet_years.append((year, sheet))
+    except ValueError:
+        print(f"Sheet-Name '{sheet}' enthält kein gültiges Jahr und wird übersprungen.")
+        continue
+
+# Sortiere die Sheets nach Jahr
+sheet_years_sorted = sorted(sheet_years, key=lambda x: x[0])
+
+# Liste zur Speicherung der Ergebnisse
+data = []
+
+# Iteriere über jedes Sheet und extrahiere die benötigten Daten
+for year, sheet in sheet_years_sorted:
+    # Lese das aktuelle Sheet
+    df = pd.read_excel(excel_file, sheet_name=sheet)
+    
+    # Stelle sicher, dass die benötigten Spalten vorhanden sind
+    if 'Bezirke' not in df.columns or 'Straftaten_insgesamt' not in df.columns:
+        print(f"Sheet '{sheet}' fehlt die erforderliche Spalte. Überspringe dieses Sheet.")
+        continue
+    
+    # Filtere die Zeile für "Berlin (PKS gesamt)"
+    row = df[df['Bezirke'] == "Berlin (PKS gesamt)"]
+    
+    if not row.empty:
+        # Extrahiere den Wert und stelle sicher, dass er numerisch ist
+        value = row['Straftaten_insgesamt'].values[0]
+        if pd.notnull(value):
+            data.append({'Year': year, 'Straftaten_insgesamt': value})
+        else:
+            print(f"Der Wert für 'Straftaten_insgesamt' im Jahr {year} ist NaN.")
+    else:
+        print(f"'Berlin (PKS gesamt)' nicht in Sheet '{sheet}' gefunden.")
+
+# Erstelle ein DataFrame aus den gesammelten Daten
+df_data = pd.DataFrame(data)
+
+# Sortiere das DataFrame nach Jahr, um sicherzustellen, dass die Reihenfolge stimmt
+df_data = df_data.sort_values('Year').reset_index(drop=True)
+
+# Berechne die prozentuale Veränderung zum Vorjahr
+df_data['Prozentuale_Veraenderung'] = df_data['Straftaten_insgesamt'].pct_change() * 100
+
+# Optional: Runde die Prozentwerte auf zwei Dezimalstellen
+df_data['Prozentuale_Veraenderung'] = df_data['Prozentuale_Veraenderung'].round(2)
+
+# Anzeige des Ergebnisses
+print(df_data)
+
+# Optional: Speichere das Ergebnis in eine neue Excel-Datei oder CSV
+# df_data.to_excel('Prozentuale_Veraenderung_Fallzahlen.xlsx', index=False)
+# df_data.to_csv('Prozentuale_Veraenderung_Fallzahlen.csv', index=False)
+```
+
+## Erklärung der einzelnen Schritte
+
+1. **Importieren der Bibliotheken**:
+   - `pandas` wird für die Datenverarbeitung verwendet.
+
+2. **Laden der Excel-Datei**:
+   - Mit `pd.ExcelFile` werden alle Sheet-Namen aus der Excel-Datei extrahiert.
+
+3. **Extrahieren und Sortieren der Jahre**:
+   - Die Sheet-Namen werden erwartet im Format `Fallzahlen_Jahr` (z.B. `Fallzahlen_2014`).
+   - Das Jahr wird extrahiert und die Sheets werden in aufsteigender Reihenfolge sortiert.
+
+4. **Datenextraktion je Sheet**:
+   - Für jedes sortierte Sheet wird das entsprechende DataFrame geladen.
+   - Es wird überprüft, ob die notwendigen Spalten (`Bezirke` und `Straftaten_insgesamt`) vorhanden sind.
+   - Die Zeile für "Berlin (PKS gesamt)" wird gefiltert und der Wert der `Straftaten_insgesamt` extrahiert.
+
+5. **Erstellung des Ergebnis-DataFrames**:
+   - Die gesammelten Daten werden in ein neues DataFrame `df_data` überführt.
+   - Es wird nach `Year` sortiert, um die korrekte Reihenfolge sicherzustellen.
+
+6. **Berechnung der prozentualen Veränderung**:
+   - Mit `pct_change()` wird die prozentuale Veränderung der `Straftaten_insgesamt` zum Vorjahr berechnet.
+   - Die Ergebnisse werden in der neuen Spalte `Prozentuale_Veraenderung` gespeichert und optional auf zwei Dezimalstellen gerundet.
+
+7. **Ausgabe und Speicherung**:
+   - Das resultierende DataFrame wird ausgegeben.
+   - Optional kann das Ergebnis in eine neue Excel- oder CSV-Datei gespeichert werden, indem die entsprechenden Zeilen entkommentiert werden.
+
+## Beispielhafte Ausgabe
+
+Angenommen, die extrahierten `Straftaten_insgesamt`-Werte über die Jahre sind wie folgt:
+
+| Year | Straftaten_insgesamt | Prozentuale_Veraenderung |
+|------|----------------------|---------------------------|
+| 2014 | 50000                | NaN                       |
+| 2015 | 52000                | 4.00                      |
+| 2016 | 51000                | -1.92                     |
+| 2017 | 53000                | 3.92                      |
+| ...  | ...                  | ...                       |
+
+`NaN` erscheint für das erste Jahr, da es keinen Vorjahreswert gibt.
+
+## Hinweise
+
+- **Fehlende Daten**: Das Skript gibt Warnungen aus, wenn bestimmte Sheets nicht den erwarteten Aufbau haben oder wenn "Berlin (PKS gesamt)" nicht gefunden wird.
+- **Anpassungen**: Falls die Sheet-Namen ein anderes Format haben oder zusätzliche Bereinigungen erforderlich sind, muss das Skript entsprechend angepasst werden.
+- **Speicherung**: Die letzten beiden Zeilen im Skript sind auskommentiert. Entferne das Kommentarzeichen (`#`), um die Ergebnisse in eine Datei zu speichern.
+
+Ich hoffe, dieses Skript hilft dir bei deiner Analyse! Wenn du weitere Anpassungen benötigst oder Fragen hast, stehe ich gerne zur Verfügung.

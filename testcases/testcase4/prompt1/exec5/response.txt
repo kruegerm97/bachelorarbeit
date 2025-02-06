@@ -1,0 +1,153 @@
+Hier ist ein Python-Skript, das Ihre Anforderungen erfüllt. Es liest alle Sheets aus der Excel-Datei `Fallzahlen.xlsx`, aggregiert die Gesamtzahl der Straftaten für ganz Berlin, berechnet die prozentuale Veränderung zum Vorjahr und erstellt eine Zeitreihe als Pandas DataFrame.
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+excel_file = 'Fallzahlen.xlsx'
+
+# Excel-Datei laden
+xls = pd.ExcelFile(excel_file)
+
+# Liste zur Speicherung der jährlichen Gesamtdaten
+jahresdaten = []
+
+# Annahme: Die Sheet-Namen entsprechen den Jahreszahlen (z.B. '2018', '2019', ...)
+for sheet in xls.sheet_names:
+    # Daten des aktuellen Sheets lesen
+    df = pd.read_excel(xls, sheet_name=sheet)
+    
+    # Sicherstellen, dass die 'LOR-Schlüssel' Spalte als String behandelt wird
+    df['LOR-Schlüssel'] = df['LOR-Schlüssel'].astype(str)
+    
+    # Filtern nach der Zeile für ganz Berlin (angenommen '999999' ist der Schlüssel)
+    berlin_gesamt = df[df['LOR-Schlüssel'] == '999999']
+    
+    if not berlin_gesamt.empty:
+        # Gesamtzahl der Straftaten für Berlin aus der entsprechenden Zeile
+        straftaten = berlin_gesamt['Straftaten_insgesamt'].values[0]
+    else:
+        # Wenn die 'Berlin (PKS gesamt)' Zeile nicht vorhanden ist, summiere alle Bezirke
+        straftaten = df['Straftaten_insgesamt'].sum()
+    
+    # Füge die Daten zur Liste hinzu
+    jahresdaten.append({'Jahr': sheet, 'Straftaten_insgesamt': straftaten})
+
+# Erstelle einen DataFrame aus den gesammelten Daten
+df_gesamt = pd.DataFrame(jahresdaten)
+
+# Versuche, die 'Jahr' Spalte in Integer zu konvertieren für die Sortierung
+try:
+    df_gesamt['Jahr'] = df_gesamt['Jahr'].astype(int)
+    df_gesamt = df_gesamt.sort_values('Jahr')
+except ValueError:
+    # Falls die Sheet-Namen nicht numerisch sind, sortiere alphabetisch
+    df_gesamt = df_gesamt.sort_values('Jahr')
+
+# Setze das Jahr als Index
+df_gesamt.set_index('Jahr', inplace=True)
+
+# Berechne die prozentuale Veränderung zum Vorjahr
+df_gesamt['% Veränderung Vorjahr'] = df_gesamt['Straftaten_insgesamt'].pct_change() * 100
+
+# Runde die Prozentwerte auf zwei Dezimalstellen
+df_gesamt['% Veränderung Vorjahr'] = df_gesamt['% Veränderung Vorjahr'].round(2)
+
+# Anzeige des resultierenden DataFrames
+print(df_gesamt)
+
+# Optional: Speichern des DataFrames in eine neue Excel-Datei
+df_gesamt.to_excel('Prozentuale_Veraenderung_Straftaten_Berlin.xlsx')
+```
+
+### Schritt-für-Schritt-Erklärung:
+
+1. **Importieren der notwendigen Bibliothek:**
+   ```python
+   import pandas as pd
+   ```
+   Pandas wird für die Datenverarbeitung und Analyse verwendet.
+
+2. **Laden der Excel-Datei:**
+   ```python
+   excel_file = 'Fallzahlen.xlsx'
+   xls = pd.ExcelFile(excel_file)
+   ```
+   Die Excel-Datei wird geöffnet, und alle Sheet-Namen werden erfasst.
+
+3. **Iterieren durch alle Sheets:**
+   ```python
+   for sheet in xls.sheet_names:
+       df = pd.read_excel(xls, sheet_name=sheet)
+       ...
+   ```
+   Jedes Sheet wird einzeln gelesen und verarbeitet.
+
+4. **Aggregieren der Straftaten für ganz Berlin:**
+   ```python
+   df['LOR-Schlüssel'] = df['LOR-Schlüssel'].astype(str)
+   berlin_gesamt = df[df['LOR-Schlüssel'] == '999999']
+   
+   if not berlin_gesamt.empty:
+       straftaten = berlin_gesamt['Straftaten_insgesamt'].values[0]
+   else:
+       straftaten = df['Straftaten_insgesamt'].sum()
+   ```
+   Es wird nach der Zeile mit `LOR-Schlüssel` '999999' gesucht, die die Gesamtzahl der Straftaten für Berlin enthält. Falls diese Zeile nicht existiert, werden die `Straftaten_insgesamt` aller Bezirke summiert.
+
+5. **Erstellen des DataFrames mit Jahresdaten:**
+   ```python
+   jahresdaten.append({'Jahr': sheet, 'Straftaten_insgesamt': straftaten})
+   df_gesamt = pd.DataFrame(jahresdaten)
+   ```
+
+6. **Sortieren und Indexieren:**
+   ```python
+   try:
+       df_gesamt['Jahr'] = df_gesamt['Jahr'].astype(int)
+       df_gesamt = df_gesamt.sort_values('Jahr')
+   except ValueError:
+       df_gesamt = df_gesamt.sort_values('Jahr')
+   
+   df_gesamt.set_index('Jahr', inplace=True)
+   ```
+
+7. **Berechnung der prozentualen Veränderung zum Vorjahr:**
+   ```python
+   df_gesamt['% Veränderung Vorjahr'] = df_gesamt['Straftaten_insgesamt'].pct_change() * 100
+   df_gesamt['% Veränderung Vorjahr'] = df_gesamt['% Veränderung Vorjahr'].round(2)
+   ```
+
+8. **Anzeige und optionales Speichern des Ergebnisses:**
+   ```python
+   print(df_gesamt)
+   df_gesamt.to_excel('Prozentuale_Veraenderung_Straftaten_Berlin.xlsx')
+   ```
+
+### Wichtige Hinweise:
+
+- **Sheet-Namen:** Das Skript setzt voraus, dass die Sheet-Namen die Jahreszahlen sind (z.B. '2018', '2019'). Falls die Sheet-Namen ein anderes Format haben, müssen ggf. Anpassungen vorgenommen werden, insbesondere bei der Sortierung.
+
+- **'Berlin (PKS gesamt)' Zeile:** Es wird angenommen, dass die Zeile mit `LOR-Schlüssel` '999999' die Gesamtzahlen für Berlin enthält. Sollte dies anders sein, passen Sie den Schlüssel entsprechend an.
+
+- **Fehlende Daten:** Wenn bestimmte Sheets keine Gesamtzahlen für Berlin enthalten und die Summe der Bezirke nicht die korrekten Gesamtzahlen widerspiegelt, sollte eine alternative Methode zur Aggregation der Daten verwendet werden.
+
+### Voraussetzungen:
+
+Stellen Sie sicher, dass die `pandas` Bibliothek installiert ist. Falls nicht, können Sie sie mit folgendem Befehl installieren:
+
+```bash
+pip install pandas
+```
+
+### Ausführen des Skripts:
+
+1. Speichern Sie das Skript in einer Datei, z.B. `analyse_fallzahlen.py`.
+2. Stellen Sie sicher, dass sich die `Fallzahlen.xlsx` im selben Verzeichnis wie das Skript befindet oder passen Sie den Pfad entsprechend an.
+3. Führen Sie das Skript über die Kommandozeile aus:
+
+```bash
+python analyse_fallzahlen.py
+```
+
+Nach der Ausführung erhalten Sie eine Ausgabe des DataFrames mit den prozentualen Veränderungen der Straftaten für jedes Jahr und eine neue Excel-Datei `Prozentuale_Veraenderung_Straftaten_Berlin.xlsx` mit den Ergebnissen.

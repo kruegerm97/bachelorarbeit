@@ -1650,8 +1650,8 @@
       \strng{authorfullhash}{61f43fe28c7471ba015f8b996e05e633}
       \strng{authorfullhashraw}{61f43fe28c7471ba015f8b996e05e633}
       \field{extraname}{3}
-      \field{sortinit}{3}
-      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{booktitle}{First Conference on Language Modeling}
@@ -1664,7 +1664,42 @@
       \verb https://openreview.net/forum?id=IBCBMeAhmC
       \endverb
     \endentry
+    \entry{opendataberlin}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=0c0dbb34c7ffae6394b16d80455aebd6}{%
+           family={Berlin},
+           familyi={B\bibinitperiod},
+           given={Polizei},
+           giveni={P\bibinitperiod}}}%
+      }
+      \strng{namehash}{0c0dbb34c7ffae6394b16d80455aebd6}
+      \strng{fullhash}{0c0dbb34c7ffae6394b16d80455aebd6}
+      \strng{fullhashraw}{0c0dbb34c7ffae6394b16d80455aebd6}
+      \strng{bibnamehash}{0c0dbb34c7ffae6394b16d80455aebd6}
+      \strng{authorbibnamehash}{0c0dbb34c7ffae6394b16d80455aebd6}
+      \strng{authornamehash}{0c0dbb34c7ffae6394b16d80455aebd6}
+      \strng{authorfullhash}{0c0dbb34c7ffae6394b16d80455aebd6}
+      \strng{authorfullhashraw}{0c0dbb34c7ffae6394b16d80455aebd6}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Kriminalitätsatlas Berlin}
+      \field{year}{2024}
+      \verb{urlraw}
+      \verb https://daten.berlin.de/datensaetze/kriminalitatsatlas-berlin
+      \endverb
+      \verb{url}
+      \verb https://daten.berlin.de/datensaetze/kriminalitatsatlas-berlin
+      \endverb
+    \endentry
   \enddatalist
+  \missing{brown2020}
+  \missing{min2022}
+  \missing{ouyang2022}
+  \missing{wang2022selfconsistency}
+  \missing{wei2022}
+  \missing{yao2022react}
 \endrefsection
 \endinput
 

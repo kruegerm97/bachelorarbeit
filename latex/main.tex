@@ -198,6 +198,31 @@ Trotz beeindruckender Fortschritte stößt die automatisierte Code-Generierung n
 \end{itemize}
 Wir präsent diese Herausforderungen in datenanalytischen Aufgaben sind, soll in den folgenden Kapiteln untersucht werden. Vor allem durch den Vergleich von generiertem und manuell geschriebenem Code lassen sich die Stärken und Schwächen von LLMs in der Datenanalyse besser einschätzen.
 
+\subsection{Prompting in Großen Sprachmodellen}
+\label{sec:prompting}
+
+Der Begriff \emph{Prompting} beschreibt das Verfahren, ein vorab trainiertes Sprachmodell allein durch textuelle Eingaben (Prompts) zu steuern, anstatt das Modell selbst weiter zu trainieren. Gerade seit der Veröffentlichung großer Modelle wie GPT-3 \cite{brown2020} hat sich dieses Vorgehen etabliert, weil es schnelle Anpassungen für unterschiedliche Aufgaben ermöglicht: Anwender formulieren die Aufgabe oder Anfrage in natürlicher Sprache und das Modell „lernt“ aus dieser Promptbeschreibung im laufenden Betrieb, ohne weitere Anpassung der Modellgewichte.
+
+\paragraph{Grundlegende Strategien.}
+\begin{itemize}
+  \item \textbf{Zero-Shot, One-Shot und Few-Shot Prompting:}  
+  Bei \emph{Zero-Shot} Prompting erhält das Modell nur eine Aufgabenbeschreibung, ohne Beispiele. Bei \emph{One-Shot} kommt genau ein Beispiel hinzu, während \emph{Few-Shot} mehrere Demonstrationsbeispiele bereitstellt. Erste Arbeiten, wie jene von Brown et al. \cite{brown2020}, zeigten, dass schon wenige Beispiele im Prompt teils große Leistungsunterschiede bewirken können.
+
+  \item \textbf{Demonstration-based Prompting:}  
+  Eine Form des Few-Shot Promptings, bei der anhand mehrerer Input-Output-Paare („Demonstrations“) ersichtlich wird, welches Ausgabeformat und welche Lösungsstrategie gewünscht ist. Studien von Min et al. \cite{min2022} analysieren hier die Rolle von Beispielauswahl und -reihenfolge.
+
+  \item \textbf{Instruction-based Prompting:}  
+  Anstatt nur Beispiele zu geben, formuliert man präzise Anweisungen in Textform, etwa \emph{„Fasse den Text in drei Sätzen zusammen.“} Viele aktuelle Modelle (\emph{z.\,B.\ InstructGPT}) wurden speziell darauf trainiert, solche Instruktionen verlässlich umzusetzen \cite{ouyang2022}.
+
+  \item \textbf{Chain-of-Thought Prompting:}  
+  Hier legt das Modell Schritt für Schritt dar, wie es zu seiner Antwort gelangt (etwa bei mathematischen oder logischen Problemen). Wei et al. \cite{wei2022} zeigten, dass die explizite Darlegung von Zwischen-Schritten zu einer höheren Genauigkeit in komplexen Aufgaben führen kann. Varianten wie \emph{Self-Consistency} lassen das Modell sogar mehrere mögliche Lösungswege formulieren und wählen \cite{wang2022selfconsistency}.
+
+\end{itemize}
+
+\paragraph{Nutzen und Grenzen.}
+\emph{Prompting} ermöglicht einerseits schnelle Anpassungen an neue Aufgaben, ohne umfangreiches Fine-Tuning. Andererseits hängt das Ergebnis stark von der Promptformulierung ab, was das \emph{Prompt Engineering} zu einer entscheidenden Fähigkeit macht. Zudem können \emph{Biases} oder \emph{Halluzinationen} durch reines Prompting oft nicht vollständig vermieden werden. Aktuelle Arbeiten erforschen daher Ansätze wie \emph{automatisches Prompt-Design}, \emph{Reinforcement Learning from Human Feedback} und \emph{Tool-Use} (z.\,B.\ \emph{ReAct} \cite{yao2022react}), um die Robustheit weiter zu erhöhen.
+
+
 \section{LLMs in der Programmierung – aktueller Stand}
 \label{sec:llms_programmierung}
 Die Entwicklung von Large Language Models (LLMs) hat in den letzten Jahren nicht nur die Art und Weise, wie natürliche Sprache verarbeitet und generiert wird, verändert, sondern auch große Fortschritte in der automatisierten Code-Erstellung ermöglicht. Durch die Kombination aus leistungsstarken Modellarchitekturen wie Transformers, großen Mengen an Trainingsdaten und moderner Hardware haben LLMs heute eine große Präsemz in vielen Bereichen der Softwareentwicklung und Datenanalyse.
@@ -271,7 +296,7 @@ Zusammenfassend zeigen die genannten Studien, dass LLMs zwar großes Potenzial z
 \subsection{Überblick und Reduktion der Datengrundlage}
 Die Datengrundlage für die empirische Untersuchung bilden Kriminalitätsstatistiken (sogenannte \emph{Fallzahlen}) der Stadt Berlin\cite{opendataberlin}. Die zugehörige Excel-Datei umfasst mehrere Sheets, jeweils zu den Jahren 2014--2023. Darin sind die Straftaten pro Bezirk (bzw. Ober- und Unterbezirke) aufgelistet. In der Ursprungsform gliedert sich die Tabelle wie folgt:
 \begin{itemize}
-    \item \textbf{Oberbezirk}: Enthält aggregierte Zahlen der jeweiligen Region.
+    \item \textbf{Oberbezirk}: Enthält aggregierte Zahlen der jeweiligen Unterbezirke.
     \item \textbf{Unterbezirke}: Ausführlichere Aufschlüsselung der Straftaten innerhalb des Oberbezirks.
     \item \textbf{Spalten mit Straftat-Kategorien}: u.\,a. \enquote{Straftaten insgesamt}, \enquote{Körperverletzungen}, \enquote{Diebstahl}, \dots
 \end{itemize}
@@ -282,14 +307,15 @@ Für die weitere Analyse wird jedoch nur auf \emph{Oberbezirks}-Daten zurückgeg
 Jedes Jahr (bzw. jedes Sheet) soll in einer separaten \texttt{pandas}-DataFrame-Tabelle abgebildet werden. Dies geschieht folgendermaßen:
 \begin{enumerate}
     \item \textbf{Reduzieren der Datengrundlage}: Entfernen der Unterbezirke, um nur die Oberbezirke zu behalten.
-    \item \textbf{Einlesen der Excel-Sheets}: Mit \texttt{pandas.read\_excel(...)} wird jede Jahres-Tabelle eingelesen.
     \item \textbf{Bereinigung und Umbenennung}: Unnötige Spalten werden entfernt, Spaltennamen ggf. standardisiert (z.\,B. \enquote{Bezirk}, \enquote{Straftaten\_insgesamt}).
+    \item \textbf{Einlesen der Excel-Sheets}: Mit \texttt{pandas.read\_excel(...)} wird jede Jahres-Tabelle eingelesen.
     \item \textbf{Speicherung in DataFrame}: Pro Sheet entsteht ein bereinigtes und vereinheitlichtes DataFrame.
 \end{enumerate}
 
 \subsection{Testfälle und Vorgehen}
 Insgesamt sind vier Testfälle definiert, die unterschiedliche Aspekte der Datenanalyse abdecken. Für jeden Testfall werden \textbf{15 Ausführungen} erzeugt, wobei drei verschiedene Prompting-Strategien (jeweils fünf Wiederholungen) zum Einsatz kommen:
 \begin{itemize}
+    \label{itemize:promptingstrategien}
     \item \textbf{Strategie A: Prompt wie ein \enquote{normaler User}}\\
     Hier wird eine einfache, natürlichsprachliche Anfrage formuliert, ohne viele zusätzliche Informationen.
     \item \textbf{Strategie B: Prompt mit Metadaten}\\
@@ -376,7 +402,7 @@ Ein DataFrame, bei dem jede Zeile einen \texttt{Bezirk} darstellt und mindestens
 
 \subsubsection{Testfall 4: Zeitreihe über die Jahre 2014--2023}
 \paragraph{Zielsetzung:}
-Ausgabe der \textbf{prozentualen Entwicklung} (bezogen auf \emph{Berlin insgesamt}) der \texttt{Straftaten\_insgesamt} pro Jahr. Damit soll ersichtlich werden, wie sich das Gesamtaufkommen an Straftaten im Zeitverlauf verändert hat. 
+Ausgabe der \textbf{prozentualen Entwicklung} (bezogen auf \emph{Berlin insgesamt}) der \texttt{Straftaten\_insgesamt} pro Jahr, bezogen auf das Vorjahr. Damit soll ersichtlich werden, wie sich das Gesamtaufkommen an Straftaten im Zeitverlauf verändert hat. 
 
 \paragraph{Vorgehen:}
 \begin{enumerate}
@@ -390,7 +416,7 @@ Ausgabe der \textbf{prozentualen Entwicklung} (bezogen auf \emph{Berlin insgesam
 Ein DataFrame mit mindestens zwei Spalten:
 \begin{center}
 \begin{tabular}{l|l}
-\textbf{Jahr} & \textbf{Straftaten\_Veränderung\_(\%)} \\
+\textbf{Jahr} & \textbf{Straftaten\_Veränderung\_(\%) zu Vorjahr} \\
 \hline
 2014 & 0\% (Basiswert) \\
 2015 & +3,5\% \\
@@ -412,22 +438,36 @@ TODO: noch mehr ausschreiben
 \subsection{Testfälle der Datenanalyse}
 \label{sec:testfaelle}
 \subsubsection{Testfall 1}
-    Im ersten Testfall soll der Datensatz nach einer gewissen Spalte sortiert werden. Die Begründung hierfür ist, dass dies eine sehr einfache, aber auch sehr häufig aufkommende Datenanalyse-Aufgabe ist und somit einen guten Einstieg in die Untersuchung darstellt. Die Prompt für diese Aufgabe lautet: \emph{Ich habe eine Excel Datei mit dem Namen 'Fallzahlen\&HZ2014-2023.xlsx', mit mehreren Sheets. Hier ist der Inhalt des Sheets 'Fallzahlen\_2023': \textbf{[CSV\_content]}, bitte analysiere die Daten und erstelle mir ein Python Skript, das das Sheet 'Fallzahlen\_2023' der Excel Datei nach der Anzahl der Straftaten insgesamt eines Bezirks in 2023 sortiert.}
+    Im ersten Testfall soll der Datensatz nach einer gewissen Spalte sortiert werden. Die Begründung hierfür ist, dass dies eine sehr einfache, aber auch sehr häufig aufkommende Datenanalyse-Aufgabe ist und somit einen guten Einstieg in die Untersuchung darstellt. Die Prompts für diese Aufgabe lauten:
+    \begin{itemize}
+        \item \textbf{Zero-Shot Prompting}: \emph{Ich habe eine Excel Datei mit dem Namen 'Fallzahlen.xlsx'. Hier ist der Inhalt des Sheets 'Fallzahlen\_2023': \texttt{[DataFrame]}. Erstelle mir ein Skript in Python, das die Daten aus der Excel-Datei einliest, nach den Straftaten insgesamt der Bezirke sortiert und in einem Dataframe speichert.}
+        \item \textbf{Instruction Prompting}: \emph{Ich habe eine Excel Datei mit dem Namen 'Fallzahlen.xlsx'. Hier ist der Inhalt des Sheets 'Fallzahlen\_2023': \texttt{[DataFrame]}. Erstelle mir ein Skript in Python, das die Daten aus der Excel-Datei einliest, nach der Spalte 'Straftaten\_insgesamt' der Bezirke sortiert und in einem Pandas Dataframe speichert. Die Zeilen mit den LOR-Schlüsseln 999900 und 999999 sollen bei der Sortierung außer Acht gelassen werden, da es sich bei diesen nicht um Bezirke handelt.}
+        \item \textbf{Chain-of-Thought Prompting}: \emph{Ich habe eine Excel Datei mit dem Namen 'Fallzahlen.xlsx'. Der Inhalt des Sheets ist als pandas DataFrame \texttt{[DataFrame]} gegeben. Bitte erstelle mir ein Python-Skript, das die folgenden Schritte ausführt:\\1. Lies die Daten des Sheets 'Fallzahlen\_2023' der Excel-Datei 'Fallzahlen.xlsx' ein.\\2. Sortiere die Daten nach der Spalte 'Straftaten\_insgesamt' absteigend. Zur Sortierung sollen die Zeilen mit den LOR-Schlüsseln 999900 und 999999 nicht beachtet werden, da es sich bei diesen nicht um Bezirke handelt. Sie sollen aber am Ende des Dataframes stehen bleiben.\\3. Speichere das Ergebnis der Sortierung in einem Pandas Dataframe ab.\\Achte darauf, dass das Skript robust ist und potentielle Fehler, wie fehlende Spalten berücksichtigt.}
+    \end{itemize}
 
 \subsubsection{Testfall 2 Verbund und Aggregation}
-    Für den zweiten Testfall sollen die Tabellen der Excel Datei durch einen Join zusammengeführt und dann der Bezirk mit den meisten Straftaten insgesamt von allen Jahren kombiniert geliefert werden. Die Prompt für diese Aufgabe lautet: \emph{Ich habe eine Execl Datei mit dem Namen "Fallzahlen\&HZ2014-2023.xlsx", hier sind die Inhalte von den Sheets Fallzahlen\_2014 bis Fallzaheln\_2023, jedes Jahr hat ein eigenes Sheet mit der gleichen Namenskonvention: \textbf{[CSV\_content]}. Die anderen Sheets, die nicht dieser Konvention folgen, sollen ignoriert werden. Erstelle mir ein Python Skript, mit welchem die Tabellen der relevanten Sheets der Excel Datei durch einen Join zusammengeführt werden und der Bezirk mit den meisten Straftaten von allen Jahren kombiniert zurückgegeben wird.}
+    Für den zweiten Testfall sollen die Tabellen der Excel Datei durch einen Join zusammengeführt und dann die Bezirke nach den Straftaten insgesamt von allen Jahren kombiniert geliefert werden. Die Prompts für diese Aufgabe lauten:
+    \begin{itemize}
+        \item \textbf{Zero-Shot Prompting}: \emph{Ich habe eine Excel Datei mit dem Namen 'Fallzahlen.xlsx'. Erstelle mir ein Python Skript, das die Daten aller Sheets zusammenliest, sie nach der Anzahl der Straftaten insgesamt pro Bezirk sortiert und in einem Pandas DataFrame speichert. Hier sind die Daten eines der Sheets als Beispiel: \texttt{[DataFrame]}}
+        \item \textbf{Instruction Prompting}: \emph{Ich habe eine Excel Datei mit dem Namen 'Fallzahlen.xlsx'. Erstelle mir ein Python Skript, das die Daten der einzelnen Bezirke (Zeilen) aller Sheets mit einem Join zusammenfügt, sie nach der akkumulierten Spalte 'Straftaten\_insgesamt' pro Bezirk sortiert und in einem Pandas DataFrame speichert. Die Zeilen mit den LOR-Schlüsseln 999900 und 999999 sollen bei der Sortierung nicht beachtet werden, da es sich hierbei nicht um Bezirke handelt. Hier sind die Daten eines der Sheets als Beispiel: \texttt{[DataFrame]}}
+        \item \textbf{Chain-of-Thought Prompting}: \emph{Ich habe eine Excel Datei mit dem Namen 'Fallzahlen.xlsx'. Erstelle mir ein Python Skript, das folgende Anforderungen erfüllen soll:\\ 1. Die Excel-Datei einlesen und die Sheets als DataFrames speichern.\\ 2. Die DateFrames der einzelnen Sheets zusammen joinen, sodass pro Zeile (jede Zeile ist ein eigener Bezirk) der akkumulierte Wert der einzelnen Straftaten steht.\\ 3. Das neue gejointe DataFrame nach der Spalte 'Straftaten\_insgesamt' sortieren. Für die Sortierung sollen die Zeilen mit den LOR-Schlüsseln 999900 und 999999 nicht beachtet werden, da es sich hierbei nicht um Bezirke handelt. Sie sollen aber am Ende des DataFrames stehen bleiben.\\ 4. Das sortierte Pandas DataFrame zurückgeben.\\ Hier ist der Inhalt eines der Sheets als Beispiel: \texttt{[DataFrame]}}
+    \end{itemize}
 
 \subsubsection{Testfall 3}
-    Im dritten Testfall soll das Sprachmodell die prozentuale Verteilung der Straftaten in den Bezirken berechnen. Die Prompt für diese Aufgabe lautet: \emph{Erstelle mir ein Python Skript, mit welchem die prozentuale Verteilung der genauen Straftaten anteilig der Straftaten insgesamt pro Bezirk berechnet wird.}
-    Prozentuale Verteilung pro Bezirk. Also Straftaten insgesamt von allen Bezirken und prozentualer Anteil pro Bezirk berechnen.
+    Im dritten Testfall soll das Sprachmodell die prozentualen Anteile der gesamten Straftaten der Bezirke von ganz Berlin berechnen. Die Prompts für diese Aufgabe lauten:
+    \begin{itemize}
+        \item \textbf{Zero-Shot Prompting}: \emph{Ich habe eine Excel Datei mit dem Namen 'Fallzahlen.xlsx'. Erstelle mir ein Python Skript, welches den prozentualen Anteil der gesamten Straftaten der einzelnen Bezirke von den gesamten Straftaten von ganz Berlin berechnet. Hier ist der Inhalt des Sheets 'Fallzahlen\_2023': \texttt{[DataFrame]}}
+        \item \textbf{Instruction Prompting}: \emph{Ich habe eine Excel Datei mit dem Namen 'Fallzahlen.xlsx'. Erstelle mir ein Python Skript, welches den prozentualen Anteil der einzelnen Bezirke von ganz Berlin für die Spalte 'Straftaten\_insgesamt' berechnet. Jede Zeile der Tabelle ist ein einzelner Bezirk und 'Berlin (PKS gesamt)' ist die Gesamtanzahl von ganz Berlin. Hier ist der Inhalt des Sheets 'Fallzahlen\_2023': \texttt{[DataFrame]}}
+        \item \textbf{Chain-of-Thought Prompting}: \emph{Ich habe eine Excel Datei mit dem Namen 'Fallzahlen.xlsx'. Erstelle mir ein Python Skript, welches folgende Anforderungen erfüllt:\\ 1. Die Excel-Datei einlesen\\ 2. Die Tabelle als Pandas DataFrame speichert\\ 3. Überprüfen, ob die notwendigen Spalten 'Bezirke' und 'Straftaten\_insgesamt' vorhanden sind\\ 4. Finde die Gesamtzahl der Straftaten für ganz Berlin in der Zeile mit dem Bezirk 'Berlin (PKS gesamt)'\\ 5. Berechne den prozentualen Anteil der einzelnen Bezirke von ganz Berlin für die Spalte 'Straftaten\_insgesamt'\\ 6. Das Ergebnis als DataFrame zurückgeben\\ Hier ist der Inhalt des Sheets 'Fallzahlen\_2023': \texttt{[DataFrame]}}
+    \end{itemize}
 
 \subsubsection{Testfall 4}
-    Im vierten Testfall soll eine simple Visualisierung des Datensatzes stattfinden. Es soll ein Balkendiagramm der Bezirke und der Verteilung der genauen Straftaten erstellt werden. Hierbei sollen die Bezirke auf der x-Achse und die Anzahl der einzelnen Straftaten mit ihrer Verteilung in einem Balken auf der y-Achse dargestellt und absteigend mit der Anzahl der Straftaten insgesamt pro Bezirk sortiert werden. Die Prompt für diese Aufgabe lautet: \emph{Erstelle mir ein Python Skript, mit welchem ein Balkendiagramm der Anzahl der Straftaten insgesamt und dessen Verteilung der genauen Straftaten pro Bezirk erstellt wird. Hierbei sollen auf der X-Achse die Bezirke und auf der Y-Achse pro Bezirk ein Balken über die Verteilung der Anzahl der Straftaten sein.}
-    faellt weg
-
-\subsubsection{Testfall 5 Zeitreihenanalyse prozentuale Verteilung}
-    Für den letzten Testfall ist die Erstellung einer Zeitreihe vorgesehen. Hierbei soll die Anzahl der Straftaten insgesamt pro Jahr in einer Zeitreihe dargestellt werden. Die Prompt für diese Aufgabe lautet: \emph{Erstelle mir ein Python Skript, mit welchem eine Zeitreihe der Anzahl der Straftaten insgesamt pro Jahr dargestellt wird.}
-    Zeitreihe als Pandas dataframe
+    Im vierten Testfall sollen die Skripte eine Zeitreihe der prozentualen Veränderung der gesamten Straftaten von ganz Berlin als Pandas Dataframe erstellen. Die Prompts für diese Aufgabe lauten:
+    \begin{itemize}
+        \item \textbf{Zero-Shot Prompting}: \emph{Ich habe eine Excel Datei mit dem Namen 'Fallzahlen.xlsx'. Erstelle mir ein Python Skript, das die Daten aller Sheets analysiert und eine Zeitreihe mit der prozentualen Veränderung zum jeweiligen Vorjahr der gesamten Straftaten von ganz Berlin als Pandas Dataframe erstellt.\\Hier sind die Daten eines der Sheets als Beispiel: \texttt{[DataFrame]}}
+        \item \textbf{Instruction Prompting}: \emph{Ich habe eine Excel Datei mit dem Namen 'Fallzahlen.xlsx'. Erstelle mir ein Python Skript, das die Daten aller Sheets analysiert und eine Zeitreihe mit der prozentualen Veränderung der Spalte "Straftaten\_insgesamt" zum jeweiligen Vorjahr von der Zeile "Berlin (PKS gesamt)" als Pandas Dataframe erstellt. Die Sheets folgen der Namensgebung 'Fallzahlen\_2014', 'Fallzahlen\_2015', etc.\\Hier sind die Daten eines der Sheets als Beispiel: \texttt{[DataFrame]}}
+        \item \textbf{Chain-of-Thought Prompting}: \emph{Ich habe eine Excel-Datei mit dem Namen 'Fallzahlen.xlsx'. Diese Datei enthält mehrere Sheets, die nach dem Muster 'Fallzahlen\_2014', 'Fallzahlen\_2015', usw. benannt sind. Jedes Sheet enthält Daten, darunter eine Spalte namens 'Straftaten\_insgesamt'. Erstelle mir ein Python Skript mit den folgenen Schritten:\\ 1. Lese alle Sheets der Excel-Datei ein und speichere jedes Sheet in einem separaten Pandas DataFrame.\\ 2. Extrahiere den Wert der Spalte 'Straftaten\_insgesamt' für die Zeile 'Berlin (PKS gesamt)' aus jedem DataFrame.\\ 3. Berechne die prozentuale Veränderung des Werts 'Straftaten\_insgesamt' zum jeweiligen Vorjahr.\\4. Speichere die Ergebnisse in einem neuen Pandas DataFrame, das die Jahre und die prozentuale Veränderung enthält.\\Hier sind die Daten eines der Sheets als Beispiel: \texttt{[DataFrame]}}
+    \end{itemize}
 
 
 \subsection{Auswertungskriterien}
@@ -443,40 +483,181 @@ TODO: noch mehr ausschreiben
         
     \end{enumerate}
 
-\section{Auswertung der Python-Code-Generiung zur Datenanalyse durch LLMs}
-\label{sec:auswertung}
-\subsection{Testfall 1}
-\label{subsec:auswertung_testfall1}
-TODO: ChatGPT\\
-Im ersten Testfall wurde ein Python-Skript generiert, das die Excel-Tabelle \enquote{Fallzahlen\_2023} nach der Anzahl der Straftaten insgesamt in 2023 sortieren sollte. Hierfür gab es zehn Ausführungen (\emph{Executions}). Die wichtigsten Beobachtungen sind:
-
-\paragraph{Erfolgsquote (Pass@10):}
+\section{Auswertung der Python-Code-Generierung zur Datenanalyse durch LLMs}
+\label{sec:auswertung }
+\subsection{Testfall 1: Sortierung und Ausgabe der Fallzahlen 2023}
+\label{subsec:auswertung_testfall1 }
+    
+Im ersten Testfall wurde ein Python-Skript generiert, das die Excel-Tabelle \enquote{Fallzahlen\_2023} nach der Anzahl der Straftaten insgesamt in 2023 sortieren sollte. Hierfür wurden drei verschiedene Prompting-Strategien (A, B, C\ref{itemize:promptingstrategien}) verwendet, wobei jede Strategie fünfmal ausgeführt wurde. Die wichtigsten Beobachtungen sind:
+    
+\paragraph{Erfolgsquote (Pass@15):}
 \begin{itemize}
-    \item Fünf Skripte (\#1, \#4, \#5, \#6 und \#2 mit Teilfehler) konnten letztlich eine korrekte Sortierung vornehmen oder eine korrekte Ausgabe erzeugen.
-    \item Fünf Skripte (\#3, \#7, \#8, \#9, \#10) schlugen aufgrund von \verb|KeyError|-Fehlermeldungen fehl, da der generierte Code nicht exakt mit den vorhandenen Spaltennamen übereinstimmte.
+    \item \textbf{Prompt 1 (Zero-Shot Prompting)}: Alle fünf Ausführungen waren teils erfolgreich. Die Daten wurden zwar korrekt sortiert, jedoch wurden die Zeilen mit den LOR-Schlüsseln 999900 und 999999 (die nicht zu den Bezirken gehören) in die Sortierung einbezogen, was nicht der gewünschten Anforderung entsprach.
+    \item \textbf{Prompt 2 (Instruction Prompting)}: Alle fünf Ausführungen waren teils erfolgreich. Die Zeilen mit den LOR-Schlüsseln 999900 und 999999 wurden korrekt aus der Sortierung ausgeschlossen, jedoch wurden sie vollständig aus dem DataFrame entfernt, was ebenfalls nicht der gewünschten Anforderung entsprach.
+    \item \textbf{Prompt 3 (Chain of Thought Prompting)}: Alle fünf Ausführungen waren erfolgreich. Die Skripte sortierten die Daten korrekt nach der Spalte \enquote{Straftaten\_insgesamt} und behielten dabei die Zeilen mit den LOR-Schlüsseln 999900 und 999999 am Ende des DataFrames, wie gewünscht.
 \end{itemize}
-Berücksichtigt man Skript \#2 als \enquote{erfolgreich} (trotz Fehlermeldung), ergibt sich damit ein \textbf{Pass@10 von 50\%}.
+Berücksichtigt man die Teilerfolge als fehlgeschlagen, ergibt sich ein \textbf{Pass@15 von 33\%} (5 von 15 Ausführungen waren vollständig erfolgreich). Betrachtet man die Teilerfolge jedoch als erfolgreich, ergibt sich ein \textbf{Pass@15 von 100\%} (15 von 15 Ausführungen waren teils erfolgreich).
+    
+\paragraph{Korrektheit und typische Fehlerquellen:}
+\begin{itemize}
+    \item \textbf{Prompt 1}: Der Hauptfehler lag darin, dass die Zeilen mit den LOR-Schlüsseln 999900 und 999999 (also keinem Bezirk zuzuordnende Straftaten und Berlin gesamt) in die Sortierung einbezogen wurden. Dies führte dazu, dass die Sortierung nicht den Anforderungen entsprach, da diese Zeilen nicht zu den Bezirken gehören.
+    \item \textbf{Prompt 2}: Hier wurden die Zeilen mit den LOR-Schlüsseln 999900 und 999999 (also keinem Bezirk zuzuordnende Straftaten und Berlin gesamt) zwar korrekt aus der Sortierung ausgeschlossen, jedoch wurden sie vollständig aus dem DataFrame entfernt, was ebenfalls nicht den Anforderungen entsprach.
+    \item \textbf{Prompt 3}: Diese Strategie war die einzige, die alle Anforderungen erfüllte. Die Daten wurden korrekt sortiert, und die Zeilen mit den LOR-Schlüsseln 999900 und 999999 (also keinem Bezirk zuzuordnende Straftaten und Berlin gesamt) wurden am Ende des DataFrames belassen.
+\end{itemize}
+    
+\paragraph{Performance und Ressourcenverbrauch:}
+\begin{itemize}
+    \item Die Laufzeit betrug bei allen erfolgreichen und teils erfolgreichen Skripten nur wenige Zehntelsekunden (zwischen 0,49 und 0,56 Sekunden).
+    \item Der Speicherverbrauch bewegte sich bei rund 150,MB \emph{Maximum Resident Set Size}, was für diesen kleinen Datensatz sehr effizient ist.
+    \item Die CPU-Auslastung lag bei allen Ausführungen zwischen 445\% und 498\%, was auf eine effiziente Nutzung der verfügbaren Ressourcen hinweist.
+\end{itemize}
+    
+\paragraph{Codequalität und Wartbarkeit:}
+\begin{itemize}
+    \item \textbf{Struktur}: Die meisten Skripte bestanden aus wenigen, übersichtlichen Schritten: \emph{Daten einlesen}, \emph{Spalte bereinigen/umbenennen}, \emph{sortieren}, \emph{Datei abspeichern}. Die Skripte von Prompt 3 waren dabei am strukturiertesten und enthielten zusätzliche Schritte zur Fehlerbehandlung und Robustheit.
+    \item \textbf{Dokumentation}: Die Skripte waren in der Regel gut kommentiert und erklärten die Schritte und die Funktionsweise. Dies war insbesondere bei den Skripten von Prompt 3 der Fall, die zusätzliche Kommentare zur Fehlerbehandlung und zur Logik der Sortierung enthielten.
+    \item \textbf{Erweiterbarkeit}: Die Skripte von Prompt 3 waren am einfachsten zu erweitern, da sie bereits eine robuste Fehlerbehandlung enthielten und die Logik der Sortierung klar dokumentiert war. Die Skripte von Prompt 1 und 2 waren weniger robust, da sie keine Fehlerbehandlung für mögliche Änderungen in den Spaltennamen oder Datenstrukturen enthielten.
+\end{itemize}
+    
+\paragraph{Fazit zu Testfall 1:}
+Die Ergebnisse zeigen, dass die \textbf{Prompting-Strategie C (Chain of Thought)} die zuverlässigste Methode zur Generierung von Python-Code für die Sortierung eines Excel-Datensatzes ist. Diese Strategie lieferte in allen Fällen korrekte und robuste Skripte, die den Anforderungen entsprachen. Die Strategien A und B waren weniger zuverlässig, da sie entweder die Sortierung nicht korrekt durchführten oder die Daten unvollständig zurückgaben.
+
+In Bezug auf \textbf{Performance} gab es keine Probleme, und alle Skripte waren effizient. Die Codequalität war bei den Skripten von Prompt 3 am höchsten, da sie gut dokumentiert und robust waren. Für produktive Einsätze ist daher die Verwendung von \textbf{Chain of Thought}-Prompts zu empfehlen, um sicherzustellen, dass der generierte Code den Anforderungen entspricht und leicht erweitert werden kann.
+
+\subsection{Testfall 2: Join aller Tabellen und Bezirks-Topwert}
+\label{subsec:auswertung_testfall2}
+
+Im zweiten Testfall wurde ein Python-Skript generiert, das die Daten aller Excel-Sheets (2014--2023) zusammenführt, die Straftaten pro Bezirk über die Jahre summiert und die Bezirke nach der Gesamtzahl der Straftaten sortiert ausgibt. Hierfür wurden drei verschiedene Prompting-Strategien (Zero-Shot, Instruction Prompting, Chain of Thought) verwendet, wobei jede Strategie fünfmal ausgeführt wurde. Die wichtigsten Beobachtungen sind:
+
+\paragraph{Erfolgsquote (Pass@15):}
+\begin{itemize}
+    \item \textbf{Prompt 1 (Zero-Shot Prompting)}: Drei von fünf Ausführungen waren teils erfolgreich. Die Daten wurden korrekt zusammengeführt und sortiert, jedoch wurden die unerwünschten LOR-Schlüssel (999900 und 999999) nicht korrekt behandelt. Zwei Ausführungen scheiterten vollständig, da sie die Daten nicht korrekt aggregierten oder falsche Spaltennamen verwendeten.
+    \item \textbf{Prompt 2 (Instruction Prompting)}: Eine von fünf Ausführungen war erfolgreich. Die erfolgreiche Ausführung (Execution 4) führte den Join korrekt durch und filterte die unerwünschten LOR-Schlüssel. Die anderen Ausführungen scheiterten entweder an der korrekten Filterung oder an der Aggregation der Daten.
+    \item \textbf{Prompt 3 (Chain of Thought Prompting)}: Vier von fünf Ausführungen waren erfolgreich. Die Skripte führten den Join korrekt durch, filterten die unerwünschten LOR-Schlüssel (999900 und 999999) aus der Sortierung und behielten sie im DataFrame. Eine Ausführung war teils erfolgreich, da sie Warnungen aufgrund von Pandas-Copy-Warnings warf, aber das korrekte Ergebnis lieferte.
+\end{itemize}
+Die Gesamterfolgsquote beträgt \textbf{33\%} (5 von 15 Ausführungen waren vollständig erfolgreich).
+\paragraph{Erfolgsquoten der einzelnen Prompts:}
+\begin{itemize}
+    \item \textbf{Prompt 1 (Zero-Shot)}: 0\% vollständig erfolgreich, 60\% teils erfolgreich, 40\% nicht erfolgreich.
+    \item \textbf{Prompt 2 (Instruction Prompting)}: 20\% vollständig erfolgreich, 20\% teils erfolgreich, 60\% nicht erfolgreich.
+    \item \textbf{Prompt 3 (Chain of Thought)}: 80\% vollständig erfolgreich, 20\% teils erfolgreich, 0\% nicht erfolgreich.
+\end{itemize}
 
 \paragraph{Korrektheit und typische Fehlerquellen:}
-Der Hauptgrund für Fehlermeldungen lag in der \textbf{Spaltenbenennung}. Das LLM generierte teils leicht abweichende oder gar nicht existierende Spaltennamen wie \enquote{Straftaten -insgesamt-} anstelle von \enquote{Straftaten \textbackslash n-insgesamt-}, was in \verb|KeyError|-Ausnahmen resultierte. In den Fällen mit korrekter Spaltenzuordnung funktionierte das Skript erwartungsgemäß.
+\begin{itemize}
+    \item \textbf{Prompt 1 (Zero-Shot)}: Der Hauptfehler lag darin, dass die unerwünschten LOR-Schlüssel (999900 und 999999) nicht korrekt aus der Sortierung ausgeschlossen wurden. In einigen Fällen wurden sie sogar in die Sortierung einbezogen, was zu falschen Ergebnissen führte. Zusätzlich gab es Probleme bei der Aggregation der Daten über die Jahre.
+    \item \textbf{Prompt 2 (Instruction Prompting)}: Die meisten Ausführungen scheiterten daran, die unerwünschten LOR-Schlüssel korrekt zu filtern. In einigen Fällen wurden sie vollständig aus dem DataFrame entfernt, was nicht den Anforderungen entsprach. Eine Ausführung war erfolgreich, da sie die Filterung korrekt implementierte.
+    \item \textbf{Prompt 3 (Chain of Thought)}: Diese Strategie war die zuverlässigste. Die meisten Ausführungen führten den Join korrekt durch, filterten die unerwünschten LOR-Schlüssel aus der Sortierung und behielten sie im DataFrame. Eine Ausführung warf Warnungen aufgrund von Pandas-Copy-Warnings, lieferte aber das korrekte Ergebnis.
+\end{itemize}
 
 \paragraph{Performance und Ressourcenverbrauch:}
 \begin{itemize}
-    \item Die Laufzeit betrug bei allen erfolgreichen Skripten nur wenige Zehntelsekunden.
-    \item Der Speicherverbrauch bewegte sich bei rund 80\,MB \emph{Maximum Resident Set Size}.
+    \item Die Laufzeit betrug bei allen Ausführungen zwischen 2,83 und 3,28 Sekunden, was für die Verarbeitung von 10 Excel-Sheets mit insgesamt 140 Zeilen sehr effizient ist.
+    \item Der Speicherverbrauch bewegte sich bei rund 150--155\,MB \emph{Maximum Resident Set Size}, was für diesen Datensatz angemessen ist.
+    \item Die CPU-Auslastung lag bei allen Ausführungen zwischen 157\% und 168\%, was auf eine effiziente Nutzung der verfügbaren Ressourcen hinweist.
 \end{itemize}
-Damit sind alle Skripte für diesen kleinen Datensatz sehr effizient.
 
 \paragraph{Codequalität und Wartbarkeit:}
 \begin{itemize}
-    \item Struktur: Die meisten Skripte bestanden aus wenigen, übersichtlichen Schritten: \emph{Daten einlesen}, \emph{Spalte bereinigen/umbenennen}, \emph{sortieren}, \emph{Datei abspeichern}.
-    \item Dokumentation: Die Skripte waren alle gut kommentiert und erklärten die Schritte und die Funktionsweise. Dadurch ist der Code leicht nachvollziehbar und einfach zu warten.
-    \item Erweiterbarkeit: Sofern die Spaltennamen exakt passen, können die Skripte leicht um weitere Verarbeitungsschritte ergänzt werden. Allerdings fehlt eine robuste Fehlerbehandlung, die bei leicht geänderten Spaltennamen (oder anderen Datenfehlern) reagieren würde. Lediglich bei einer der fünf fehlgeschlagenen Ausführungen (Ausführung 7) wurde der \verb|KeyError| vom Skript aufgefangen und eine entsprechende Fehlermeldung ausgegeben.
+    \item \textbf{Struktur}: Die Struktur ist in allen drei Prompts gut unterteilt und übersichtlich. Die Skripte von Prompt 3 waren jedoch am strukturiertesten und enthielten eine etwas genauere Unterteilung der Schritte.
+    \item \textbf{Dokumentation}: Alle Skripte sind gut kommentiert und erklärten die einzelnen Schritte.
+    \item \textbf{Erweiterbarkeit}: Alle Skripte sind leicht erweiterbar und können einfach angepasst werden, um zusätzliche Funktionalitäten hinzuzufügen. Es wurden teils auch Erweiterungsmöglichkeiten für die Skripte gegeben, wie zum Beispiel das generieren einer neuen Excel-Datei, sofern dieses nicht schon im Skript selbst enthalten war. 
 \end{itemize}
 
-\paragraph{Fazit zu Testfall 1:}
-Die Ergebnisse zeigen, dass LLMs in knapp der Hälfte der Fälle sofort lauffähigen Code zur Sortierung eines Excel-Datensatzes liefern. Die größte Schwachstelle ist das \textbf{fehleranfällige Handling von Spaltennamen}. In Bezug auf \textbf{Performance} gab es keine Probleme, und die erfolgreichen Skripte waren korrekt und effizient. Allerdings ist die Codequalität nur teilweise zufriedenstellend, da oft Kommentare und Fehlertoleranz fehlen. Für produktive Einsätze ist daher eine \emph{manuelle Nachbearbeitung} oder ein robustes Spaltenmapping häufig noch notwendig.\\
-Die 
+\paragraph{Fazit zu Testfall 2:}
+Die Ergebnisse zeigen, dass die \textbf{Chain of Thought (CoT)}-Strategie die zuverlässigste Methode zur Generierung von Python-Code für die Zusammenführung und Sortierung von Excel-Daten ist. Diese Strategie lieferte in den meisten Fällen korrekte und robuste Skripte, die den Anforderungen entsprachen. Die \textbf{Zero-Shot}- und \textbf{Instruction Prompting}-Strategien waren weniger zuverlässig, da sie entweder die Filterung nicht korrekt durchführten oder die Daten unvollständig zurückgaben. 
+
+In Bezug auf \textbf{Performance} gab es keine Probleme, und alle Skripte waren effizient. Die Codequalität war bei den Skripten von Prompt 3 am höchsten, da sie gut dokumentiert und robust waren. Für produktive Einsätze ist daher die Verwendung von \textbf{Chain of Thought}-Prompts zu empfehlen, um sicherzustellen, dass der generierte Code den Anforderungen entspricht und leicht erweitert werden kann.
+
+\subsection{Testfall 3: Prozentuale Verteilung der Straftaten}
+\label{subsec:auswertung_testfall3}
+
+Im dritten Testfall wurde ein Python-Skript generiert, das den prozentualen Anteil der Straftaten pro Bezirk an den gesamten Straftaten in Berlin berechnet. Hierfür wurden drei verschiedene Prompting-Strategien (Zero-Shot, Instruction Prompting, Chain of Thought) verwendet, wobei jede Strategie fünfmal ausgeführt wurde. Die wichtigsten Beobachtungen sind:
+
+\paragraph{Erfolgsquote (Pass@15):}
+\begin{itemize}
+    \item \textbf{Prompt 1 (Zero-Shot)}: Alle fünf Ausführungen waren erfolgreich. Die Skripte berechneten die prozentualen Anteile korrekt und speicherten die Ergebnisse in einer Excel-Datei.
+    \item \textbf{Prompt 2 (Instruction Prompting)}: Alle fünf Ausführungen waren erfolgreich. Die Skripte berechneten die prozentualen Anteile korrekt und speicherten die Ergebnisse in einer Excel-Datei.
+    \item \textbf{Prompt 3 (Chain of Thought)}: Vier von fünf Ausführungen waren erfolgreich. Eine Ausführung scheiterte aufgrund eines Syntaxfehlers, bei dem ein Python-Schlüsselwort („if“ und „not“) ins Deutsche übersetzt wurde.
+\end{itemize}
+Die Gesamterfolgsquote beträgt \textbf{93\%} (14 von 15 Ausführungen waren erfolgreich).
+\paragraph{Erfolgsquoten der einzelnen Prompts:}
+\begin{itemize}
+    \item \textbf{Prompt 1 (Zero-Shot)}: 100\% erfolgreich.
+    \item \textbf{Prompt 2 (Instruction Prompting)}: 100\% erfolgreich.
+    \item \textbf{Prompt 3 (Chain of Thought)}: 80\% erfolgreich, 20\% nicht erfolgreich (Syntaxfehler).
+\end{itemize}
+
+\paragraph{Korrektheit und typische Fehlerquellen:}
+\begin{itemize}
+    \item \textbf{Prompt 1 (Zero-Shot)}: Alle Ausführungen waren erfolgreich. Die Skripte berechneten die prozentualen Anteile korrekt und behandelten die unerwünschten LOR-Schlüssel (999900 und 999999) korrekt.
+    \item \textbf{Prompt 2 (Instruction Prompting)}: Alle Ausführungen waren erfolgreich. Die Skripte berechneten die prozentualen Anteile korrekt und behandelten die unerwünschten LOR-Schlüssel korrekt.
+    \item \textbf{Prompt 3 (Chain of Thought)}: Vier von fünf Ausführungen waren erfolgreich. Eine Ausführung scheiterte aufgrund eines Syntaxfehlers, bei dem ein Python-Schlüsselwort („if“ und „not“) ins Deutsche übersetzt wurde. Dies führte zu einem \verb|SyntaxError| und einem Abbruch des Skripts.
+\end{itemize}
+
+\paragraph{Performance und Ressourcenverbrauch:}
+\begin{itemize}
+    \item Die Laufzeit betrug bei allen erfolgreichen Ausführungen zwischen 0,51 und 0,59 Sekunden, was für die Berechnung der prozentualen Anteile sehr effizient ist.
+    \item Der Speicherverbrauch bewegte sich bei rund 150--155\,MB \emph{Maximum Resident Set Size}, was für diesen Datensatz angemessen ist.
+    \item Die CPU-Auslastung lag bei allen Ausführungen zwischen 424\% und 479\%, was auf eine effiziente Nutzung der verfügbaren Ressourcen hinweist.
+\end{itemize}
+
+\paragraph{Codequalität und Wartbarkeit:}
+\begin{itemize}
+    \item \textbf{Struktur}: Die Struktur ist in allen drei Prompts gut unterteilt und übersichtlich. Die Skripte von Prompt 3 waren jedoch am strukturiertesten und enthielten eine etwas genauere Unterteilung der Schritte.
+    \item \textbf{Dokumentation}: Alle Skripte sind gut kommentiert und erklärten die einzelnen Schritte.
+    \item \textbf{Erweiterbarkeit}: Alle Skripte sind leicht erweiterbar und können einfach angepasst werden, um zusätzliche Funktionalitäten hinzuzufügen. Es wurden teils auch Erweiterungsmöglichkeiten für die Skripte gegeben, wie zum Beispiel das generieren einer neuen Excel-Datei, sofern dieses nicht schon im Skript selbst enthalten war. 
+\end{itemize}
+
+\paragraph{Fazit zu Testfall 3:}
+Die Ergebnisse zeigen, dass die \textbf{Zero-Shot}- und \textbf{Instruction Prompting}-Strategien in allen Fällen erfolgreich waren, während die \textbf{Chain of Thought (CoT)}-Strategie aufgrund eines Syntaxfehlers in einer Ausführung scheiterte. Dennoch war die CoT-Strategie in den meisten Fällen zuverlässig und lieferte gut strukturierten und dokumentierten Code. 
+
+In Bezug auf \textbf{Performance} gab es keine Probleme, und alle Skripte waren effizient. Die Codequalität war bei den Skripten von Prompt 3 am höchsten, da sie gut dokumentiert und robust waren. Für produktive Einsätze ist daher die Verwendung von \textbf{Chain of Thought}-Prompts zu empfehlen, um sicherzustellen, dass der generierte Code den Anforderungen entspricht und leicht erweitert werden kann.
+
+\subsection{Testfall 4: Zeitreihe über die Jahre 2014--2023}
+\label{subsec:auswertung_testfall4}
+
+Im vierten Testfall wurde ein Python-Skript generiert, das die prozentuale Veränderung der Straftaten in Berlin im Vergleich zum Vorjahr berechnet und als Zeitreihe ausgibt. Hierfür wurden drei verschiedene Prompting-Strategien (Zero-Shot, Instruction Prompting, Chain of Thought) verwendet, wobei jede Strategie fünfmal ausgeführt wurde. Die wichtigsten Beobachtungen sind:
+
+\paragraph{Erfolgsquote (Pass@15):}
+\begin{itemize}
+    \item \textbf{Prompt 1 (Zero-Shot)}: Zwei von fünf Ausführungen waren erfolgreich. Die erfolgreichen Ausführungen berechneten die prozentuale Veränderung korrekt. Drei Ausführungen scheiterten: zwei aufgrund von Problemen mit den Sheet-Namen und eine aufgrund eines Syntaxfehlers, bei dem ein Python-Schlüsselwort („not“) ins Deutsche übersetzt wurde.
+    \item \textbf{Prompt 2 (Instruction Prompting)}: Alle fünf Ausführungen waren erfolgreich. Die Skripte berechneten die prozentuale Veränderung korrekt und speicherten die Ergebnisse in einem DataFrame.
+    \item \textbf{Prompt 3 (Chain of Thought)}: Alle fünf Ausführungen waren erfolgreich. Eine Ausführung warf eine Warnung aufgrund einer veralteten Pandas-Funktionalität, lieferte aber das korrekte Ergebnis.
+\end{itemize}
+Die Gesamterfolgsquote beträgt \textbf{80\%} (12 von 15 Ausführungen waren erfolgreich).
+\paragraph{Erfolgsquoten der einzelnen Prompts:}
+\begin{itemize}
+    \item \textbf{Prompt 1 (Zero-Shot)}: 40\% erfolgreich, 60\% nicht erfolgreich (Probleme mit Sheet-Namen und Syntaxfehler).
+    \item \textbf{Prompt 2 (Instruction Prompting)}: 100\% erfolgreich.
+    \item \textbf{Prompt 3 (Chain of Thought)}: 100\% erfolgreich (eine Ausführung mit Warnung).
+\end{itemize}
+
+\paragraph{Korrektheit und typische Fehlerquellen:}
+\begin{itemize}
+    \item \textbf{Prompt 1 (Zero-Shot)}: Zwei Ausführungen waren erfolgreich. Drei Ausführungen scheiterten: zwei aufgrund von Problemen mit den Sheet-Namen (die Jahre konnten nicht korrekt extrahiert werden) und eine aufgrund eines Syntaxfehlers, bei dem ein Python-Schlüsselwort („not“) ins Deutsche übersetzt wurde.
+    \item \textbf{Prompt 2 (Instruction Prompting)}: Alle Ausführungen waren erfolgreich. Die Skripte berechneten die prozentuale Veränderung korrekt und behandelten die Daten korrekt.
+    \item \textbf{Prompt 3 (Chain of Thought)}: Alle Ausführungen waren erfolgreich. Eine Ausführung warf eine Warnung aufgrund einer veralteten Pandas-Funktionalität, lieferte aber das korrekte Ergebnis.
+\end{itemize}
+
+\paragraph{Performance und Ressourcenverbrauch:}
+\begin{itemize}
+    \item Die Laufzeit betrug bei allen erfolgreichen Ausführungen zwischen 2,85 und 3,47 Sekunden, was für die Berechnung der prozentualen Veränderung sehr effizient ist.
+    \item Der Speicherverbrauch bewegte sich bei rund 150--160\,MB \emph{Maximum Resident Set Size}, was für diesen Datensatz angemessen ist.
+    \item Die CPU-Auslastung lag bei allen Ausführungen zwischen 155\% und 168\%, was auf eine effiziente Nutzung der verfügbaren Ressourcen hinweist.
+\end{itemize}
+
+\paragraph{Codequalität und Wartbarkeit:}
+\begin{itemize}
+    \item \textbf{Struktur}: Die Struktur ist in allen drei Prompts gut unterteilt und übersichtlich. Die Skripte von Prompt 3 waren jedoch am strukturiertesten und enthielten eine etwas genauere Unterteilung der Schritte.
+    \item \textbf{Dokumentation}: Alle Skripte sind gut kommentiert und erklärten die einzelnen Schritte.
+    \item \textbf{Erweiterbarkeit}: Alle Skripte sind leicht erweiterbar und können einfach angepasst werden, um zusätzliche Funktionalitäten hinzuzufügen. Es wurden teils auch Erweiterungsmöglichkeiten für die Skripte gegeben, wie zum Beispiel das generieren einer neuen Excel-Datei, sofern dieses nicht schon im Skript selbst enthalten war. 
+\end{itemize}
+
+\paragraph{Fazit zu Testfall 4:}
+Die Ergebnisse zeigen, dass die \textbf{Instruction Prompting}- und \textbf{Chain of Thought (CoT)}-Strategien in allen Fällen erfolgreich waren, während die \textbf{Zero-Shot}-Strategie aufgrund von Problemen mit den Sheet-Namen und Syntaxfehlern in drei von fünf Ausführungen scheiterte. Dennoch war die CoT-Strategie in den meisten Fällen zuverlässig und lieferte gut strukturierten und dokumentierten Code. 
+
+In Bezug auf \textbf{Performance} gab es keine Probleme, und alle Skripte waren effizient. Die Codequalität war bei den Skripten von Prompt 3 am höchsten, da sie gut dokumentiert und robust waren. Für produktive Einsätze ist daher die Verwendung von \textbf{Chain of Thought}-Prompts zu empfehlen, um sicherzustellen, dass der generierte Code den Anforderungen entspricht und leicht erweitert werden kann.
 
 \section{Fazit und Ausblick}
 \label{sec:fazit}
@@ -490,17 +671,67 @@ Die
 
 \subsection{Quellcodeverzeichnis}
 \subsubsection{Testfall 1}
-\lstinputlisting[language=Python, caption={OpenAI API Request Skript Testfall 1}, label={lst:request1}]{../testcases/testcase1/request.py}
-\lstinputlisting[language=Python, caption={Generierter Python Code Testfall 1, Ausführung 1}, label={lst:code1_1}]{../testcases/testcase1/exec1/script.py}
-\lstinputlisting[language=Python, caption={Generierter Python Code Testfall 1, Ausführung 2}, label={lst:code1_2}]{../testcases/testcase1/exec2/script.py}
-\lstinputlisting[language=Python, caption={Generierter Python Code Testfall 1, Ausführung 3}, label={lst:code1_3}]{../testcases/testcase1/exec3/script.py}
-\lstinputlisting[language=Python, caption={Generierter Python Code Testfall 1, Ausführung 4}, label={lst:code1_4}]{../testcases/testcase1/exec4/script.py}
-\lstinputlisting[language=Python, caption={Generierter Python Code Testfall 1, Ausführung 5}, label={lst:code1_5}]{../testcases/testcase1/exec5/script.py}
-\lstinputlisting[language=Python, caption={Generierter Python Code Testfall 1, Ausführung 6}, label={lst:code1_6}]{../testcases/testcase1/exec6/script.py}
-\lstinputlisting[language=Python, caption={Generierter Python Code Testfall 1, Ausführung 7}, label={lst:code1_7}]{../testcases/testcase1/exec7/script.py}
-\lstinputlisting[language=Python, caption={Generierter Python Code Testfall 1, Ausführung 8}, label={lst:code1_8}]{../testcases/testcase1/exec8/script.py}
-\lstinputlisting[language=Python, caption={Generierter Python Code Testfall 1, Ausführung 9}, label={lst:code1_9}]{../testcases/testcase1/exec9/script.py}
-\lstinputlisting[language=Python, caption={Generierter Python Code Testfall 1, Ausführung 10}, label={lst:code1_10}]{../testcases/testcase1/exec10/script.py}
+\lstinputlisting[language=Python, caption={OpenAI API Request Skript}, label={lst:request1}]{../testcases/testcase1/prompt1/request.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 1 Ausführung 1}, label={lst:request1}]{../testcases/testcase1/prompt1/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 1 Ausführung 2}, label={lst:request1}]{../testcases/testcase1/prompt1/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 1 Ausführung 3}, label={lst:request1}]{../testcases/testcase1/prompt1/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 1 Ausführung 4}, label={lst:request1}]{../testcases/testcase1/prompt1/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 1 Ausführung 5}, label={lst:request1}]{../testcases/testcase1/prompt1/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 2 Ausführung 1}, label={lst:request1}]{../testcases/testcase1/prompt2/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 2 Ausführung 2}, label={lst:request1}]{../testcases/testcase1/prompt2/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 2 Ausführung 3}, label={lst:request1}]{../testcases/testcase1/prompt2/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 2 Ausführung 4}, label={lst:request1}]{../testcases/testcase1/prompt2/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 2 Ausführung 5}, label={lst:request1}]{../testcases/testcase1/prompt2/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 3 Ausführung 1}, label={lst:request1}]{../testcases/testcase1/prompt3/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 3 Ausführung 2}, label={lst:request1}]{../testcases/testcase1/prompt3/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 3 Ausführung 3}, label={lst:request1}]{../testcases/testcase1/prompt3/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 3 Ausführung 4}, label={lst:request1}]{../testcases/testcase1/prompt3/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 3 Ausführung 5}, label={lst:request1}]{../testcases/testcase1/prompt3/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 1 Ausführung 1}, label={lst:request1}]{../testcases/testcase2/prompt1/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 1 Ausführung 2}, label={lst:request1}]{../testcases/testcase2/prompt1/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 1 Ausführung 3}, label={lst:request1}]{../testcases/testcase2/prompt1/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 1 Ausführung 4}, label={lst:request1}]{../testcases/testcase2/prompt1/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 1 Ausführung 5}, label={lst:request1}]{../testcases/testcase2/prompt1/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 2 Ausführung 1}, label={lst:request1}]{../testcases/testcase2/prompt2/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 2 Ausführung 2}, label={lst:request1}]{../testcases/testcase2/prompt2/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 2 Ausführung 3}, label={lst:request1}]{../testcases/testcase2/prompt2/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 2 Ausführung 4}, label={lst:request1}]{../testcases/testcase2/prompt2/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 2 Ausführung 5}, label={lst:request1}]{../testcases/testcase2/prompt2/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 3 Ausführung 1}, label={lst:request1}]{../testcases/testcase2/prompt3/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 3 Ausführung 2}, label={lst:request1}]{../testcases/testcase2/prompt3/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 3 Ausführung 3}, label={lst:request1}]{../testcases/testcase2/prompt3/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 3 Ausführung 4}, label={lst:request1}]{../testcases/testcase2/prompt3/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 3 Ausführung 5}, label={lst:request1}]{../testcases/testcase2/prompt3/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 1 Ausführung 1}, label={lst:request1}]{../testcases/testcase3/prompt1/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 1 Ausführung 2}, label={lst:request1}]{../testcases/testcase3/prompt1/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 1 Ausführung 3}, label={lst:request1}]{../testcases/testcase3/prompt1/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 1 Ausführung 4}, label={lst:request1}]{../testcases/testcase3/prompt1/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 1 Ausführung 5}, label={lst:request1}]{../testcases/testcase3/prompt1/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 2 Ausführung 1}, label={lst:request1}]{../testcases/testcase3/prompt2/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 2 Ausführung 2}, label={lst:request1}]{../testcases/testcase3/prompt2/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 2 Ausführung 3}, label={lst:request1}]{../testcases/testcase3/prompt2/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 2 Ausführung 4}, label={lst:request1}]{../testcases/testcase3/prompt2/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 2 Ausführung 5}, label={lst:request1}]{../testcases/testcase3/prompt2/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 3 Ausführung 1}, label={lst:request1}]{../testcases/testcase3/prompt3/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 3 Ausführung 2}, label={lst:request1}]{../testcases/testcase3/prompt3/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 3 Ausführung 3}, label={lst:request1}]{../testcases/testcase3/prompt3/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 3 Ausführung 4}, label={lst:request1}]{../testcases/testcase3/prompt3/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 3 Ausführung 5}, label={lst:request1}]{../testcases/testcase3/prompt3/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 1 Ausführung 1}, label={lst:request1}]{../testcases/testcase4/prompt1/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 1 Ausführung 2}, label={lst:request1}]{../testcases/testcase4/prompt1/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 1 Ausführung 3}, label={lst:request1}]{../testcases/testcase4/prompt1/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 1 Ausführung 4}, label={lst:request1}]{../testcases/testcase4/prompt1/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 1 Ausführung 5}, label={lst:request1}]{../testcases/testcase4/prompt1/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 2 Ausführung 1}, label={lst:request1}]{../testcases/testcase4/prompt2/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 2 Ausführung 2}, label={lst:request1}]{../testcases/testcase4/prompt2/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 2 Ausführung 3}, label={lst:request1}]{../testcases/testcase4/prompt2/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 2 Ausführung 4}, label={lst:request1}]{../testcases/testcase4/prompt2/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 2 Ausführung 5}, label={lst:request1}]{../testcases/testcase4/prompt2/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 3 Ausführung 1}, label={lst:request1}]{../testcases/testcase4/prompt3/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 3 Ausführung 2}, label={lst:request1}]{../testcases/testcase4/prompt3/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 3 Ausführung 3}, label={lst:request1}]{../testcases/testcase4/prompt3/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 3 Ausführung 4}, label={lst:request1}]{../testcases/testcase4/prompt3/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 3 Ausführung 5}, label={lst:request1}]{../testcases/testcase4/prompt3/exec5/script.py}
 
 TODO: Abbildungsverzeichnis einfügen
 \end{document}

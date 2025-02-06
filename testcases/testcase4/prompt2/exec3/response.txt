@@ -1,0 +1,120 @@
+Natürlich, hier ist ein Python-Skript, das die von dir beschriebenen Anforderungen erfüllt. Dieses Skript verwendet die `pandas` Bibliothek, um die Excel-Datei zu lesen, die relevanten Daten zu extrahieren und die prozentuale Veränderung der Straftaten insgesamten Klasse pro Jahr zu berechnen.
+
+### Voraussetzungen
+
+Stelle sicher, dass du `pandas` und `openpyxl` installiert hast. Falls nicht, kannst du sie mit `pip` installieren:
+
+```bash
+pip install pandas openpyxl
+```
+
+### Python-Skript
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+excel_file = 'Fallzahlen.xlsx'
+
+# Lese alle Sheetnamen aus der Excel-Datei
+xls = pd.ExcelFile(excel_file)
+sheet_names = xls.sheet_names
+
+# Initialisiere ein Dictionary, um die Daten zu speichern
+data = {}
+
+# Iteriere durch alle Sheets
+for sheet in sheet_names:
+    try:
+        # Extrahiere das Jahr aus dem Sheetnamen, z.B. 'Fallzahlen_2014' -> 2014
+        year = int(sheet.split('_')[-1])
+    except ValueError:
+        print(f"Sheet '{sheet}' folgt nicht dem erwarteten Namensformat. Überspringe...")
+        continue
+
+    # Lese das aktuelle Sheet
+    df = pd.read_excel(xls, sheet_name=sheet)
+
+    # Filtere die Zeile für 'Berlin (PKS gesamt)'
+    berlin_data = df[df['Bezirke'] == 'Berlin (PKS gesamt)']
+
+    if berlin_data.empty:
+        print(f"Keine Daten für 'Berlin (PKS gesamt)' im Sheet '{sheet}' gefunden.")
+        continue
+
+    # Extrahiere den Wert der Spalte 'Straftaten_insgesamt'
+    total_crimes = berlin_data['Straftaten_insgesamt'].values[0]
+
+    # Speichere die Daten im Dictionary
+    data[year] = total_crimes
+
+# Erstelle einen DataFrame aus dem Dictionary
+df_crimes = pd.DataFrame(list(data.items()), columns=['Jahr', 'Straftaten_insgesamt'])
+
+# Sortiere den DataFrame nach Jahr
+df_crimes = df_crimes.sort_values('Jahr').reset_index(drop=True)
+
+# Berechne die prozentuale Veränderung zum Vorjahr
+df_crimes['Prozentuale_Veränderung (%)'] = df_crimes['Straftaten_insgesamt'].pct_change() * 100
+
+# Optional: Runde die prozentuale Veränderung auf zwei Dezimalstellen
+df_crimes['Prozentuale_Veränderung (%)'] = df_crimes['Prozentuale_Veränderung (%)'].round(2)
+
+# Zeige den Ergebnis-DataFrame
+print(df_crimes)
+
+# Optional: Speichere den DataFrame in eine neue Excel-Datei
+df_crimes.to_excel('Straftaten_Veränderung_Zeitreihe.xlsx', index=False)
+```
+
+### Erklärung des Skripts
+
+1. **Importieren der Bibliotheken:**
+   - `pandas` wird für die Datenmanipulation und -analyse verwendet.
+
+2. **Excel-Datei laden:**
+   - Das Skript lädt die Excel-Datei `Fallzahlen.xlsx` und extrahiert alle Sheetnamen.
+
+3. **Daten extrahieren:**
+   - Für jedes Sheet wird das Jahr aus dem Sheetnamen extrahiert.
+   - Das Skript sucht nach der Zeile, wo die Spalte `Bezirke` den Wert `'Berlin (PKS gesamt)'` hat.
+   - Der Wert aus der Spalte `Straftaten_insgesamt` wird extrahiert und im Dictionary `data` gespeichert.
+
+4. **DataFrame erstellen:**
+   - Das Dictionary wird in einen `pandas` DataFrame umgewandelt.
+   - Der DataFrame wird nach Jahr sortiert.
+
+5. **Prozentuale Veränderung berechnen:**
+   - Die prozentuale Veränderung der Straftaten insgesamten Zahl zum Vorjahr wird berechnet und als neue Spalte hinzugefügt.
+
+6. **Ergebnis anzeigen und speichern:**
+   - Der finale DataFrame wird angezeigt.
+   - Optional kann der DataFrame in eine neue Excel-Datei `Straftaten_Veränderung_Zeitreihe.xlsx` gespeichert werden.
+
+### Beispielausgabe
+
+Nach dem Ausführen des Skripts erhältst du einen DataFrame ähnlich dem folgenden:
+
+```
+    Jahr  Straftaten_insgesamt  Prozentuale_Veränderung (%)
+0  2014               500000                          NaN
+1  2015               510000                      2.00
+2  2016               495000                     -2.94
+3  2017               530000                      7.07
+4  2018               550000                      3.77
+...
+```
+
+- **Jahr:** Das Jahr der Daten.
+- **Straftaten_insgesamt:** Gesamtzahl der Straftaten in Berlin.
+- **Prozentuale_Veränderung (%):** Prozentuale Veränderung gegenüber dem Vorjahr.
+
+### Hinweise
+
+- **Fehlerbehandlung:** Das Skript enthält einfache Fehlerbehandlungen, um Sheets zu überspringen, die nicht dem erwarteten Namensformat folgen oder in denen keine Daten für `'Berlin (PKS gesamt)'` gefunden werden.
+  
+- **Anpassungen:** Stelle sicher, dass die Spaltennamen in der Excel-Datei exakt mit den im Skript verwendeten Namen übereinstimmen (`'Bezirke'` und `'Straftaten_insgesamt'`). Falls sie abweichen, passe die Namen im Skript entsprechend an.
+
+- **Erweiterungen:** Du kannst das Skript erweitern, um zusätzliche Analysen durchzuführen oder Visualisierungen zu erstellen, zum Beispiel mit `matplotlib` oder `seaborn`.
+
+Ich hoffe, dieses Skript hilft dir bei deiner Analyse! Falls du weitere Fragen oder Anpassungswünsche hast, lass es mich wissen.

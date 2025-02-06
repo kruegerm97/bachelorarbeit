@@ -1,0 +1,170 @@
+Natürlich! Hier ist ein Python-Skript, das die beschriebenen Schritte durchführt. Das Skript verwendet die `pandas`-Bibliothek, um die Excel-Datei zu verarbeiten. Stelle sicher, dass du `pandas` installiert hast (`pip install pandas openpyxl`), bevor du das Skript ausführst.
+
+```python
+import pandas as pd
+
+def main():
+    # Pfad zur Excel-Datei
+    excel_file = 'Fallzahlen.xlsx'
+
+    # Lade alle Sheet-Namen aus der Excel-Datei
+    xls = pd.ExcelFile(excel_file)
+    sheet_names = xls.sheet_names
+
+    # Dictionary zum Speichern der DataFrames
+    dataframes = {}
+    
+    # Dictionary zum Speichern der 'Straftaten_insgesamt' Werte
+    strafaten_dict = {}
+
+    for sheet in sheet_names:
+        # Lese jedes Sheet in einen DataFrame
+        df = pd.read_excel(excel_file, sheet_name=sheet)
+        dataframes[sheet] = df
+
+        # Extrahiere das Jahr aus dem Sheet-Namen (angenommen, Format 'Fallzahlen_YYYY')
+        try:
+            year = int(sheet.split('_')[-1])
+        except ValueError:
+            print(f"Sheet-Name {sheet} entspricht nicht dem erwarteten Format 'Fallzahlen_YYYY'.")
+            continue
+
+        # Finde die Zeile für 'Berlin (PKS gesamt)'
+        berlin_row = df[df['Bezirke'] == 'Berlin (PKS gesamt)']
+
+        if not berlin_row.empty:
+            # Extrahiere den Wert von 'Straftaten_insgesamt'
+            strafaten_value = berlin_row['Straftaten_insgesamt'].values[0]
+            strafaten_dict[year] = strafaten_value
+        else:
+            print(f"'Berlin (PKS gesamt)' nicht im Sheet {sheet} gefunden.")
+            strafaten_dict[year] = None
+
+    # Erstelle einen DataFrame aus den gesammelten Daten
+    strafaten_df = pd.DataFrame(list(strafaten_dict.items()), columns=['Jahr', 'Straftaten_insgesamt'])
+    strafaten_df.sort_values('Jahr', inplace=True)
+    strafaten_df.reset_index(drop=True, inplace=True)
+
+    # Berechne die prozentuale Veränderung zum Vorjahr
+    strafaten_df['Prozentuale_Veraenderung'] = strafaten_df['Straftaten_insgesamt'].pct_change() * 100
+
+    # Optional: Runde die Veränderung auf 2 Dezimalstellen
+    strafaten_df['Prozentuale_Veraenderung'] = strafaten_df['Prozentuale_Veraenderung'].round(2)
+
+    # Anzeige der Ergebnisse
+    print(strafaten_df)
+
+    # Optional: Speichern der Ergebnisse in eine neue Excel-Datei
+    output_file = 'Straftaten_Veraenderung.xlsx'
+    strafaten_df.to_excel(output_file, index=False)
+    print(f"Ergebnisse wurden in '{output_file}' gespeichert.")
+
+if __name__ == "__main__":
+    main()
+```
+
+### Erklärung der Schritte:
+
+1. **Importieren der Bibliothek:**
+   ```python
+   import pandas as pd
+   ```
+
+2. **Hauptfunktion definieren:**
+   - **Excel-Datei laden:**
+     ```python
+     excel_file = 'Fallzahlen.xlsx'
+     xls = pd.ExcelFile(excel_file)
+     sheet_names = xls.sheet_names
+     ```
+     Dies lädt alle Sheet-Namen aus der Excel-Datei.
+
+   - **Initialisieren von Dictionaries:**
+     ```python
+     dataframes = {}
+     strafaten_dict = {}
+     ```
+     `dataframes` speichert jeden DataFrame, `strafaten_dict` speichert die extrahierten Werte.
+
+   - **Durchlaufen der Sheets:**
+     ```python
+     for sheet in sheet_names:
+         df = pd.read_excel(excel_file, sheet_name=sheet)
+         dataframes[sheet] = df
+
+         try:
+             year = int(sheet.split('_')[-1])
+         except ValueError:
+             print(f"Sheet-Name {sheet} entspricht nicht dem erwarteten Format 'Fallzahlen_YYYY'.")
+             continue
+
+         berlin_row = df[df['Bezirke'] == 'Berlin (PKS gesamt)']
+
+         if not berlin_row.empty:
+             strafaten_value = berlin_row['Straftaten_insgesamt'].values[0]
+             strafaten_dict[year] = strafaten_value
+         else:
+             print(f"'Berlin (PKS gesamt)' nicht im Sheet {sheet} gefunden.")
+             strafaten_dict[year] = None
+     ```
+     - Jeder Sheet wird eingelesen und im `dataframes` Dictionary gespeichert.
+     - Das Jahr wird aus dem Sheet-Namen extrahiert.
+     - Die Zeile mit `'Bezirke' == 'Berlin (PKS gesamt)'` wird gesucht und der Wert von `'Straftaten_insgesamt'` extrahiert.
+
+   - **Erstellen des Ergebnis-DataFrames:**
+     ```python
+     strafaten_df = pd.DataFrame(list(strafaten_dict.items()), columns=['Jahr', 'Straftaten_insgesamt'])
+     strafaten_df.sort_values('Jahr', inplace=True)
+     strafaten_df.reset_index(drop=True, inplace=True)
+     ```
+
+   - **Berechnen der prozentualen Veränderung:**
+     ```python
+     strafaten_df['Prozentuale_Veraenderung'] = strafaten_df['Straftaten_insgesamt'].pct_change() * 100
+     strafaten_df['Prozentuale_Veraenderung'] = strafaten_df['Prozentuale_Veraenderung'].round(2)
+     ```
+
+   - **Ergebnisse anzeigen und speichern:**
+     ```python
+     print(strafaten_df)
+     output_file = 'Straftaten_Veraenderung.xlsx'
+     strafaten_df.to_excel(output_file, index=False)
+     print(f"Ergebnisse wurden in '{output_file}' gespeichert.")
+     ```
+
+3. **Skript ausführen:**
+   ```python
+   if __name__ == "__main__":
+       main()
+   ```
+
+### Zusätzliche Hinweise:
+
+- **Fehlerbehandlung:**
+  - Das Skript gibt eine Warnung aus, wenn ein Sheet-Name nicht dem erwarteten Format entspricht oder wenn die spezifische Zeile nicht gefunden wird.
+  
+- **Speichern der Ergebnisse:**
+  - Die Ergebnisse werden nicht nur auf dem Bildschirm angezeigt, sondern auch in einer neuen Excel-Datei namens `'Straftaten_Veraenderung.xlsx'` gespeichert.
+
+- **Anpassungen:**
+  - Falls die Sheet-Namen ein anderes Muster haben, musst du die Methode zur Extraktion des Jahres (`year = int(sheet.split('_')[-1])`) entsprechend anpassen.
+  - Stelle sicher, dass die Spaltennamen genau übereinstimmen (z.B. `'Bezirke'` und `'Straftaten_insgesamt'`).
+
+### Beispielausgabe:
+
+Nach dem Ausführen des Skripts könnte die Ausgabe folgendermaßen aussehen:
+
+```
+    Jahr  Straftaten_insgesamt  Prozentuale_Veraenderung
+0  2014               50000                       NaN
+1  2015               52000                     4.00
+2  2016               51000                    -1.92
+3  2017               53000                     3.92
+...
+```
+
+In diesem DataFrame repräsentiert jede Zeile ein Jahr und die entsprechende prozentuale Veränderung der Straftaten im Vergleich zum Vorjahr.
+
+---
+
+Dieses Skript sollte dir dabei helfen, die gewünschten Analysen durchzuführen. Passe es nach Bedarf an deine spezifischen Anforderungen und Datenstrukturen an.
