@@ -44,3 +44,10 @@ neues Kapitel vor Methodik zu Ausgangsdaten und worauf sie runtergebrochen werde
 Auch dataframe aus eigener Programmierung, der verwendet werden soll von den Skripten.
 Wenn Zeit auch fertige Tabelle aus eigener Programmierung fuer die Testfaelle um gewollte Ergebnisse der Testfaelle zu haben.
 Auch erklaeren, dass verschiedene Prompting Strategien pro Testfall verwendet werden.
+
+Tabellarische Übersicht über Ergebnisse
+Tests mit Originaldaten: Top Unterbezirke in Straftaten insgesamt und Raub oder Ähnliches. (3 Testfälle)
+
+Prio: Theorie aufräumen und eigene Skripte
+
+WICHTIGES TODO: Chain of Thought Prompt überarbeiten, Modell soll Arbeitsschritte und Gedankengänge mit ausgeben.

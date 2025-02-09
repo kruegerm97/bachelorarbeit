@@ -198,29 +198,22 @@ Trotz beeindruckender Fortschritte stößt die automatisierte Code-Generierung n
 \end{itemize}
 Wir präsent diese Herausforderungen in datenanalytischen Aufgaben sind, soll in den folgenden Kapiteln untersucht werden. Vor allem durch den Vergleich von generiertem und manuell geschriebenem Code lassen sich die Stärken und Schwächen von LLMs in der Datenanalyse besser einschätzen.
 
-\subsection{Prompting in Großen Sprachmodellen}
+\subsection{Prompting mit Sprachmodellen}
 \label{sec:prompting}
 
-Der Begriff \emph{Prompting} beschreibt das Verfahren, ein vorab trainiertes Sprachmodell allein durch textuelle Eingaben (Prompts) zu steuern, anstatt das Modell selbst weiter zu trainieren. Gerade seit der Veröffentlichung großer Modelle wie GPT-3 \cite{brown2020} hat sich dieses Vorgehen etabliert, weil es schnelle Anpassungen für unterschiedliche Aufgaben ermöglicht: Anwender formulieren die Aufgabe oder Anfrage in natürlicher Sprache und das Modell „lernt“ aus dieser Promptbeschreibung im laufenden Betrieb, ohne weitere Anpassung der Modellgewichte.
+Mit dem Begriff \emph{Prompting} wird das Verfahren beschrieben, ein zuvor trainiertes Sprachmodell allein durch spezifische Eingabetexte (\emph{Prompts}) zu steuern, ohne weiteres trainieren des Modells. Im Gegensatz zur zuvor verbreiteten Vorgehensweise, ein vortrainiertes Modell für jede Aufgabe mit allen notwendigen Parametern komplett anzupassen, wird beim Prompting direkt auf das bereits eingearbeitete Wissen des Modells zurückgegriffen und steuert dadurch dessen Ausgabe durch passende Formulierungen\cite{liu2021pretrainpromptpredictsystematic}. Mit der Veröffentlichung großer Modelle wie GPT-3 zog dieses Vorgehen große Aufmerksamkeit auf sich, weil es diesen Modellen ermöglichte, durch spezifische Anweisungen in einer Prompt, komplexe Aufgaben zu lösen, wie Brown et al.(2020)\cite{brown2020languagemodelsfewshotlearners} zeigten.
 
-\paragraph{Grundlegende Strategien.}
+\paragraph{Grundlegende Strategien}
 \begin{itemize}
   \item \textbf{Zero-Shot, One-Shot und Few-Shot Prompting:}  
-  Bei \emph{Zero-Shot} Prompting erhält das Modell nur eine Aufgabenbeschreibung, ohne Beispiele. Bei \emph{One-Shot} kommt genau ein Beispiel hinzu, während \emph{Few-Shot} mehrere Demonstrationsbeispiele bereitstellt. Erste Arbeiten, wie jene von Brown et al. \cite{brown2020}, zeigten, dass schon wenige Beispiele im Prompt teils große Leistungsunterschiede bewirken können.
-
-  \item \textbf{Demonstration-based Prompting:}  
-  Eine Form des Few-Shot Promptings, bei der anhand mehrerer Input-Output-Paare („Demonstrations“) ersichtlich wird, welches Ausgabeformat und welche Lösungsstrategie gewünscht ist. Studien von Min et al. \cite{min2022} analysieren hier die Rolle von Beispielauswahl und -reihenfolge.
+  Bei \emph{Zero-Shot} Prompting wird dem Modell lediglich eine Aufgabenbeschreibung gegeben, ohne Beispiele. Hierbei soll das Modell von alleine auf die richtige und gewünschte Lösung kommen. Bei \emph{One-Shot} wird dem genau ein Beispiel hinzugefügt, während \emph{Few-Shot} mehrere Demonstrationsbeispiele bereitstellt. Erste Arbeiten, wie jene von Brown et al.\cite{brown2020languagemodelsfewshotlearners}, zeigten, dass schon wenige Beispiele im Prompt teils große Leistungsunterschiede bewirken können.
 
   \item \textbf{Instruction-based Prompting:}  
-  Anstatt nur Beispiele zu geben, formuliert man präzise Anweisungen in Textform, etwa \emph{„Fasse den Text in drei Sätzen zusammen.“} Viele aktuelle Modelle (\emph{z.\,B.\ InstructGPT}) wurden speziell darauf trainiert, solche Instruktionen verlässlich umzusetzen \cite{ouyang2022}.
+  Anstatt nur Beispiele zu geben, werden präzise Anweisungen in Textform formuliert, wie beispielsweise \emph{„Fasse den Text in drei Sätzen zusammen.“}. Ouyang et al.(2022) führen dafür auch ihr Modell \emph{InstructGPT} ein, welches speziell darauf trainiert wurde, solche Anweisungen verlässlich und mit Berücksichtigung der Wünsche des Nutzers in korrekter Weise umzusetzen\cite{ouyang2022traininglanguagemodelsfollow}.
 
   \item \textbf{Chain-of-Thought Prompting:}  
-  Hier legt das Modell Schritt für Schritt dar, wie es zu seiner Antwort gelangt (etwa bei mathematischen oder logischen Problemen). Wei et al. \cite{wei2022} zeigten, dass die explizite Darlegung von Zwischen-Schritten zu einer höheren Genauigkeit in komplexen Aufgaben führen kann. Varianten wie \emph{Self-Consistency} lassen das Modell sogar mehrere mögliche Lösungswege formulieren und wählen \cite{wang2022selfconsistency}.
-
+  Hierbei wird das Modell dazu angewiesen Schrittweise vorzugehen und diese Zwischenschritte explizit auszugeben. Dadurch liefern Modelle oft bessere und eher nachvollziehbare Ergebnisse zurück, wie Wei et al.(2022) zeigen\cite{wei2023chainofthoughtpromptingelicitsreasoning}.
 \end{itemize}
-
-\paragraph{Nutzen und Grenzen.}
-\emph{Prompting} ermöglicht einerseits schnelle Anpassungen an neue Aufgaben, ohne umfangreiches Fine-Tuning. Andererseits hängt das Ergebnis stark von der Promptformulierung ab, was das \emph{Prompt Engineering} zu einer entscheidenden Fähigkeit macht. Zudem können \emph{Biases} oder \emph{Halluzinationen} durch reines Prompting oft nicht vollständig vermieden werden. Aktuelle Arbeiten erforschen daher Ansätze wie \emph{automatisches Prompt-Design}, \emph{Reinforcement Learning from Human Feedback} und \emph{Tool-Use} (z.\,B.\ \emph{ReAct} \cite{yao2022react}), um die Robustheit weiter zu erhöhen.
 
 
 \section{LLMs in der Programmierung – aktueller Stand}
@@ -480,7 +473,7 @@ TODO: noch mehr ausschreiben
 \subsection{Verwendete Tools}
     \begin{enumerate}
         \item \textbf{Large Language Model}: Als Large Language Model wird ChatGPT mit GPTo1-mini verwendet, da ChatGPT als aktueller Marktführer gilt und GPTo1-mini das neueste und leistungsfähigste Modell ist, welches mit der OpenAI API verfügbar ist.
-        
+        TODO Libraries hinzufügen
     \end{enumerate}
 
 \section{Auswertung der Python-Code-Generierung zur Datenanalyse durch LLMs}
@@ -659,8 +652,43 @@ Die Ergebnisse zeigen, dass die \textbf{Instruction Prompting}- und \textbf{Chai
 
 In Bezug auf \textbf{Performance} gab es keine Probleme, und alle Skripte waren effizient. Die Codequalität war bei den Skripten von Prompt 3 am höchsten, da sie gut dokumentiert und robust waren. Für produktive Einsätze ist daher die Verwendung von \textbf{Chain of Thought}-Prompts zu empfehlen, um sicherzustellen, dass der generierte Code den Anforderungen entspricht und leicht erweitert werden kann.
 
+\subsection{Übersicht der Ergebnisse}
+\begin{table}[h!]
+    \centering
+    \caption{Übersicht der Pass@15-Ergebnisse pro Testfall und Prompting-Strategie(Es wird nur die Erfolgsquote der komplett korrekten Ergebnisse angegeben)}
+    \label{tab:pass15}
+    \begin{tabular}{l|ccc}
+    \hline
+    \textbf{Testfall} & \textbf{Zero-Shot} & \textbf{Instruction} & \textbf{Chain of Thought} \\
+    \hline
+    1 & 0\% & 0\% & 100\% \\
+    2 & 0\% & 20\% & 80\% \\
+    3 & 100\% & 100\% & 80\% \\
+    4 & 40\% & 100\% & 100\% \\
+    \hline
+    \end{tabular}
+\end{table}
+
 \section{Fazit und Ausblick}
 \label{sec:fazit}
+TODO:check
+Die vorliegende Arbeit hat untersucht, wie gut sich moderne \emph{Large Language Models} (LLMs) – exemplarisch repräsentiert durch ChatGPT mit dem Modell „GPTo1“ – für die automatisierte Generierung von Python-Code im Kontext typischer Datenanalyseaufgaben eignen. Im Fokus standen vier typische Szenarien: das Sortieren und Filtern von Daten (Testfall1), das Zusammenführen und Aggregieren verschiedener Tabellen (Testfall2), die Berechnung prozentualer Anteile (Testfall3) sowie die Ermittlung von Zeitreihen mitsamt prozentualer Veränderung zum Vorjahr (Testfall4). Dabei wurden unterschiedliche Prompting-Strategien (Zero-Shot, Instruction Prompting und Chain of Thought) eingesetzt und die Qualität der resultierenden Skripte anhand von Kriterien wie Korrektheit, Performanz, Code-Struktur und Wartbarkeit evaluiert.
+
+\paragraph{Zentrale Erkenntnisse} \begin{itemize} \item \textbf{Korrektheit und Erfolgsquote:}
+Die Ergebnisse zeigen, dass die Leistungsfähigkeit stark von der Art des Promptings abhängt. Während \emph{Chain of Thought}-Prompts im Durchschnitt sehr robuste und korrekte Lösungen lieferten, kam es bei Zero-Shot-Ansätzen häufiger zu Syntaxfehlern, falschen Sheet-Namen oder fehlerhafter Ausfilterung bestimmter Zeilen (LOR-Schlüssel). Insgesamt bestätigte sich, dass \emph{strukturierte Prompt-Anweisungen} (Instruction oder Chain of Thought) zu einer höheren Erfolgsquote führen als ein unpräziser Zero-Shot-Ansatz. \item \textbf{Performanz:}
+Bei allen Testfällen war die Ausführungszeit sehr kurz (teils nur wenige Zehntelsekunden bis wenige Sekunden), was für den überschaubaren Datensatz (mehrere Excel-Sheets, aber jeweils nur im Bereich einiger Zeilen pro Sheet) vollkommen ausreichend ist. Damit bestätigt sich, dass ein KI-basierter Code-Generator im Kontext kleiner bis mittlerer Datenanalysen in Sachen Laufzeit absolut konkurrenzfähig ist. \item \textbf{Qualität und Wartbarkeit:}
+Die generierten Skripte weisen – insbesondere bei Chain of Thought – eine erstaunlich gute Code-Struktur auf. Sie sind in der Regel sinnvoll kommentiert, nutzen etablierte Python-Bibliotheken (z.,B. \texttt{pandas}) und sind leicht erweiterbar. Limitationen zeigen sich jedoch in Fällen, in denen das Modell falsche oder irreführende Annahmen über Spaltennamen oder Datenstrukturen trifft. Solche Fehler entstehen meist durch Unklarheiten oder fehlende Details in den Prompts. \item \textbf{Grenzen:}
+Trotz der hohen Erfolgsquote in den definierten Testfällen darf man nicht vergessen, dass in realen Szenarien Datenanalysen oft komplexere Anforderungen mit sich bringen: Ungewohnte Datenformate, aufwändige Vorverarbeitungs- und Qualitätschecks oder tiefergehende statistische Verfahren. Hier können LLMs ohne exakte Vorgaben schnell an ihre Grenzen gelangen. Die Modelle tendieren außerdem gelegentlich zu „Halluzinationen“, indem sie nicht-existente Funktionen oder Spalten vorschlagen. \end{itemize}
+
+\paragraph{Ausblick} Die steigende Leistungsfähigkeit von LLMs lässt erwarten, dass die automatische Code-Generierung in den kommenden Jahren eine immer größere Rolle in Datenanalyse- und Data-Science-Projekten spielen wird. Insbesondere die folgenden Entwicklungen erscheinen relevant:
+
+\begin{itemize} \item \textbf{Spezialisierte Modelle und Fine-Tuning:}
+Mit zunehmender Verfügbarkeit von domänenspezifischen Datensätzen für Code-Generierung könnten LLMs besser auf bestimmte Aufgaben, wie z.,B. Datenbereinigung oder automatisiertes Exploratory Data Analysis (EDA), optimiert werden. Eine engere Anbindung an unternehmenseigene Datenbanken ist ebenfalls denkbar. \item \textbf{Bessere Kontextverarbeitung:}
+Aktuelle LLMs haben eine begrenzte Kontextlänge. Künftige Modelle werden voraussichtlich größere Kontextfenster bieten und so umfangreichere Code-Dateien oder Datenschemata verarbeiten können. Damit würden komplexere Use Cases (etwa umfangreiche ETL-Pipelines) in den Bereich des Möglichen rücken. \item \textbf{Integrierte Fehlersuche und Debugging:}
+Erste Ansätze zeigen, dass LLMs nicht nur Code generieren, sondern auch zum Debugging eingesetzt werden können. Wenn die Modelle direkt während der Code-Erstellung mögliche Probleme erkennen und Lösungsvorschläge machen, könnte die Produktivität bei Datenanalyse-Projekten weiter gesteigert werden. \item \textbf{Erweiterte Qualitäts- und Sicherheitstests:}
+Wie in aktuellen Studien – beispielsweise von Liu et al. (2023) – diskutiert, bedarf es verbesserter Evaluationsmethoden (etwa \emph{EvalPlus}), um die tatsächliche Funktionalität und Sicherheit des generierten Codes sicherzustellen. Automatisierte Unit-Tests und Code-Audits im Prompt bzw. Post-Processing könnten ein wesentlicher Baustein sein. \end{itemize}
+
+\noindent Zusammenfassend lässt sich festhalten, dass LLMs bereits heute in der Lage sind, für standardisierte Datenanalyseschritte in Python zuverlässig einsatzfähigen Code zu erstellen. Dies kann den Einstieg in die Datenanalyse vereinfachen und auch erfahrenen Anwendern mühsame Routineaufgaben abnehmen. Allerdings bleibt ein gewisses Maß an menschlicher Kontrolle weiterhin unverzichtbar: Sei es zur Prüfung potenzieller Halluzinationen, zur Anpassung spezieller Projektanforderungen oder zur Qualitätssicherung komplexer Analysen. Das Potenzial für zukünftige Anwendungen ist groß – insbesondere, wenn die Modelle durch spezialisierte Trainingsdaten, fortgeschrittene Prompting-Techniken und integrierte Debugging-Funktionen weiter verbessert werden.
 
 \newpage
 % Literatur
