@@ -1,3 +1,9 @@
 Section 4:
 \subsection{Zusammenfassung}
 In diesem Kapitel wurden die Ausgangsdaten (Kriminalitätsstatistiken für 2014--2023) vorgestellt und erläutert, wie sie für die empirische Analyse \emph{vereinfacht} werden: Wir beschränken uns \textbf{ausschließlich} auf die Oberbezirke und ignorieren die detaillierteren Unterbezirksinformationen. Anschließend wurden vier Testfälle definiert, die verschiedene Aspekte der Datenanalyse abdecken (Sortierung, Joins, prozentuale Anteile und Zeitreihen). Pro Testfall finden \textbf{drei Prompting-Strategien} Anwendung, die jeweils \emph{fünf Mal} wiederholt werden. Dadurch entstehen 15 Ausführungen je Testfall, deren Ergebnisse in den folgenden Kapiteln ausgewertet und diskutiert werden.
+
+Section 2.1
+ Die umfangreichen Bibliotheken wie NumPy, pandas und scikit-learn sind Teil der Trainingskorpora, wodurch LLMs häufig in der Lage sind, Standardroutinen oder Bibliotheksfunktionen korrekt anzuwenden\cite{chen2021evaluatinglargelanguagemodels}.
+
+sec methodik 5
+ und auch mit den Ergebnissen anderer Arbeiten, wie etwa von Chen et al. (2021)\cite{chen2021evaluatinglargelanguagemodels} und Liu et al. (2023)\cite{NEURIPS2023_43e9d647} verglichen.
