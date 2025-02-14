@@ -1,0 +1,110 @@
+Natürlich, hier ist ein Python-Skript, das die beschriebenen Anforderungen erfüllt. Das Skript verwendet die `pandas`-Bibliothek, um die Excel-Datei zu lesen, die Daten zu verarbeiten und die gewünschten Ergebnisse zu erzielen.
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+excel_datei = 'Fallzahlen&HZ 2014-2023.xlsx'
+
+# Liste der Oberbezirke
+oberbezirke = [
+    'Mitte', 'Friedrichshain-Kreuzberg', 'Pankow', 'Charlottenburg-Wilmersdorf',
+    'Spandau', 'Steglitz-Zehlendorf', 'Tempelhof-Schöneberg', 'Neukölln',
+    'Treptow-Köpenick', 'Marzahn-Hellersdorf', 'Lichtenberg', 'Reinickendorf'
+]
+
+# Liste der relevanten Sheet-Namen
+sheet_namen = [f'Fallzahlen_{jahr}' for jahr in range(2014, 2024)]
+
+# Alle relevanten Sheets einlesen und in eine Liste von DataFrames speichern
+daten_list = []
+for sheet in sheet_namen:
+    try:
+        df = pd.read_excel(excel_datei, sheet_name=sheet)
+        daten_list.append(df)
+    except Exception as e:
+        print(f"Fehler beim Lesen des Sheets {sheet}: {e}")
+
+# Alle DataFrames zu einem einzigen DataFrame zusammenführen
+gesamt_df = pd.concat(daten_list, ignore_index=True)
+
+# Anzeige der Spaltennamen zur Überprüfung (optional)
+# print(gesamt_df.columns)
+
+# Filtern der Unterbezirke:
+# - Ausschließen der Oberbezirke
+# - Ausschließen von nicht zugeordneten Zeilen
+filtered_df = gesamt_df[
+    (~gesamt_df['Bezeichnung (Bezirksregion)'].isin(oberbezirke)) &
+    (~gesamt_df['Bezeichnung (Bezirksregion)'].str.contains('nicht zuzuordnen', case=False, na=False))
+]
+
+# Sicherstellen, dass die 'Straftaten -insgesamt-' Spalte numerisch ist
+filtered_df['Straftaten -insgesamt-'] = pd.to_numeric(filtered_df['Straftaten -insgesamt-'], errors='coerce')
+
+# Entfernen von Zeilen mit NaN in 'Straftaten -insgesamt-'
+filtered_df = filtered_df.dropna(subset=['Straftaten -insgesamt-'])
+
+# Aggregieren der Straftaten pro Unterbezirk
+aggregiert_df = filtered_df.groupby('Bezeichnung (Bezirksregion)')['Straftaten -insgesamt-'].sum().reset_index()
+
+# Top 10 Unterbezirke mit den meisten Straftaten
+top_10_df = aggregiert_df.sort_values(by='Straftaten -insgesamt-', ascending=False).head(10)
+
+# Optional: Zur besseren Darstellung sortieren
+top_10_df = top_10_df.sort_values(by='Straftaten -insgesamt-', ascending=False)
+
+# Finale Ausgabe
+print("Top 10 Unterbezirke mit den meisten Straftaten:")
+print(top_10_df)
+
+# Optional: Speichern des Ergebnisses in eine neue Excel-Datei
+# top_10_df.to_excel('Top_10_Unterbezirke_Straftaten.xlsx', index=False)
+```
+
+### Erklärung der Schritte:
+
+1. **Importieren der notwendigen Bibliothek:**
+   - `pandas` wird verwendet, um die Excel-Datei zu lesen und die Daten zu verarbeiten.
+
+2. **Festlegen des Pfads zur Excel-Datei und der Liste der Oberbezirke:**
+   - `excel_datei` enthält den Namen der Excel-Datei.
+   - `oberbezirke` ist eine Liste der Oberbezirke, die ausgeschlossen werden sollen.
+
+3. **Generieren der Liste der relevanten Sheet-Namen:**
+   - Die Sheets werden von `Fallzahlen_2014` bis `Fallzahlen_2023` erwartet.
+
+4. **Einlesen aller relevanten Sheets:**
+   - Mit einer Schleife werden alle Sheets nacheinander eingelesen und in der Liste `daten_list` gespeichert.
+   - Fehler beim Lesen einzelner Sheets werden ausgegeben, ohne das gesamte Skript zu unterbrechen.
+
+5. **Zusammenführen aller DataFrames:**
+   - Alle DataFrames aus `daten_list` werden zu einem einzigen DataFrame `gesamt_df` zusammengeführt.
+
+6. **Filtern der Unterbezirke:**
+   - Ausschließen der Oberbezirke mittels `isin`.
+   - Ausschließen von Zeilen, die den Begriff „nicht zuzuordnen“ enthalten (unabhängig von Groß-/Kleinschreibung).
+
+7. **Sicherstellen der numerischen Werte in der Straftaten-Spalte:**
+   - Die Spalte `'Straftaten -insgesamt-'` wird in numerische Werte umgewandelt.
+   - Zeilen mit ungültigen Werten werden entfernt.
+
+8. **Aggregieren der Straftaten pro Unterbezirk:**
+   - Gruppieren nach `'Bezeichnung (Bezirksregion)'` und Summieren der Straftaten.
+
+9. **Ermitteln der Top 10 Unterbezirke:**
+   - Sortieren nach der aggregierten Summe der Straftaten in absteigender Reihenfolge.
+   - Auswahl der ersten 10 Einträge.
+
+10. **Ausgabe des finalen DataFrames:**
+    - Die Top 10 Unterbezirke werden im Terminal angezeigt.
+    - Optional kann das Ergebnis in eine neue Excel-Datei gespeichert werden, indem die auskommentierte Zeile aktiviert wird.
+
+### Hinweise:
+
+- Stelle sicher, dass die Excel-Datei sich im selben Verzeichnis wie das Skript befindet oder gib den vollständigen Pfad zur Datei an.
+- Falls die Spaltennamen leicht abweichen, überprüfe sie mit `print(gesamt_df.columns)` und passe sie gegebenenfalls im Skript an.
+- Um das Skript auszuführen, benötigst du die `pandas`-Bibliothek. Installiere sie ggf. mit `pip install pandas` und auch `openpyxl` für das Lesen von Excel-Dateien: `pip install openpyxl`.
+- Bei sehr großen Excel-Dateien könnte das Einlesen und Verarbeiten etwas Zeit in Anspruch nehmen.
+
+Ich hoffe, dieses Skript hilft dir weiter! Wenn du weitere Anpassungen benötigst oder Fragen hast, lass es mich wissen.

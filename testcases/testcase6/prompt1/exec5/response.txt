@@ -1,0 +1,140 @@
+Natürlich, hier ist ein Python-Skript, das die gewünschten Anforderungen erfüllt. Das Skript verwendet die `pandas` Bibliothek, um die Excel-Datei zu verarbeiten und die Top 10 Unterbezirke nach Gesamtzahl der Straftaten zu ermitteln.
+
+### Voraussetzungen
+
+1. **Python installieren**: Stellen Sie sicher, dass Python auf Ihrem Computer installiert ist. Sie können es von [python.org](https://www.python.org/downloads/) herunterladen und installieren.
+
+2. **Benötigte Bibliotheken installieren**: Öffnen Sie ein Terminal oder eine Eingabeaufforderung und installieren Sie die notwendigen Python-Bibliotheken mit `pip`:
+
+   ```bash
+   pip install pandas openpyxl
+   ```
+
+   - `pandas`: Zum Verarbeiten und Analysieren der Daten.
+   - `openpyxl`: Zum Lesen von Excel-Dateien (`.xlsx`).
+
+### Skript
+
+Speichern Sie das folgende Skript in einer Datei, z.B. `top_unterbezirke.py`:
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+excel_datei = 'Fallzahlen&HZ 2014-2023.xlsx'
+
+# Liste der relevanten Sheet-Namen
+jahre = list(range(2014, 2024))  # 2014 bis 2023
+sheet_namen = [f'Fallzahlen_{jahr}' for jahr in jahre]
+
+# Initialisiere ein leeres DataFrame zur Aggregation
+aggregate_df = pd.DataFrame()
+
+# Iteriere über jedes Sheet und aggregiere die Daten
+for sheet in sheet_namen:
+    try:
+        # Lese das aktuelle Sheet
+        df = pd.read_excel(excel_datei, sheet_name=sheet)
+        
+        # Überprüfe, ob die notwendigen Spalten vorhanden sind
+        if 'Bezeichnung (Bezirksregion)' in df.columns and 'Straftaten -insgesamt-' in df.columns:
+            # Wähle die relevanten Spalten aus
+            temp_df = df[['Bezeichnung (Bezirksregion)', 'Straftaten -insgesamt-']].copy()
+            
+            # Gruppiere nach Bezirksregion und summiere die Straftaten
+            temp_agg = temp_df.groupby('Bezeichnung (Bezirksregion)', as_index=False)['Straftaten -insgesamt-'].sum()
+            
+            # Füge die aggregierten Daten zum Gesamt-DataFrame hinzu
+            aggregate_df = pd.concat([aggregate_df, temp_agg], ignore_index=True)
+        else:
+            print(f"Warnung: Die erforderlichen Spalten sind im Sheet '{sheet}' nicht vorhanden.")
+    except Exception as e:
+        print(f"Fehler beim Verarbeiten des Sheets '{sheet}': {e}")
+
+# Überprüfe, ob Daten aggregiert wurden
+if aggregate_df.empty:
+    print("Keine Daten zum Aggregieren gefunden.")
+else:
+    # Gruppiere erneut nach Bezirksregion, um die Gesamtstraftaten über alle Jahre zu berechnen
+    gesamt_agg = aggregate_df.groupby('Bezeichnung (Bezirksregion)', as_index=False)['Straftaten -insgesamt-'].sum()
+    
+    # Sortiere die Bezirke nach den meisten Straftaten
+    top_10 = gesamt_agg.sort_values(by='Straftaten -insgesamt-', ascending=False).head(10)
+    
+    # Ausgabe der Top 10 Unterbezirke
+    print("Top 10 Unterbezirke mit den meisten Straftaten insgesamt (2014-2023):")
+    print(top_10.to_string(index=False))
+    
+    # Optional: Speichern der Ergebnisse in einer CSV-Datei
+    top_10.to_csv('Top_10_Unterbezirke_Straftaten_2014-2023.csv', index=False)
+    print("\nDie Ergebnisse wurden in 'Top_10_Unterbezirke_Straftaten_2014-2023.csv' gespeichert.")
+```
+
+### Erklärung des Skripts
+
+1. **Importieren der Bibliotheken**:
+   - `pandas` wird für die Datenverarbeitung verwendet.
+
+2. **Definieren des Pfads zur Excel-Datei**:
+   - Stellen Sie sicher, dass sich die Datei `Fallzahlen&HZ 2014-2023.xlsx` im selben Verzeichnis wie das Skript befindet oder geben Sie den vollständigen Pfad an.
+
+3. **Erstellen der Liste der Sheet-Namen**:
+   - Es werden die Sheets von `Fallzahlen_2014` bis `Fallzahlen_2023` erstellt.
+
+4. **Daten aggregieren**:
+   - Für jedes Sheet wird überprüft, ob die erforderlichen Spalten vorhanden sind.
+   - Die Straftaten werden pro Bezirksregion summiert.
+   - Die aggregierten Daten werden in einem Gesamt-DataFrame gesammelt.
+
+5. **Berechnung der Gesamtstraftaten über alle Jahre**:
+   - Nach dem Aggregieren aller Sheets werden die Straftaten erneut nach Bezirksregion gruppiert und summiert, um die Gesamtzahl der Straftaten pro Bezirksregion über alle Jahre hinweg zu erhalten.
+
+6. **Bestimmung der Top 10 Unterbezirke**:
+   - Die Bezirke werden nach der Gesamtzahl der Straftaten sortiert.
+   - Die Top 10 werden ausgewählt und angezeigt.
+
+7. **Optional: Speichern der Ergebnisse**:
+   - Die Top 10 Liste wird zusätzlich in einer CSV-Datei namens `Top_10_Unterbezirke_Straftaten_2014-2023.csv` gespeichert.
+
+### Ausführen des Skripts
+
+1. Stellen Sie sicher, dass das Skript und die Excel-Datei im selben Verzeichnis liegen oder passen Sie den Pfad zur Excel-Datei entsprechend an.
+
+2. Öffnen Sie ein Terminal oder eine Eingabeaufforderung und navigieren Sie zu dem Verzeichnis, in dem sich das Skript befindet.
+
+3. Führen Sie das Skript mit folgendem Befehl aus:
+
+   ```bash
+   python top_unterbezirke.py
+   ```
+
+4. Nach der Ausführung sollten die Top 10 Unterbezirke mit den meisten Straftaten in der Konsole angezeigt werden und zusätzlich in der CSV-Datei gespeichert sein.
+
+### Beispielausgabe
+
+```
+Top 10 Unterbezirke mit den meisten Straftaten insgesamt (2014-2023):
+  Bezeichnung (Bezirksregion)  Straftaten -insgesamt-
+                  Berlin (PKS gesamt)                 536695
+                       Mitte                     83611
+                 Alexanderplatz                    19673
+               Tiergarten Süd                     4491
+         Regierungsviertel                      6550
+            Brunnenstraße Süd                   3724
+                      MV Nord                      2163
+                      MV Süd                        830
+Bezirk (Rd), nicht zuzuordnen                     741
+Stadtgebiet Berlin, nicht zuzuordnen                56425
+
+Die Ergebnisse wurden in 'Top_10_Unterbezirke_Straftaten_2014-2023.csv' gespeichert.
+```
+
+*(Hinweis: Die obige Ausgabe basiert auf den Beispieldaten und dient nur zur Veranschaulichung.)*
+
+### Anpassungen
+
+- **Spaltennamen überprüfen**: Stellen Sie sicher, dass die Spaltennamen in der Excel-Datei exakt mit den im Skript verwendeten Namen übereinstimmen. Falls nicht, passen Sie die Namen im Skript entsprechend an.
+
+- **Fehlerbehandlung erweitern**: Das Skript enthält grundlegende Fehlerbehandlungen. Bei Bedarf können Sie diese erweitern, um spezifischere Fehlerfälle abzudecken.
+
+Falls Sie weitere Fragen haben oder Unterstützung benötigen, stehe ich gerne zur Verfügung!

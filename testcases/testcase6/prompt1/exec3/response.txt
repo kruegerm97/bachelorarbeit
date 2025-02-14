@@ -1,0 +1,120 @@
+Natürlich! Hier ist ein Python-Skript, das die gewünschten Aufgaben erfüllt. Dieses Skript verwendet die `pandas`-Bibliothek, um die Excel-Datei zu verarbeiten. Stellen Sie sicher, dass Sie `pandas` und `openpyxl` installiert haben, bevor Sie das Skript ausführen.
+
+### Schritt 1: Installation der benötigten Bibliotheken
+
+Stellen Sie sicher, dass Sie die erforderlichen Bibliotheken installiert haben. Sie können dies über `pip` tun:
+
+```bash
+pip install pandas openpyxl
+```
+
+### Schritt 2: Python-Skript erstellen
+
+Hier ist das vollständige Python-Skript:
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+excel_file = 'Fallzahlen&HZ 2014-2023.xlsx'
+
+# Liste der relevanten Sheet-Namen
+sheet_names = [f'Fallzahlen_{jahr}' for jahr in range(2014, 2024)]
+
+# Initialisiere ein leeres DataFrame zur Speicherung aller Daten
+all_data = pd.DataFrame()
+
+# Iteriere über alle relevanten Sheets und füge die Daten hinzu
+for sheet in sheet_names:
+    try:
+        # Lese das aktuelle Sheet
+        df = pd.read_excel(excel_file, sheet_name=sheet)
+        
+        # Überprüfe, ob die notwendigen Spalten vorhanden sind
+        if 'Bezeichnung (Bezirksregion)' in df.columns and 'Straftaten \n-insgesamt-' in df.columns:
+            # Wähle nur die relevanten Spalten
+            df_subset = df[['Bezeichnung (Bezirksregion)', 'Straftaten \n-insgesamt-']]
+            
+            # Entferne mögliche NaN-Werte und stelle sicher, dass 'Straftaten \n-insgesamt-' numerisch ist
+            df_subset = df_subset.dropna(subset=['Straftaten \n-insgesamt-'])
+            df_subset['Straftaten \n-insgesamt-'] = pd.to_numeric(df_subset['Straftaten \n-insgesamt-'], errors='coerce').fillna(0)
+            
+            # Füge die Daten zum all_data DataFrame hinzu
+            all_data = pd.concat([all_data, df_subset], ignore_index=True)
+        else:
+            print(f"Warnung: Die notwendigen Spalten sind im Sheet '{sheet}' nicht vorhanden.")
+    except Exception as e:
+        print(f"Fehler beim Verarbeiten des Sheets '{sheet}': {e}")
+
+# Gruppiere die Daten nach Unterbezirk und summiere die Straftaten
+total_straftaten = all_data.groupby('Bezeichnung (Bezirksregion)')['Straftaten \n-insgesamt-'].sum()
+
+# Sortiere die Unterbezirke nach den meisten Straftaten
+top_10_unterbezirke = total_straftaten.sort_values(ascending=False).head(10)
+
+# Ausgabe der Ergebnisse
+print("Die Top 10 Unterbezirke mit den meisten Straftaten (2014-2023):")
+print(top_10_unterbezirke)
+```
+
+### Schritt 3: Erklärung des Skripts
+
+1. **Importieren der Bibliothek:**
+   - Das Skript verwendet `pandas` zum Lesen und Verarbeiten der Excel-Datei.
+
+2. **Definieren des Excel-Dateipfads:**
+   - Stellen Sie sicher, dass sich die Datei `Fallzahlen&HZ 2014-2023.xlsx` im gleichen Verzeichnis wie das Skript befindet oder geben Sie den vollständigen Pfad an.
+
+3. **Erstellen der Liste der Sheet-Namen:**
+   - Generiert eine Liste von Sheet-Namen von `Fallzahlen_2014` bis `Fallzahlen_2023`.
+
+4. **Initialisieren eines leeren DataFrames:**
+   - Alle Daten aus den relevanten Sheets werden hier gesammelt.
+
+5. **Iterieren über alle Sheets:**
+   - Für jedes Jahr wird das entsprechende Sheet gelesen.
+   - Es wird überprüft, ob die notwendigen Spalten (`Bezeichnung (Bezirksregion)` und `Straftaten \n-insgesamt-`) vorhanden sind.
+   - Die relevanten Spalten werden extrahiert, bereinigt und zum `all_data` DataFrame hinzugefügt.
+
+6. **Gruppieren und Summieren der Straftaten:**
+   - Die Daten werden nach `Bezeichnung (Bezirksregion)` gruppiert, und die Straftaten werden summiert.
+
+7. **Sortieren und Auswahl der Top 10:**
+   - Die Unterbezirke werden nach der Gesamtzahl der Straftaten sortiert, und die Top 10 werden ausgewählt.
+
+8. **Ausgabe der Ergebnisse:**
+   - Die Top 10 Unterbezirke mit den meisten Straftaten von 2014 bis 2023 werden im Terminal angezeigt.
+
+### Schritt 4: Ausführen des Skripts
+
+Speichern Sie das Skript beispielsweise als `top_unterbezirke.py` und führen Sie es über die Kommandozeile oder eine Python-IDE aus:
+
+```bash
+python top_unterbezirke.py
+```
+
+### Beispielausgabe
+
+Die Ausgabe könnte wie folgt aussehen:
+
+```
+Die Top 10 Unterbezirke mit den meisten Straftaten (2014-2023):
+Bezeichnung (Bezirksregion)
+Berlin (PKS gesamt)     5366950
+Mitte                     836110
+Alexanderplatz           196730
+...
+Name: Straftaten \n-insgesamt-, dtype: int64
+```
+
+Diese Ausgabe zeigt die Unterbezirke und die Gesamtzahl der Straftaten über den angegebenen Zeitraum.
+
+### Hinweise
+
+- **Spaltennamen überprüfen:** Stellen Sie sicher, dass die Spaltennamen in den Excel-Sheets exakt mit denen im Skript übereinstimmen (einschließlich Leerzeichen und Zeilenumbrüchen). Falls die Spaltennamen variieren, passen Sie das Skript entsprechend an.
+
+- **Fehlende Daten:** Das Skript behandelt fehlende oder nicht numerische Werte, indem es sie entfernt bzw. mit `0` auffüllt. Überprüfen Sie die Daten auf Konsistenz für genauere Ergebnisse.
+
+- **Leistungsoptimierungen:** Bei sehr großen Excel-Dateien könnte die Leistung beeinträchtigt werden. In solchen Fällen können Optimierungen oder alternative Methoden zur Datenverarbeitung in Betracht gezogen werden.
+
+Ich hoffe, dieses Skript hilft Ihnen weiter! Wenn Sie weitere Anpassungen benötigen oder Fragen haben, lassen Sie es mich wissen.

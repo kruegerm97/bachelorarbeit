@@ -1,0 +1,141 @@
+Hier ist ein Python-Skript, das die gewünschten Anforderungen erfüllt. Es verwendet die Bibliothek `pandas`, um die Excel-Datei zu lesen und die Daten zu verarbeiten. Stellen Sie sicher, dass Sie `pandas` installiert haben (`pip install pandas`) und dass die Bibliothek `openpyxl` für das Lesen von `.xlsx`-Dateien installiert ist (`pip install openpyxl`).
+
+```python
+import pandas as pd
+
+# Definiere den Dateipfad und den Sheet-Namen
+excel_datei = 'Fallzahlen&HZ 2014-2023.xlsx'
+sheet_name = 'Fallzahlen_2023'
+
+# Liste der Oberbezirke
+oberbezirke = [
+    'Mitte',
+    'Friedrichshain-Kreuzberg',
+    'Pankow',
+    'Charlottenburg-Wilmersdorf',
+    'Spandau',
+    'Steglitz-Zehlendorf',
+    'Tempelhof-Schöneberg',
+    'Neukölln',
+    'Treptow-Köpenick',
+    'Marzahn-Hellersdorf',
+    'Lichtenberg',
+    'Reinickendorf'
+]
+
+# Lese das Excel-Sheet ein
+df = pd.read_excel(excel_datei, sheet_name=sheet_name)
+
+# Entferne die letzten zwei Zeilen (Gesamtwerte)
+df = df.iloc[:-2].reset_index(drop=True)
+
+# Bereinige die Spaltennamen (entferne Zeilenumbrüche und Leerzeichen)
+df.columns = df.columns.str.replace('\n', ' ').str.strip()
+
+# Stelle sicher, dass die 'Raub' Spalte numerisch ist
+df['Raub'] = pd.to_numeric(df['Raub'], errors='coerce')
+
+# Initialisiere ein Dictionary, um die Ergebnisse zu speichern
+ergebnisse = {}
+
+# Variable, um den aktuellen Oberbezirk zu verfolgen
+aktueller_oberbezirk = None
+
+# Iteriere über die DataFrame-Zeilen
+for index, row in df.iterrows():
+    bezirk_bezeichnung = row['Bezeichnung (Bezirksregion)']
+    
+    if bezirk_bezeichnung in oberbezirke:
+        # Aktuellen Oberbezirk setzen
+        aktueller_oberbezirk = bezirk_bezeichnung
+        # Initialisiere eine Liste für die Unterbezirke des aktuellen Oberbezirks
+        ergebnisse[aktueller_oberbezirk] = []
+    else:
+        if aktueller_oberbezirk:
+            # Füge den Unterbezirk zu der Liste des aktuellen Oberbezirks hinzu
+            ergebnisse[aktueller_oberbezirk].append({
+                'Unterbezirk': bezirk_bezeichnung,
+                'Raub': row['Raub']
+            })
+
+# Jetzt finde für jeden Oberbezirk den Unterbezirk mit den meisten Raubdelikten
+for oberbezirk, unterbezirk_list in ergebnisse.items():
+    if not unterbezirk_list:
+        print(f"Oberbezirk '{oberbezirk}' hat keine Unterbezirke.")
+        continue
+    
+    # Finde den Unterbezirk mit dem maximalen Raub-Wert
+    max_raub_unterbezirk = max(unterbezirk_list, key=lambda x: x['Raub'])
+    
+    print(f"Oberbezirk: {oberbezirk}")
+    print(f"  Unterbezirk mit den meisten Raubdelikten: {max_raub_unterbezirk['Unterbezirk']} ({max_raub_unterbezirk['Raub']} Raubdelikte)")
+    print()
+
+```
+
+### Erklärung des Skripts
+
+1. **Bibliotheken importieren:**
+   Das Skript verwendet `pandas` zur Datenverarbeitung.
+
+2. **Dateipfad und Sheet-Name definieren:**
+   Stellen Sie sicher, dass die Excel-Datei im selben Verzeichnis wie das Skript liegt oder geben Sie den vollständigen Pfad an.
+
+3. **Oberbezirke definieren:**
+   Eine Liste der Oberbezirke wird erstellt, um sie später im DataFrame zu identifizieren.
+
+4. **Excel-Datei einlesen:**
+   Das angegebene Sheet wird in einen DataFrame geladen.
+
+5. **Letzte zwei Zeilen entfernen:**
+   Diese enthalten die Gesamtwerte und sollen ignoriert werden.
+
+6. **Spaltennamen bereinigen:**
+   Entfernt Zeilenumbrüche und überflüssige Leerzeichen aus den Spaltennamen, um sicherzustellen, dass sie korrekt referenziert werden können.
+
+7. **'Raub' Spalte in numerisch umwandeln:**
+   Dies stellt sicher, dass die Werte für die Berechnung als Zahlen behandelt werden.
+
+8. **Daten strukturieren:**
+   Das Skript durchläuft jede Zeile, identifiziert Oberbezirke und sammelt die entsprechenden Unterbezirke mit ihren 'Raub'-Werten.
+
+9. **Unterbezirk mit den meisten Raubdelikten finden:**
+   Für jeden Oberbezirk wird der Unterbezirk mit dem höchsten 'Raub'-Wert ermittelt und ausgegeben.
+
+### Beispielausgabe
+
+```
+Oberbezirk: Mitte
+  Unterbezirk mit den meisten Raubdelikten: Regierungsviertel (44 Raubdelikte)
+
+Oberbezirk: Friedrichshain-Kreuzberg
+  Unterbezirk mit den meisten Raubdelikten: Alexanderplatz (199 Raubdelikte)
+
+...
+```
+
+### Hinweise
+
+- **Fehlerbehandlung:** Das Skript geht davon aus, dass die Daten konsistent sind. Für eine robustere Lösung könnten zusätzliche Überprüfungen und Fehlerbehandlungen hinzugefügt werden.
+- **Leistungsoptimierung:** Für sehr große Datensätze könnte die Leistung optimiert werden, aber für die gegebene Anzahl von Zeilen ist dies nicht erforderlich.
+- **Weitere Anpassungen:** Wenn zusätzliche Anforderungen bestehen (z.B. Export der Ergebnisse in eine Datei), kann das Skript entsprechend erweitert werden.
+
+### Ausführung des Skripts
+
+1. Stellen Sie sicher, dass Python installiert ist.
+
+2. Installieren Sie die erforderlichen Bibliotheken, falls noch nicht geschehen:
+
+   ```bash
+   pip install pandas openpyxl
+   ```
+
+3. Speichern Sie das Skript in einer `.py`-Datei, z.B. `raubdelikte.py`.
+
+4. Führen Sie das Skript in der Kommandozeile oder einer Python-Umgebung aus:
+
+   ```bash
+   python raubdelikte.py
+   ```
+
+Das Skript gibt dann für jeden Oberbezirk den Unterbezirk mit den meisten Raubdelikten aus.

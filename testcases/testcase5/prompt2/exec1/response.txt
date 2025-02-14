@@ -1,0 +1,127 @@
+Gerne helfe ich Ihnen dabei, ein Python-Skript zu erstellen, das die gewünschten Informationen aus Ihrer Excel-Datei extrahiert. Im Folgenden finden Sie ein vollständiges Skript, das die Unterbezirke mit den meisten Raubdelikten für jeden Oberbezirk aus dem Sheet `'Fallzahlen_2023'` ausliest und ausgibt.
+
+### Voraussetzungen
+
+Stellen Sie sicher, dass Sie die notwendigen Python-Pakete installiert haben. Sie benötigen vor allem `pandas` und `openpyxl`. Sie können diese Pakete mit pip installieren:
+
+```bash
+pip install pandas openpyxl
+```
+
+### Python-Skript
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+excel_datei = 'Fallzahlen&HZ 2014-2023.xlsx'
+
+# Name des Sheets
+sheet_name = 'Fallzahlen_2023'
+
+# Oberbezirke-Liste
+oberbezirke = [
+    'Mitte',
+    'Friedrichshain-Kreuzberg',
+    'Pankow',
+    'Charlottenburg-Wilmersdorf',
+    'Spandau',
+    'Steglitz-Zehlendorf',
+    'Tempelhof-Schöneberg',
+    'Neukölln',
+    'Treptow-Köpenick',
+    'Marzahn-Hellersdorf',
+    'Lichtenberg',
+    'Reinickendorf'
+]
+
+# Daten aus dem Excel-Sheet auslesen
+df = pd.read_excel(excel_datei, sheet_name=sheet_name)
+
+# Letzte zwei Zeilen (Gesamtwerte) entfernen
+df = df.iloc[:-2].reset_index(drop=True)
+
+# Spaltennamen anpassen, falls nötig (Beispiel: Leerzeichen entfernen)
+df.columns = [col.strip() for col in df.columns]
+
+# Liste zur Speicherung der Ergebnisse
+ergebnisse = []
+
+# Variable zur Speicherung des aktuellen Oberbezirks
+aktueller_oberbezirk = None
+
+# Dictionary zur Speicherung der maximalen Raubdelikte pro Oberbezirk
+max_raub_dict = {}
+
+for index, row in df.iterrows():
+    bezirk = row['Bezeichnung (Bezirksregion)']
+    
+    if bezirk in oberbezirke:
+        # Neuer Oberbezirk gefunden
+        aktueller_oberbezirk = bezirk
+    else:
+        if aktueller_oberbezirk is not None:
+            # Unterbezirk des aktuellen Oberbezirks
+            unterbezirk = bezirk
+            raub = row['Raub']
+            
+            # Überprüfen, ob dieser Unterbezirk mehr Raubdelikte hat als vorherige
+            if aktueller_oberbezirk not in max_raub_dict:
+                max_raub_dict[aktueller_oberbezirk] = {'Unterbezirk': unterbezirk, 'Raub': raub}
+            else:
+                if raub > max_raub_dict[aktueller_oberbezirk]['Raub']:
+                    max_raub_dict[aktueller_oberbezirk] = {'Unterbezirk': unterbezirk, 'Raub': raub}
+
+# Ergebnisse ausgeben
+print("Unterbezirk mit den meisten Raubdelikten pro Oberbezirk:")
+for oberbezirk in oberbezirke:
+    if oberbezirk in max_raub_dict:
+        unterbezirk = max_raub_dict[oberbezirk]['Unterbezirk']
+        raub = max_raub_dict[oberbezirk]['Raub']
+        print(f"{oberbezirk}: {unterbezirk} ({raub} Raubdelikte)")
+    else:
+        print(f"{oberbezirk}: Keine Unterbezirke gefunden oder keine Daten vorhanden.")
+```
+
+### Erklärung des Skripts
+
+1. **Import der notwendigen Bibliotheken:**
+   - `pandas` wird verwendet, um die Excel-Datei zu lesen und die Daten zu verarbeiten.
+
+2. **Festlegen der Excel-Datei und des Sheets:**
+   - Der Pfad zur Excel-Datei und der Name des Sheets werden definiert.
+
+3. **Definieren der Oberbezirke:**
+   - Eine Liste aller Oberbezirke wird erstellt, um diese während der Iteration zu erkennen.
+
+4. **Daten einlesen und aufbereiten:**
+   - Die Excel-Datei wird eingelesen.
+   - Die letzten zwei Zeilen, die Gesamtwerte enthalten, werden entfernt.
+   - Die Spaltennamen werden bereinigt, um mögliche Leerzeichen zu entfernen.
+
+5. **Durchgehen der Daten:**
+   - Das Skript iteriert durch jede Zeile des DataFrames.
+   - Wenn ein Oberbezirk erkannt wird, wird dieser als aktueller Oberbezirk gespeichert.
+   - Für jede Unterbezirk-Zeile werden die Anzahl der Raubdelikte überprüft und das Maximum pro Oberbezirk gespeichert.
+
+6. **Ausgabe der Ergebnisse:**
+   - Am Ende werden die Unterbezirke mit den meisten Raubdelikten für jeden Oberbezirk ausgegeben.
+
+### Beispielhafte Ausgabe
+
+```
+Unterbezirk mit den meisten Raubdelikten pro Oberbezirk:
+Mitte: Alexanderplatz (199 Raubdelikte)
+Friedrichshain-Kreuzberg: Tiergarten Süd (47 Raubdelikte)
+Pankow: Regierungsviertel (44 Raubdelikte)
+Charlottenburg-Wilmersdorf: ... (Raubdelikte)
+...
+```
+
+### Hinweise
+
+- Stellen Sie sicher, dass die Spaltennamen in Ihrer Excel-Datei genau mit den im Skript verwendeten Namen übereinstimmen. Falls Unterschiede bestehen (z.B. zusätzliche Leerzeichen), passen Sie die Spaltennamen im Skript entsprechend an.
+- Das Skript ignoriert die letzten zwei Zeilen der Tabelle, wie von Ihnen gewünscht.
+- Falls bestimmte Oberbezirke keine Unterbezirke haben oder keine Daten vorhanden sind, wird dies entsprechend in der Ausgabe vermerkt.
+
+Ich hoffe, dieses Skript hilft Ihnen weiter! Bei weiteren Fragen stehe ich gerne zur Verfügung.

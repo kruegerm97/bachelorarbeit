@@ -1,0 +1,104 @@
+Natürlich! Hier ist ein Python-Skript, das die gewünschten Anforderungen erfüllt. Dieses Skript verwendet die `pandas` Bibliothek, um die Excel-Datei zu lesen und die Analyse durchzuführen. Stellen Sie sicher, dass Sie die notwendigen Bibliotheken installiert haben, indem Sie `pip install pandas openpyxl` ausführen, falls Sie dies noch nicht getan haben.
+
+## Annahmen und Vorgehensweise
+
+1. **Oberbezirk Definition:** Da die genaue Struktur der Ober- und Unterbezirke aus den bereitgestellten Daten nicht eindeutig ersichtlich ist, gehe ich davon aus, dass die ersten drei Stellen des `LOR-Schlüssel` den Oberbezirk identifizieren. Diese Annahme basiert auf typischen Kodierungssystemen, kann jedoch je nach spezifischer Verwendung variieren. Passen Sie dies bei Bedarf an.
+
+2. **Daten Bereinigung:** Das Skript schließt spezielle Einträge wie "nicht zuzuordnen" und Gesamtdatensätze ("Berlin (PKS gesamt)") aus der Analyse aus, da sie keine spezifischen Unterbezirke repräsentieren.
+
+3. **Maximale Raubdelikte:** Für jeden Oberbezirk wird der Unterbezirk mit den meisten Raubdelikten identifiziert und ausgegeben.
+
+## Python-Skript
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+excel_datei = 'Fallzahlen&HZ 2014-2023.xlsx'
+
+# Lesen des Sheets 'Fallzahlen_2023'
+df = pd.read_excel(excel_datei, sheet_name='Fallzahlen_2023')
+
+# Anzeigen der ersten Zeilen zur Überprüfung (optional)
+# print(df.head())
+
+# Sicherstellen, dass 'LOR-Schlüssel' als String behandelt wird
+df['LOR-Schlüssel'] = df['LOR-Schlüssel'].astype(str)
+
+# Extrahieren der Oberbezirk-Information aus den ersten 3 Zeichen des LOR-Schlüssels
+# Passen Sie dies an, falls die Struktur anders ist
+df['Oberbezirk_Key'] = df['LOR-Schlüssel'].str[:3]
+
+# Optional: Definieren Sie eine Mapping-Tabelle für Oberbezirk_Key zu Oberbezirk_Name
+# Hier ist ein Beispiel. Sie müssen dies basierend auf Ihrer spezifischen Kodierung anpassen.
+oberbezirk_mapping = {
+    '100': 'Mitte',
+    '110': 'Cluster A',  # Beispielnamen
+    '120': 'Cluster B',
+    # Fügen Sie weitere Zuordnungen hier hinzu
+    # ...
+}
+
+# Hinzufügen einer Spalte für den Oberbezirk-Namen
+df['Oberbezirk'] = df['Oberbezirk_Key'].map(oberbezirk_mapping)
+
+# Falls bestimmte Keys nicht im Mapping vorhanden sind, können Sie den Key als Namen verwenden
+df['Oberbezirk'] = df['Oberbezirk'].fillna(df['Oberbezirk_Key'])
+
+# Bereinigen der Daten: Entfernen von Einträgen, die nicht zugeordnet werden können
+ausgeschlossene_terms = ['nicht zuzuordnen', 'gesamt']
+
+df_clean = df[~df['Bezeichnung (Bezirksregion)'].str.contains('|'.join(ausgeschlossene_terms), na=False)]
+
+# Gruppieren nach Oberbezirk und Finden des Unterbezirks mit den meisten Raubdelikten
+result = df_clean.loc[df_clean.groupby('Oberbezirk')['Raub'].idxmax()][['Oberbezirk', 'Bezeichnung (Bezirksregion)', 'Raub']]
+
+# Sortieren der Ergebnisse nach Oberbezirk (optional)
+result = result.sort_values('Oberbezirk')
+
+# Ausgabe der Ergebnisse
+for index, row in result.iterrows():
+    print(f"Oberbezirk: {row['Oberbezirk']}, Unterbezirk mit den meisten Raubdelikten: {row['Bezeichnung (Bezirksregion)']} ({row['Raub']} Raubdelikte)")
+
+# Optional: Speichern der Ergebnisse in einer neuen Excel- oder CSV-Datei
+# result.to_excel('Ergebnis_Most_Raubdelikte.xlsx', index=False)
+# oder
+# result.to_csv('Ergebnis_Most_Raubdelikte.csv', index=False)
+```
+
+## Erklärung der Schritte
+
+1. **Importieren der Bibliotheken:**
+   - `pandas` wird für die Datenverarbeitung verwendet.
+
+2. **Lesen der Excel-Datei:**
+   - Das Skript liest das spezifische Sheet `'Fallzahlen_2023'` aus der Excel-Datei.
+
+3. **Vorverarbeitung:**
+   - Der `LOR-Schlüssel` wird als String behandelt, und die ersten drei Zeichen werden extrahiert, um den `Oberbezirk` zu identifizieren.
+   - Eine Mapping-Tabelle (`oberbezirk_mapping`) wird verwendet, um die Schlüssel den tatsächlichen Oberbezirksnamen zuzuordnen. Sie müssen diese Tabelle entsprechend Ihrer tatsächlichen Datenstruktur anpassen.
+
+4. **Datenbereinigung:**
+   - Einträge, die "nicht zuzuordnen" oder "gesamt" in der `Bezeichnung (Bezirksregion)` enthalten, werden ausgeschlossen, da sie keine spezifischen Unterbezirke darstellen.
+
+5. **Gruppierung und Identifikation:**
+   - Die Daten werden nach `Oberbezirk` gruppiert, und innerhalb jeder Gruppe wird der Unterbezirk mit den höchsten Raubdelikten identifiziert.
+
+6. **Ausgabe:**
+   - Die Ergebnisse werden in der Konsole ausgegeben. Optional können Sie die Ergebnisse auch in eine neue Excel- oder CSV-Datei speichern, indem Sie die auskommentierten Zeilen am Ende des Skripts aktivieren.
+
+## Hinweise
+
+- **Mapping-Anpassung:** Die `oberbezirk_mapping`-Diktionary muss basierend auf Ihrer spezifischen `LOR-Schlüssel`-Struktur und den tatsächlichen Oberbezirksnamen angepasst werden. Wenn die ersten drei Stellen des `LOR-Schlüssels` nicht den Oberbezirken entsprechen, passen Sie die Extraktion entsprechend an.
+
+- **Bibliotheken installieren:** Falls Sie `pandas` oder `openpyxl` noch nicht installiert haben, können Sie dies mit den folgenden Befehlen tun:
+
+  ```bash
+  pip install pandas openpyxl
+  ```
+
+- **Fehlerbehebung:** Stellen Sie sicher, dass die Spaltennamen im Skript exakt mit denen in Ihrer Excel-Datei übereinstimmen. Falls es Abweichungen gibt, passen Sie die Spaltennamen im Skript entsprechend an.
+
+- **Erweiterungen:** Sie können das Skript erweitern, um weitere Analysen durchzuführen oder die Ergebnisse visuell darzustellen, z.B. mit Diagrammen.
+
+Ich hoffe, dieses Skript hilft Ihnen bei Ihrer Analyse! Bei weiteren Fragen stehe ich gerne zur Verfügung.

@@ -110,7 +110,7 @@ if __name__ == "__main__":
 ### Erklärung des Skripts:
 
 1. **Funktion `process_fallzahlen_excel`**:
-   - **Parameter**: `file_path` – der Pfad zur Excel-Datei.
+   - **Parameter**: `file_path` - der Pfad zur Excel-Datei.
    - **Rückgabe**: Ein `DataFrame`, das die zusammengeführten und sortierten Daten enthält.
    - **Fehlerbehandlung**: Das Skript überprüft, ob die Datei existiert und ob die erforderlichen Spalten in jedem Sheet vorhanden sind.
 

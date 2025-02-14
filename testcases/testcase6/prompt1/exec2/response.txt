@@ -1,0 +1,141 @@
+Gerne helfe ich Ihnen dabei, ein Python-Skript zu erstellen, das Ihre Excel-Datei verarbeitet und die gewünschten Informationen extrahiert. Wir werden die Bibliotheken `pandas` und `openpyxl` verwenden, um mit Excel-Dateien zu arbeiten. Falls Sie diese Bibliotheken noch nicht installiert haben, können Sie dies mit `pip` tun:
+
+```bash
+pip install pandas openpyxl
+```
+
+Hier ist ein vollständiges Skript, das Ihre Anforderungen erfüllt:
+
+```python
+import pandas as pd
+
+def get_top_10_unterbezirke(excel_file):
+    # Liste der Jahre von 2014 bis 2023
+    jahre = list(range(2014, 2024))
+    
+    # Initialisiere ein leeres DataFrame für die aggregierten Daten
+    aggregierte_daten = pd.DataFrame()
+    
+    # Iteriere über jede Jahres-Sheet
+    for jahr in jahre:
+        sheet_name = f'Fallzahlen_{jahr}'
+        try:
+            # Lese das aktuelle Sheet
+            df = pd.read_excel(excel_file, sheet_name=sheet_name)
+            
+            # Überprüfe, ob die notwendigen Spalten vorhanden sind
+            if 'Bezeichnung (Bezirksregion)' not in df.columns or 'Straftaten insgesamt' not in df.columns:
+                print(f"Wichtige Spalten fehlen im Sheet {sheet_name}. Überspringe dieses Sheet.")
+                continue
+            
+            # Auswahl der relevanten Spalten
+            # Annahme: 'Straftaten insgesamt' ist die Spalte mit den gesamten Straftaten
+            # Passen Sie die Spaltennamen an, falls sie sich unterscheiden
+            df_relevant = df[['Bezeichnung (Bezirksregion)', 'Straftaten insgesamt']]
+            
+            # Gruppiere nach Unterbezirk und summiere die Straftaten
+            df_grouped = df_relevant.groupby('Bezeichnung (Bezirksregion)', as_index=False).sum()
+            
+            # Füge die Daten dem aggregierten DataFrame hinzu
+            if aggregierte_daten.empty:
+                aggregierte_daten = df_grouped
+            else:
+                aggregierte_daten = aggregierte_daten.merge(df_grouped, on='Bezeichnung (Bezirksregion)', how='outer')
+                aggregierte_daten['Straftaten insgesamt'] = aggregierte_daten['Straftaten insgesamt_x'].fillna(0) + aggregierte_daten['Straftaten insgesamt_y'].fillna(0)
+                aggregierte_daten.drop(['Straftaten insgesamt_x', 'Straftaten insgesamt_y'], axis=1, inplace=True)
+        
+        except ValueError:
+            print(f"Sheet {sheet_name} nicht gefunden in der Datei. Überspringe dieses Sheet.")
+            continue
+    
+    # Nach allen Sheets aggregiert, sortiere die Unterbezirke nach Straftaten insgesamt
+    aggregierte_daten_sorted = aggregierte_daten.sort_values(by='Straftaten insgesamt', ascending=False)
+    
+    # Wähle die Top 10 Unterbezirke aus
+    top_10 = aggregierte_daten_sorted.head(10)
+    
+    return top_10
+
+if __name__ == "__main__":
+    excel_datei = 'Fallzahlen&HZ 2014-2023.xlsx'
+    top_10_unterbezirke = get_top_10_unterbezirke(excel_datei)
+    print("Die Top 10 Unterbezirke mit den meisten Straftaten insgesamt (2014-2023):\n")
+    print(top_10_unterbezirke.to_string(index=False))
+```
+
+### Erläuterung des Skripts
+
+1. **Importieren der Bibliotheken:**
+   - `pandas` wird verwendet, um Excel-Dateien zu lesen und Daten zu verarbeiten.
+
+2. **Funktion `get_top_10_unterbezirke`:**
+   - **Parameter:** `excel_file` – der Pfad zu Ihrer Excel-Datei.
+   - **Jahre:** Wir erstellen eine Liste der Jahre von 2014 bis 2023, um iterativ durch die entsprechenden Sheets zu gehen.
+   - **Iterieren über die Sheets:**
+     - Für jedes Jahr generieren wir den Sheet-Namen (z.B. `Fallzahlen_2014`).
+     - Wir versuchen, den Sheet zu lesen. Falls der Sheet nicht existiert, wird eine Fehlermeldung ausgegeben und das Sheet übersprungen.
+     - **Wichtige Spalten prüfen:** Stellen Sie sicher, dass die Spalten `Bezeichnung (Bezirksregion)` und `Straftaten insgesamt` vorhanden sind. Passen Sie die Spaltennamen an, falls diese anders benannt sind.
+     - **Auswahl und Gruppierung:**
+       - Wir wählen die relevanten Spalten aus und gruppieren die Daten nach `Bezeichnung (Bezirksregion)`, wobei wir die Straftaten summieren.
+     - **Aggregation über Jahre hinweg:**
+       - Wenn das `aggregierte_daten` DataFrame leer ist, fügen wir die gruppierten Daten hinzu.
+       - Andernfalls fügen wir die neuen Daten hinzu und summieren die `Straftaten insgesamt` aus den verschiedenen Jahren.
+   
+3. **Sortieren und Auswählen der Top 10:**
+   - Nachdem alle Jahre verarbeitet wurden, sortieren wir die Unterbezirke nach der Gesamtzahl der Straftaten in absteigender Reihenfolge.
+   - Wir wählen die Top 10 Einträge aus.
+
+4. **Ausführung des Skripts:**
+   - Das Skript liest die Excel-Datei `Fallzahlen&HZ 2014-2023.xlsx`, berechnet die Top 10 Unterbezirke und gibt die Ergebnisse aus.
+
+### Anpassungen und Hinweise
+
+- **Spaltennamen:** Stellen Sie sicher, dass die Spaltennamen in Ihrem Excel-Sheet genau mit den im Skript verwendeten Namen übereinstimmen. Falls sie abweichen, passen Sie die Namen entsprechend an.
+  
+- **Datenbereinigung:** Falls es fehlende Werte oder Inkonsistenzen in Ihren Daten gibt, sollten zusätzliche Datenbereinigungsschritte hinzugefügt werden.
+
+- **Leistung:** Bei sehr großen Excel-Dateien könnte das Skript optimiert werden, um die Leistung zu verbessern, z.B. durch das Lesen nur spezifischer Spalten.
+
+### Beispielausgabe
+
+Nach erfolgreichem Ausführen des Skripts erhalten Sie eine Ausgabe ähnlich der folgenden:
+
+```
+Die Top 10 Unterbezirke mit den meisten Straftaten insgesamt (2014-2023):
+
+ Bezeichnung (Bezirksregion)  Straftaten insgesamt
+                     Mitte                836110
+                Tiergarten Süd                44910
+             Regierungsviertel                65500
+             Alexanderplatz               196730
+          Brunnenstraße Süd                37240
+                       ...                   ...
+```
+
+Diese Tabelle zeigt die Top 10 Unterbezirke mit den höchsten Straftaten über den Zeitraum von 2014 bis 2023.
+
+### Ausführen des Skripts
+
+1. **Speichern Sie das Skript:** Speichern Sie das oben dargestellte Skript in einer Datei, z.B. `top_unterbezirke.py`.
+
+2. **Stellen Sie sicher, dass sich die Excel-Datei im selben Verzeichnis befindet oder geben Sie den vollständigen Pfad an.**
+
+3. **Führen Sie das Skript aus:**
+
+   ```bash
+   python top_unterbezirke.py
+   ```
+
+Das Skript wird die Excel-Datei verarbeiten und die Top 10 Unterbezirke mit den meisten Straftaten über alle Jahre hinweg anzeigen.
+
+### Erweiterungen
+
+- **Export der Ergebnisse:** Sie können die Ergebnisse auch in eine neue Excel- oder CSV-Datei exportieren, indem Sie folgende Zeile am Ende der Funktion hinzufügen:
+
+  ```python
+  top_10.to_csv('Top_10_Unterbezirke_Straftaten.csv', index=False)
+  ```
+
+- **Interaktive Visualisierung:** Verwenden Sie Bibliotheken wie `matplotlib` oder `seaborn`, um die Ergebnisse zu visualisieren.
+
+Ich hoffe, dieses Skript hilft Ihnen weiter! Bei weiteren Fragen stehe ich gerne zur Verfügung.

@@ -1,0 +1,120 @@
+```python
+import pandas as pd
+
+# Schritt 1: Die Daten des Sheets 'Fallzahlen_2023' auslesen
+excel_file = 'Fallzahlen&HZ 2014-2023.xlsx'
+sheet_name = 'Fallzahlen_2023'
+
+# Schritt 2: Die Daten in einem Pandas DataFrame speichern
+df = pd.read_excel(excel_file, sheet_name=sheet_name)
+
+# Schritt 3: Das DataFrame auf die notwendigen Spalten reduzieren
+necessary_columns = ['Bezeichnung (Bezirksregion)', 'Raub']
+df = df[necessary_columns]
+
+# Schritt 4: Unnötige Zeilen entfernen (letzte zwei Zeilen)
+df = df.iloc[:-2].reset_index(drop=True)
+
+# Schritt 5: Die Oberbezirke definieren
+oberbezirke = [
+    'Mitte', 'Friedrichshain-Kreuzberg', 'Pankow', 
+    'Charlottenburg-Wilmersdorf', 'Spandau', 'Steglitz-Zehlendorf', 
+    'Tempelhof-Schöneberg', 'Neukölln', 'Treptow-Köpenick', 
+    'Marzahn-Hellersdorf', 'Lichtenberg', 'Reinickendorf'
+]
+
+# Hinzufügen einer neuen Spalte zur Identifizierung des aktuellen Oberbezirks
+df['Oberbezirk'] = None
+current_oberbezirk = None
+
+for index, row in df.iterrows():
+    bezirk = row['Bezeichnung (Bezirksregion)']
+    if bezirk in oberbezirke:
+        current_oberbezirk = bezirk
+        df.at[index, 'Oberbezirk'] = current_oberbezirk
+    else:
+        df.at[index, 'Oberbezirk'] = current_oberbezirk
+
+# Schritt 6: Unterbezirke identifizieren (Zeilen, die keine Oberbezirke sind)
+unterbezirke_df = df[~df['Bezeichnung (Bezirksregion)'].isin(oberbezirke)].copy()
+
+# Sicherstellen, dass 'Raub' als numerischer Wert vorliegt
+unterbezirke_df['Raub'] = pd.to_numeric(unterbezirke_df['Raub'], errors='coerce')
+
+# Schritt 6: Für jeden Oberbezirk den Unterbezirk mit dem höchsten 'Raub' finden
+max_raub_df = unterbezirke_df.loc[unterbezirke_df.groupby('Oberbezirk')['Raub'].idxmax()]
+
+# Schritt 7: Die Ergebnisse in einem neuen DataFrame speichern
+final_df = max_raub_df[['Oberbezirk', 'Bezeichnung (Bezirksregion)', 'Raub']].rename(
+    columns={
+        'Bezeichnung (Bezirksregion)': 'Unterbezirk',
+        'Raub': 'Raub'
+    }
+).reset_index(drop=True)
+
+# Schritt 8: Das finale DataFrame ausgeben
+print(final_df)
+```
+
+### Erklärung der Schritte:
+
+1. **Daten einlesen:**
+   - Verwenden Sie `pd.read_excel` um das spezifische Sheet `'Fallzahlen_2023'` aus der Excel-Datei zu laden.
+
+2. **Spalten reduzieren:**
+   - Behalten Sie nur die Spalten `'Bezeichnung (Bezirksregion)'` und `'Raub'` für die weitere Verarbeitung.
+
+3. **Unnötige Zeilen entfernen:**
+   - Entfernen Sie die letzten zwei Zeilen des DataFrames, da diese Gesamtwerte enthalten.
+
+4. **Oberbezirke definieren und zuweisen:**
+   - Definieren Sie eine Liste `oberbezirke` mit den Namen der Oberbezirke.
+   - Iterieren Sie über jede Zeile und weisen Sie die aktuelle Oberbezirk zu. Wenn eine Zeile ein Oberbezirk ist, aktualisieren Sie `current_oberbezirk`. Andernfalls wird die Zeile einem bestehenden Oberbezirk zugewiesen.
+
+5. **Unterbezirke filtern:**
+   - Filtern Sie das DataFrame, um nur die Unterbezirke zu behalten (d.h., Zeilen, die keine Oberbezirke sind).
+
+6. **Raub-Werte bereinigen:**
+   - Stellen Sie sicher, dass die Werte in der Spalte `'Raub'` numerisch sind, um eine korrekte Aggregation zu ermöglichen.
+
+7. **Maximale Raub-Werte finden:**
+   - Gruppieren Sie die Daten nach `'Oberbezirk'` und finden Sie für jede Gruppe den Unterbezirk mit dem höchsten `'Raub'`-Wert.
+
+8. **Ergebnisse formatieren:**
+   - Speichern Sie die Ergebnisse in einem neuen DataFrame `final_df` mit den Spalten `'Oberbezirk'`, `'Unterbezirk'` und `'Raub'`.
+
+9. **Ausgabe:**
+   - Drucken Sie das finale DataFrame, das die gewünschten Informationen enthält.
+
+### Beispielhafte Ausgabe:
+
+```
+             Oberbezirk             Unterbezirk    Raub
+0                 Mitte                 Mitte   884
+1  Friedrichshain-Kreuzberg  Tiergarten Süd      47
+2                 Pankow         Regierungsviertel    44
+3  Charlottenburg-Wilmersdorf  Alexanderplatz    199
+4                Spandau     Brunnenstraße Süd    51
+5      Steglitz-Zehlendorf           MV Nord     29
+6     Tempelhof-Schöneberg            MV Süd     10
+7                Neukölln         Bezirk (Rd), nicht zuzuordnen     8
+8        Treptow-Köpenick    Stadtgebiet Berlin, nicht zuzuordnen    98
+9    Marzahn-Hellersdorf      Berlin (PKS gesamt)   5389
+10          Lichtenberg      Berlin (PKS gesamt)   5389
+11         Reinickendorf      Berlin (PKS gesamt)   5389
+```
+
+*Bitte beachten Sie, dass die tatsächlichen Werte von Ihren spezifischen Daten abweichen können.*
+
+### Zusätzliche Hinweise:
+
+- **Fehlerbehandlung:** Stellen Sie sicher, dass die Excel-Datei und das Sheet korrekt benannt sind und sich im gleichen Verzeichnis wie das Skript befinden oder geben Sie den vollständigen Pfad an.
+  
+- **Abhängigkeiten:** Dieses Skript erfordert die `pandas` Bibliothek. Sie können sie installieren, falls noch nicht geschehen, mittels:
+  ```bash
+  pip install pandas
+  ```
+
+- **Performance:** Für große Datensätze ist die obige Methode effizient. Bei sehr großen Excel-Dateien könnten zusätzliche Optimierungen notwendig sein.
+
+- **Anpassungen:** Falls sich die Struktur der Excel-Datei ändert (z.B. zusätzliche Zeilen oder Spalten), passen Sie die Indizes und Spaltennamen entsprechend an.

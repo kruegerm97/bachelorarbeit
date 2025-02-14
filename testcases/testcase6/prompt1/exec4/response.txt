@@ -1,0 +1,134 @@
+Gerne stelle ich dir ein Python-Skript zur Verfügung, das mit der Bibliothek `pandas` arbeitet, um die gewünschten Daten aus deiner Excel-Datei zu verarbeiten. Das Skript liest alle relevanten Sheets (`Fallzahlen_2014` bis `Fallzahlen_2023`), aggregiert die Gesamtzahl der Straftaten pro Unterbezirk über alle Jahre hinweg und gibt die Top 10 Unterbezirke mit den meisten Straftaten aus.
+
+### Voraussetzungen
+
+Stelle sicher, dass du Python installiert hast und die Bibliothek `pandas` sowie `openpyxl` für das Einlesen von Excel-Dateien installiert sind. Du kannst sie mit pip installieren:
+
+```bash
+pip install pandas openpyxl
+```
+
+### Skript: `top10_unterbezirke.py`
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+excel_file = 'Fallzahlen&HZ 2014-2023.xlsx'
+
+# Liste der Jahre, die verarbeitet werden sollen
+jahre = range(2014, 2024)  # 2014 bis 2023
+
+# Initialisiere ein leeres DataFrame für die Aggregation
+gesamt_df = pd.DataFrame()
+
+# Iteriere über jedes Jahr und lese das entsprechende Sheet
+for jahr in jahre:
+    sheet_name = f'Fallzahlen_{jahr}'
+    try:
+        # Lese das Sheet
+        df = pd.read_excel(excel_file, sheet_name=sheet_name)
+        
+        # Überprüfe, ob die notwendigen Spalten vorhanden sind
+        notwendige_spalten = ['Bezeichnung (Bezirksregion)', 'Straftaten insgesamt']
+        if not all(spalte in df.columns for spalte in notwendige_spalten):
+            print(f"Warnung: Nicht alle notwendigen Spalten in Sheet {sheet_name} gefunden.")
+            continue
+        
+        # Wähle nur die relevanten Spalten
+        df_relevant = df[['Bezeichnung (Bezirksregion)', 'Straftaten insgesamt']]
+        
+        # Benenne die Spalten um, um das Jahr zu identifizieren
+        df_relevant = df_relevant.rename(columns={'Straftaten insgesamt': f'Straftaten_{jahr}'})
+        
+        # Setze die Bezirksregion als Index
+        df_relevant.set_index('Bezeichnung (Bezirksregion)', inplace=True)
+        
+        # Füge zum Gesamt-DataFrame hinzu
+        if gesamt_df.empty:
+            gesamt_df = df_relevant
+        else:
+            gesamt_df = gesamt_df.join(df_relevant, how='outer')
+    
+    except FileNotFoundError:
+        print(f"Fehler: Die Datei {excel_file} wurde nicht gefunden.")
+        exit(1)
+    except ValueError:
+        print(f"Warnung: Das Sheet {sheet_name} wurde in der Datei {excel_file} nicht gefunden.")
+        continue
+
+# Ersetze fehlende Werte (falls ein Bezirk in einem Jahr fehlt) mit 0
+gesamt_df.fillna(0, inplace=True)
+
+# Berechne die Gesamtsumme der Straftaten über alle Jahre hinweg
+gesamt_df['Straftaten_Gesamt'] = gesamt_df.sum(axis=1)
+
+# Sortiere die Bezirke nach der Gesamtsumme der Straftaten in absteigender Reihenfolge
+top10 = gesamt_df['Straftaten_Gesamt'].sort_values(ascending=False).head(10)
+
+# Optional: Zurück in ein DataFrame für bessere Darstellung
+top10_df = top10.reset_index()
+top10_df.columns = ['Bezirksregion', 'Gesamt_Straftaten']
+
+# Ausgabe der Top 10 Bezirke
+print("Top 10 Unterbezirke mit den meisten Straftaten (2014-2023):")
+print(top10_df)
+
+# Optional: Speichern der Ergebnisse in eine neue Excel-Datei
+# top10_df.to_excel('Top10_Unterbezirke_Straftaten_2014-2023.xlsx', index=False)
+```
+
+### Erklärung des Skripts
+
+1. **Import der Bibliothek**: Das Skript verwendet `pandas` zum Verarbeiten der Excel-Datei.
+
+2. **Festlegung des Dateipfads und der Jahre**: Der Pfad zur Excel-Datei wird festgelegt, und eine Liste der Jahre von 2014 bis 2023 erstellt.
+
+3. **Initialisierung eines leeren DataFrames**: Dieses DataFrame wird verwendet, um die aggregierten Daten aus allen Sheets zu speichern.
+
+4. **Schleife über jedes Jahr**:
+    - Das entsprechende Sheet (`Fallzahlen_YYYY`) wird gelesen.
+    - Es wird geprüft, ob die notwendigen Spalten (`Bezeichnung (Bezirksregion)` und `Straftaten insgesamt`) vorhanden sind.
+    - Die relevanten Spalten werden ausgewählt und die Straftaten-Spalte wird umbenannt, um das Jahr zu identifizieren.
+    - Die Bezirksregion wird als Index gesetzt, und die Daten werden mit dem Gesamt-DataFrame zusammengeführt.
+
+5. **Fehlende Werte behandeln**: Wenn ein Bezirk in einem Jahr nicht vorhanden ist, werden die fehlenden Werte mit 0 aufgefüllt.
+
+6. **Berechnung der Gesamtsumme**: Für jeden Bezirk wird die Summe der Straftaten über alle Jahre berechnet.
+
+7. **Sortierung und Auswahl der Top 10**: Die Bezirke werden nach der Gesamtsumme der Straftaten sortiert, und die Top 10 werden ausgewählt.
+
+8. **Ausgabe der Ergebnisse**: Die Top 10 Bezirke werden in der Konsole ausgegeben. Optional kann das Ergebnis auch in eine neue Excel-Datei gespeichert werden (diese Zeile ist auskommentiert und kann bei Bedarf aktiviert werden).
+
+### Ausführen des Skripts
+
+1. Speichere das oben stehende Skript in einer Datei, z.B. `top10_unterbezirke.py`.
+
+2. Stelle sicher, dass sich die Excel-Datei `Fallzahlen&HZ 2014-2023.xlsx` im gleichen Verzeichnis wie das Skript befindet oder passe den `excel_file`-Pfad entsprechend an.
+
+3. Führe das Skript über die Kommandozeile aus:
+
+```bash
+python top10_unterbezirke.py
+```
+
+### Beispielausgabe
+
+Nach dem Ausführen des Skripts erhältst du eine Ausgabe ähnlich der folgenden:
+
+```
+Top 10 Unterbezirke mit den meisten Straftaten (2014-2023):
+            Bezirksregion  Gesamt_Straftaten
+0                 Mitte        83611.0
+1       Tiergarten Süd         4491.0
+2      Regierungsviertel         6550.0
+3        Alexanderplatz        19673.0
+4     Brunnenstraße Süd         3724.0
+5                 ...             ...
+```
+
+Die tatsächlichen Werte hängen von den Daten in deiner Excel-Datei ab.
+
+---
+
+Falls du weitere Anpassungen benötigst oder Fragen hast, stehe ich gerne zur Verfügung!

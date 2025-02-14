@@ -1,0 +1,59 @@
+Oberbezirk: Mitte
+  Unterbezirk mit den meisten Raubdelikten: Alexanderplatz (199 Raubdelikte)
+
+Oberbezirk: Friedrichshain-Kreuzberg
+  Unterbezirk mit den meisten Raubdelikten: Südliche Luisenstadt (256 Raubdelikte)
+
+Oberbezirk: Pankow
+  Unterbezirk mit den meisten Raubdelikten: Prenzlauer Berg Ost (70 Raubdelikte)
+
+Oberbezirk: Charlottenburg-Wilmersdorf
+  Unterbezirk mit den meisten Raubdelikten: Lietzenburger Straße (116 Raubdelikte)
+
+Oberbezirk: Spandau
+  Unterbezirk mit den meisten Raubdelikten: Spandau Mitte (61 Raubdelikte)
+
+Oberbezirk: Steglitz-Zehlendorf
+  Unterbezirk mit den meisten Raubdelikten: Schloßstraße (43 Raubdelikte)
+
+Oberbezirk: Tempelhof-Schöneberg
+  Unterbezirk mit den meisten Raubdelikten: Schöneberg Nordwest (107 Raubdelikte)
+
+Oberbezirk: Neukölln
+  Unterbezirk mit den meisten Raubdelikten: Reuterstraße (92 Raubdelikte)
+
+Oberbezirk: Treptow-Köpenick
+  Unterbezirk mit den meisten Raubdelikten: Alt-Treptow (31 Raubdelikte)
+
+Oberbezirk: Marzahn-Hellersdorf
+  Unterbezirk mit den meisten Raubdelikten: Marzahn Mitte (70 Raubdelikte)
+
+Oberbezirk: Lichtenberg
+  Unterbezirk mit den meisten Raubdelikten: Neu-Hohenschönhausen Süd (53 Raubdelikte)
+
+Oberbezirk: Reinickendorf
+  Unterbezirk mit den meisten Raubdelikten: Ost 2 - Alt-Reinickendorf (56 Raubdelikte)
+
+	Command being timed: "python testcase5/prompt2/exec5/script.py"
+	User time (seconds): 2.41
+	System time (seconds): 0.05
+	Percent of CPU this job got: 440%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.56
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 156640
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 33139
+	Voluntary context switches: 33
+	Involuntary context switches: 332
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

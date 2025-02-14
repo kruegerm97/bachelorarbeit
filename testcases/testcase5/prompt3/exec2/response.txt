@@ -1,0 +1,118 @@
+Hier ist ein Python-Skript, das die von Ihnen beschriebenen Schritte durchführt. Das Skript nutzt die `pandas` Bibliothek, um die Excel-Datei zu verarbeiten. Stellen Sie sicher, dass Sie die benötigten Bibliotheken installiert haben. Falls nicht, können Sie diese mit `pip` installieren:
+
+```bash
+pip install pandas openpyxl
+```
+
+### Python-Skript
+
+```python
+import pandas as pd
+
+# 1. Die Daten des Sheets 'Fallzahlen_2023' auslesen
+file_path = 'Fallzahlen&HZ 2014-2023.xlsx'
+sheet_name = 'Fallzahlen_2023'
+
+# 2. Die Daten in einem Pandas Dataframe speichern
+df = pd.read_excel(file_path, sheet_name=sheet_name)
+
+# 3. Das Dataframe auf die notwendigen Spalten reduzieren: 'Bezeichnung (Bezirksregion)' und 'Raub'
+df = df[['Bezeichnung (Bezirksregion)', 'Raub']]
+
+# 4. Unnötige Zeilen entfernen: Die letzten zwei Zeilen der Tabelle sind Gesamtwerte und sollen entfernt werden.
+df = df.iloc[:-2]
+
+# 5. Die Oberbezirke in der Spalte 'Bezeichnung (Bezirksregion)' identifizieren
+oberbezirke = [
+    'Mitte',
+    'Friedrichshain-Kreuzberg',
+    'Pankow',
+    'Charlottenburg-Wilmersdorf',
+    'Spandau',
+    'Steglitz-Zehlendorf',
+    'Tempelhof-Schöneberg',
+    'Neukölln',
+    'Treptow-Köpenick',
+    'Marzahn-Hellersdorf',
+    'Lichtenberg',
+    'Reinickendorf'
+]
+
+# Erstellen einer neuen Spalte 'Oberbezirk', die den aktuellen Oberbezirk enthält
+df['Oberbezirk'] = df['Bezeichnung (Bezirksregion)'].where(df['Bezeichnung (Bezirksregion)'].isin(oberbezirke))
+df['Oberbezirk'] = df['Oberbezirk'].ffill()
+
+# 6. Die Unterbezirke identifizieren, indem Oberbezirke selbst ausgeschlossen werden
+df_unter = df[~df['Bezeichnung (Bezirksregion)'].isin(oberbezirke)].copy()
+
+# Sicherstellen, dass die 'Raub'-Spalte numerisch ist
+df_unter['Raub'] = pd.to_numeric(df_unter['Raub'], errors='coerce')
+
+# Entfernen von Zeilen mit fehlenden 'Raub'-Werten
+df_unter = df_unter.dropna(subset=['Raub'])
+
+# Für jeden Oberbezirk den Unterbezirk mit dem höchsten Wert in der Spalte 'Raub' identifizieren
+idx_max_raub = df_unter.groupby('Oberbezirk')['Raub'].idxmax()
+df_max_raub = df_unter.loc[idx_max_raub]
+
+# 7. Die Ergebnisse in einem neuen Dataframe speichern mit den Spalten: 'Oberbezirk', 'Unterbezirk', 'Raub'
+final_df = df_max_raub[['Oberbezirk', 'Bezeichnung (Bezirksregion)', 'Raub']].rename(columns={
+    'Bezeichnung (Bezirksregion)': 'Unterbezirk'
+}).reset_index(drop=True)
+
+# 8. Das finale Dataframe ausgeben
+print(final_df)
+```
+
+### Erklärung der Schritte
+
+1. **Excel-Datei einlesen:**
+   Das Skript liest das Sheet `'Fallzahlen_2023'` aus der Excel-Datei `'Fallzahlen&HZ 2014-2023.xlsx'` ein und speichert die Daten in einem Pandas DataFrame `df`.
+
+2. **Relevante Spalten auswählen:**
+   Es werden nur die Spalten `'Bezeichnung (Bezirksregion)'` und `'Raub'` behalten, da diese für die weitere Verarbeitung benötigt werden.
+
+3. **Letzte zwei Zeilen entfernen:**
+   Die letzten zwei Zeilen des DataFrames, die Gesamtwerte enthalten, werden entfernt.
+
+4. **Oberbezirke identifizieren:**
+   Eine Liste `oberbezirke` enthält alle Oberbezirke. Eine neue Spalte `'Oberbezirk'` wird erstellt, die den Namen des Oberbezirks enthält. Mit `ffill()` (forward fill) wird der aktuelle Oberbezirk auf die nachfolgenden Unterbezirke angewendet, bis ein neuer Oberbezirk gefunden wird.
+
+5. **Unterbezirke filtern:**
+   Zeilen, die selbst Oberbezirke sind, werden ausgeschlossen, sodass nur die Unterbezirke verbleiben.
+
+6. **Daten bereinigen:**
+   - Die Spalte `'Raub'` wird in numerische Werte umgewandelt. Nicht-konvertierbare Werte werden als `NaN` gesetzt.
+   - Zeilen mit fehlenden `'Raub'`-Werten werden entfernt.
+
+7. **Unterbezirk mit höchstem Raub je Oberbezirk:**
+   Für jeden Oberbezirk wird der Unterbezirk mit dem höchsten Wert in der Spalte `'Raub'` identifiziert. Das Ergebnis wird in `final_df` gespeichert, das die Spalten `'Oberbezirk'`, `'Unterbezirk'` und `'Raub'` enthält.
+
+8. **Ergebnis anzeigen:**
+   Das finale DataFrame wird ausgegeben.
+
+### Beispielausgabe
+
+Das finale DataFrame `final_df` könnte wie folgt aussehen:
+
+```
+              Oberbezirk       Unterbezirk    Raub
+0                  Mitte             Unter1    884
+1  Friedrichshain-Kreuzberg   Unter2     521
+2                  Pankow         Unter3     ...
+...
+```
+
+### Hinweise
+
+- Stellen Sie sicher, dass die Spaltennamen exakt mit denen in Ihrer Excel-Datei übereinstimmen. Falls sie sich unterscheiden, passen Sie die Spaltennamen im Skript entsprechend an.
+  
+- Falls die Excel-Datei große Datenmengen enthält oder zusätzliche Datenbereinigungen notwendig sind, könnten weitere Anpassungen am Skript erforderlich sein.
+
+- Um das Ergebnis in eine neue Excel-Datei zu speichern, können Sie am Ende des Skripts folgende Zeile hinzufügen:
+
+  ```python
+  final_df.to_excel('Unterbezirke_mit_maximalem_Raub.xlsx', index=False)
+  ```
+
+Dieses Skript sollte Ihre Anforderungen erfüllen und Ihnen eine Übersicht der Unterbezirke mit den höchsten Raubfällen pro Oberbezirk geben.

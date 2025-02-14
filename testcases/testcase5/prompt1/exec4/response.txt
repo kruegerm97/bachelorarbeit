@@ -1,0 +1,132 @@
+Hier ist ein Python-Skript, das die gewünschten Anforderungen erfüllt. Das Skript verwendet die Bibliothek `pandas`, um die Excel-Datei zu lesen und die Daten zu verarbeiten.
+
+## Annahmen und Vorgehensweise
+
+1. **Oberbezirk Identifikation**:
+   - **Oberbezirk** wird angenommen als Einträge mit einem `LOR-Schlüssel`, der 5-stellig ist und mit `000` endet (z.B. `10000` für Mitte).
+   - **Unterbezirk** sind Einträge, die nicht diese Kriterien erfüllen und deren `LOR-Schlüssel` mit dem gleichen Anfang wie der Oberbezirk beginnen.
+
+2. **Zuordnung der Unterbezirke**:
+   - Jedes Unterbezirk wird dem Oberbezirk zugeordnet, dessen `LOR-Schlüssel` der längste Präfix des Unterbezirks-Schlüssels ist. Dies ermöglicht eine flexible Zuordnung, selbst wenn die Hierarchie tiefer ist.
+
+3. **Ermittlung der Unterbezirke mit den meisten Raubdelikten**:
+   - Für jeden Oberbezirk wird der Unterbezirk mit der höchsten Anzahl an Raubdelikten (`Raub`) ermittelt.
+
+## Benötigte Bibliotheken
+
+Stellen Sie sicher, dass die folgenden Bibliotheken installiert sind. Falls nicht, können Sie sie mit `pip` installieren:
+
+```bash
+pip install pandas openpyxl
+```
+
+## Python-Skript
+
+```python
+import pandas as pd
+
+def finde_oberbezirke_mit_meisten_raub(excel_datei, sheet_name):
+    # Excel-Datei lesen
+    try:
+        df = pd.read_excel(excel_datei, sheet_name=sheet_name, dtype={'LOR-Schlüssel': str})
+    except Exception as e:
+        print(f"Fehler beim Lesen der Excel-Datei: {e}")
+        return
+    
+    # Sicherstellen, dass 'LOR-Schlüssel' als String gelesen werden und führende Nullen beibehalten
+    df['LOR-Schlüssel'] = df['LOR-Schlüssel'].str.strip().str.zfill(6)
+    
+    # Entfernen von nicht zuzuordenenden Bezirken
+    df = df[~df['Bezeichnung (Bezirksregion)'].str.contains('nicht zuzuordnen', na=False)]
+    
+    # Identifizieren der Oberbezirke: 5-stelliger LOR-Schlüssel, der mit '000' endet
+    oberbezke = df[df['LOR-Schlüssel'].str.endswith('000') & (df['LOR-Schlüssel'].str.len() == 5)]
+    
+    if oberbezke.empty:
+        print("Keine Oberbezirke gefunden. Überprüfen Sie die Kriterien zur Identifikation der Oberbezirke.")
+        return
+    
+    # Liste der Oberbezirke
+    oberbezke_list = oberbezke[['LOR-Schlüssel', 'Bezeichnung (Bezirksregion)']].to_dict('records')
+    
+    # Ergebnisse speichern
+    ergebnisse = []
+    
+    for ober in oberbezke_list:
+        ober_code = ober['LOR-Schlüssel']
+        ober_name = ober['Bezeichnung (Bezirksregion)']
+        
+        # Finden der Unterbezirke, die mit dem Oberbezirkscode beginnen
+        # Annahme: Der Oberbezirkscode ohne die letzten drei Nullen ist der Präfix
+        prefix = ober_code[:-3]  # z.B. '10' aus '10000'
+        
+        # Unterbezirke finden
+        unterbezke = df[
+            (df['LOR-Schlüssel'].str.startswith(prefix)) &
+            (df['LOR-Schlüssel'] != ober_code)
+        ]
+        
+        if unterbezke.empty:
+            print(f"Keine Unterbezirke für Oberbezirk {ober_name} gefunden.")
+            continue
+        
+        # Unterbezirk mit den meisten Raubdelikten finden
+        max_raub_idx = unterbezke['Raub'].idxmax()
+        max_raub = unterbezke.loc[max_raub_idx]
+        unterbez_name = max_raub['Bezeichnung (Bezirksregion)']
+        raub_count = max_raub['Raub']
+        
+        ergebnisse.append({
+            'Oberbezirk': ober_name,
+            'Unterbezirk': unterbez_name,
+            'Raubdelikte': raub_count
+        })
+    
+    # Ergebnisse anzeigen
+    print("Unterbezirke mit den meisten Raubdelikten pro Oberbezirk:")
+    for res in ergebnisse:
+        print(f"Oberbezirk: {res['Oberbezirk']}, "
+              f"Unterbezirk: {res['Unterbezirk']}, "
+              f"Raubdelikte: {res['Raubdelikte']}")
+
+if __name__ == "__main__":
+    excel_datei = 'Fallzahlen&HZ 2014-2023.xlsx'  # Pfad zur Excel-Datei
+    sheet_name = 'Fallzahlen_2023'               # Name des Sheets
+    finde_oberbezirke_mit_meisten_raub(excel_datei, sheet_name)
+```
+
+## Erklärung des Skripts
+
+1. **Lesen der Excel-Datei**:
+   - Das Skript liest das angegebene Sheet der Excel-Datei ein.
+   - Der `LOR-Schlüssel` wird als String eingelesen, um führende Nullen zu bewahren.
+
+2. **Filtern der Oberbezirke**:
+   - Oberbezirke werden anhand des `LOR-Schlüssel` identifiziert, der 5-stellig ist und mit `000` endet.
+   
+3. **Zuordnung der Unterbezirke**:
+   - Für jeden Oberbezirk wird ein Präfix aus dem `LOR-Schlüssel` extrahiert (die ersten zwei Stellen).
+   - Unterbezirke, die mit diesem Präfix beginnen (aber nicht dem Oberbezirk selbst entsprechen), werden zugeordnet.
+
+4. **Ermittlung des Unterbezirks mit den meisten Raubdelikten**:
+   - Innerhalb der zugeordneten Unterbezirke wird der mit dem höchsten Wert in der Spalte `Raub` ausgewählt.
+
+5. **Ausgabe der Ergebnisse**:
+   - Die Ergebnisse werden in der Konsole ausgegeben, wobei jeder Oberbezirk und der entsprechende Unterbezirk mit den meisten Raubdelikten angezeigt werden.
+
+## Hinweise
+
+- **Datensäuberung**: Stellen Sie sicher, dass die Spaltennamen in Ihrer Excel-Datei exakt mit denen im Skript übereinstimmen. Eventuell müssen Sie die Spaltennamen anpassen, falls sie abweichen.
+- **Fehlerbehandlung**: Das Skript enthält grundlegende Fehlerbehandlungen, um Probleme beim Lesen der Datei oder beim Fehlen von Oberbezirken zu melden.
+- **Anpassungen**: Je nach tatsächlicher Struktur der `LOR-Schlüssel` und der administrativen Hierarchie in Ihrer Datenquelle könnten Anpassungen erforderlich sein.
+
+## Beispielausgabe
+
+```
+Unterbezirke mit den meisten Raubdelikten pro Oberbezirk:
+Oberbezirk: Mitte, Unterbezirk: Alexanderplatz, Raubdelikte: 199
+Oberbezirk: ...
+...
+```
+
+Dieses Skript sollte Ihnen eine gute Grundlage bieten, um die gewünschten Analysen durchzuführen. Passen Sie es entsprechend den genauen Anforderungen und der Struktur Ihrer Daten an.

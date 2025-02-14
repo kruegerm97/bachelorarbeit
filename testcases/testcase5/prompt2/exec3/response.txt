@@ -1,0 +1,144 @@
+Hier ist ein Python-Skript, das die gewünschten Anforderungen erfüllt. Das Skript verwendet die `pandas` Bibliothek, um die Excel-Datei zu verarbeiten. Es liest das spezifizierte Sheet ein, identifiziert die Ober- und Unterbezirke, und ermittelt für jeden Oberbezirk den Unterbezirk mit den meisten Raubdelikten.
+
+**Voraussetzungen:**
+
+- **Python** sollte installiert sein (Version 3.6 oder höher empfohlen).
+- Die Bibliothek **pandas** muss installiert sein. Falls nicht, kannst du sie mit folgendem Befehl installieren:
+
+  ```bash
+  pip install pandas
+  ```
+
+- Die Bibliothek **openpyxl** wird benötigt, um Excel-Dateien zu lesen. Installiere sie ebenfalls mit:
+
+  ```bash
+  pip install openpyxl
+  ```
+
+**Python-Skript:**
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+excel_datei = 'Fallzahlen&HZ 2014-2023.xlsx'
+
+# Name des Sheets
+sheet_name = 'Fallzahlen_2023'
+
+# Liste der Oberbezirke
+oberbezirke = [
+    'Mitte',
+    'Friedrichshain-Kreuzberg',
+    'Pankow',
+    'Charlottenburg-Wilmersdorf',
+    'Spandau',
+    'Steglitz-Zehlendorf',
+    'Tempelhof-Schöneberg',
+    'Neukölln',
+    'Treptow-Köpenick',
+    'Marzahn-Hellersdorf',
+    'Lichtenberg',
+    'Reinickendorf'
+]
+
+try:
+    # Excel-Datei einlesen
+    df = pd.read_excel(excel_datei, sheet_name=sheet_name)
+
+    # Entfernen der letzten zwei Zeilen (Gesamtwerte)
+    df = df.iloc[:-2]
+
+    # Sicherstellen, dass die relevanten Spalten vorhanden sind
+    erforderliche_spalten = ['Bezeichnung (Bezirksregion)', 'Raub']
+    for spalte in erforderliche_spalten:
+        if spalte not in df.columns:
+            raise ValueError(f"Die erforderliche Spalte '{spalte}' wurde nicht gefunden.")
+
+    # Erstellen einer neuen Spalte 'Oberbezirk', die den aktuellen Oberbezirk enthält
+    df['Oberbezirk'] = df['Bezeichnung (Bezirksregion)'].where(df['Bezeichnung (Bezirksregion)'].isin(oberbezirke))
+    df['Oberbezirk'] = df['Oberbezirk'].ffill()
+
+    # Filtern der Unterbezirke (Ausschluss der Oberbezirke)
+    unterbezirke = df[~df['Bezeichnung (Bezirksregion)'].isin(oberbezirke)].copy()
+
+    # Um sicherzustellen, dass die 'Raub' Spalte numerisch ist
+    unterbezirke['Raub'] = pd.to_numeric(unterbezirke['Raub'], errors='coerce').fillna(0).astype(int)
+
+    # Gruppieren nach 'Oberbezirk' und Finden des Unterbezirks mit den meisten Raubdelikten
+    idx_max_raub = unterbezirke.groupby('Oberbezirk')['Raub'].idxmax()
+    max_raub_unterbezirke = unterbezirke.loc[idx_max_raub]
+
+    # Ausgabe der Ergebnisse
+    print("Unterbezirk mit den meisten Raubdelikten pro Oberbezirk (2023):\n")
+    for _, row in max_raub_unterbezirke.iterrows():
+        print(f"Oberbezirk: {row['Oberbezirk']}")
+        print(f"  Unterbezirk: {row['Bezeichnung (Bezirksregion)']}")
+        print(f"  Anzahl Raubdelikte: {row['Raub']}\n")
+
+except FileNotFoundError:
+    print(f"Die Datei '{excel_datei}' wurde nicht gefunden. Bitte überprüfe den Pfad.")
+except ValueError as ve:
+    print(f"Fehler: {ve}")
+except Exception as e:
+    print(f"Ein unerwarteter Fehler ist aufgetreten: {e}")
+```
+
+**Erläuterungen zum Skript:**
+
+1. **Importieren der Bibliothek:**
+   - `pandas` wird für die Datenverarbeitung verwendet.
+
+2. **Einlesen der Excel-Datei:**
+   - Das Skript liest das angegebene Sheet `'Fallzahlen_2023'` aus der Excel-Datei `'Fallzahlen&HZ 2014-2023.xlsx'`.
+
+3. **Datenvorbereitung:**
+   - Die letzten zwei Zeilen der Daten, die Gesamtwerte darstellen, werden entfernt.
+   - Es wird überprüft, ob die erforderlichen Spalten (`'Bezeichnung (Bezirksregion)'` und `'Raub'`) vorhanden sind.
+
+4. **Identifikation der Ober- und Unterbezirke:**
+   - Eine neue Spalte `'Oberbezirk'` wird erstellt, die den aktuellen Oberbezirk für jede Zeile enthält. Dies wird erreicht, indem die Oberbezirke in der Liste `oberbezirke` gesucht und dann vorwärts aufgefüllt werden (`ffill()`), um jedem Unterbezirk seinen zugehörigen Oberbezirk zuzuweisen.
+   - Anschließend werden die Oberbezirke aus dem DataFrame gefiltert, sodass nur die Unterbezirke übrig bleiben.
+
+5. **Datenbereinigung:**
+   - Die Spalte `'Raub'` wird in einen numerischen Datentyp konvertiert, um sicherzustellen, dass die Werte korrekt verarbeitet werden können. Nicht-numerische Werte werden als 0 behandelt.
+
+6. **Berechnung der Unterbezirke mit den meisten Raubdelikten:**
+   - Das Skript gruppiert die Daten nach `'Oberbezirk'` und findet innerhalb jeder Gruppe den Unterbezirk mit der höchsten Anzahl an Raubdelikten.
+
+7. **Ausgabe der Ergebnisse:**
+   - Für jeden Oberbezirk wird der entsprechende Unterbezirk mit den meisten Raubdelikten sowie die Anzahl der Raubdelikte ausgegeben.
+
+8. **Fehlerbehandlung:**
+   - Das Skript enthält grundlegende Fehlerbehandlungen, um fehlende Dateien oder Spalten zu erkennen und unerwartete Fehler abzufangen.
+
+**Anwendung:**
+
+1. Stelle sicher, dass sich die Excel-Datei `'Fallzahlen&HZ 2014-2023.xlsx'` im gleichen Verzeichnis wie das Skript befindet oder passe den Pfad entsprechend an.
+
+2. Führe das Skript mit Python aus:
+
+   ```bash
+   python dein_skript_name.py
+   ```
+
+3. Das Skript gibt die Ergebnisse in der Konsole aus, zum Beispiel:
+
+   ```
+   Unterbezirk mit den meisten Raubdelikten pro Oberbezirk (2023):
+
+   Oberbezirk: Mitte
+     Unterbezirk: Alexanderplatz
+     Anzahl Raubdelikte: 199
+
+   Oberbezirk: Friedrichshain-Kreuzberg
+     Unterbezirk: ... 
+     Anzahl Raubdelikte: ...
+
+   ...
+   ```
+
+**Hinweis:**
+
+- Stelle sicher, dass die Spaltennamen in der Excel-Datei genau mit denen im Skript übereinstimmen. Falls es Abweichungen gibt, passe die Spaltennamen im Skript entsprechend an.
+- Bei größeren Datenmengen oder speziellen Anforderungen kann das Skript weiter angepasst werden.

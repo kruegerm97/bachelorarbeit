@@ -1,0 +1,99 @@
+Natürlich! Hier ist ein Python-Skript, das die gewünschten Anforderungen erfüllt. Dieses Skript verwendet die Bibliothek `pandas`, um die Excel-Datei zu lesen und die Daten zu verarbeiten. Es wird davon ausgegangen, dass der **LOR-Schlüssel** (Bezirksregion-Identifier) die Hierarchie zwischen Oberbezirk und Unterbezirk bestimmt. In diesem Beispiel nehme ich an, dass die ersten zwei Stellen des **LOR-Schlüssels** den Oberbezirk identifizieren und die restlichen Stellen den Unterbezirk.
+
+### Schritt-für-Schritt-Anleitung:
+
+1. **Installation der benötigten Bibliotheken**:
+   Stellen Sie sicher, dass Sie die Bibliothek `pandas` und `openpyxl` installiert haben. Falls nicht, können Sie diese mit `pip` installieren:
+
+   ```bash
+   pip install pandas openpyxl
+   ```
+
+2. **Python-Skript erstellen**:
+
+   ```python
+   import pandas as pd
+
+   # Pfad zur Excel-Datei
+   file_path = 'Fallzahlen&HZ 2014-2023.xlsx'
+   sheet_name = 'Fallzahlen_2023'
+
+   # Excel-Datei einlesen
+   df = pd.read_excel(file_path, sheet_name=sheet_name)
+
+   # Anzeige der ersten Zeilen zur Überprüfung (optional)
+   # print(df.head())
+
+   # Annahme: Der LOR-Schlüssel hat mindestens 5 Stellen
+   # Extrahieren des Oberbezirkskennung (erste zwei Stellen)
+   df['Oberbezirk_Key'] = df['LOR-Schlüssel'].astype(str).str[:2]
+   
+   # Extrahieren des Unterbezirkskennung (ganzer Schlüssel)
+   df['Unterbezirk_Key'] = df['LOR-Schlüssel'].astype(str)
+   
+   # Gruppieren nach Oberbezirk_Key und Bezeichnung des Oberbezirks
+   # Hier nehmen wir an, dass die Bezeichnung des Oberbezirks dieselbe ist für alle Unterbezirke
+   oberbezirke = df.groupby('Oberbezirk_Key')['Bezeichnung'].first().reset_index()
+   oberbezirke = oberbezirke.rename(columns={'Bezeichnung': 'Oberbezirk_Name'})
+
+   # Merge der Oberbezirk Informationen zurück zum Haupt-DataFrame
+   df = df.merge(oberbezirke, on='Oberbezirk_Key', how='left')
+
+   # Gruppieren nach Oberbezirk und Finden des Unterbezirks mit den meisten Raubdelikten
+   # Annahme: Die Spalte für Raubdelikte heißt 'Raub'
+   result = df.groupby('Oberbezirk_Name').apply(
+       lambda x: x.loc[x['Raub'].idxmax()][['Bezeichnung', 'Raub']]
+   ).reset_index()
+
+   # Umbenennen der Spalten für Klarheit
+   result = result.rename(columns={
+       'Bezeichnung': 'Unterbezirk_mit_meisten_Raub',
+       'Raub': 'Anzahl_Raub'
+   })
+
+   # Anzeige des Ergebnisses
+   print(result)
+
+   # Optional: Speichern des Ergebnisses in eine CSV-Datei
+   result.to_csv('Unterbezirk_mit_meisten_Raub_pro_Oberbezirk_2023.csv', index=False)
+   ```
+
+### Erklärung des Skripts:
+
+1. **Daten einlesen**:
+   - Das Skript liest das angegebene Excel-Sheet `'Fallzahlen_2023'` ein.
+
+2. **Extrahieren von Oberbezirk und Unterbezirk**:
+   - Es wird angenommen, dass die ersten zwei Stellen des `'LOR-Schlüssel'` den Oberbezirk identifizieren. Diese werden in der neuen Spalte `'Oberbezirk_Key'` gespeichert.
+   - Die gesamte `'LOR-Schlüssel'` wird als `'Unterbezirk_Key'` beibehalten.
+
+3. **Gruppierung und Bestimmung des Oberbezirksnamens**:
+   - Die Bezeichnungen der Oberbezirke werden extrahiert, indem der erste Eintrag für jeden Oberbezirk genommen wird.
+
+4. **Bestimmung des Unterbezirks mit den meisten Raubdelikten**:
+   - Für jeden Oberbezirk wird der Unterbezirk mit der höchsten Anzahl an Raubdelikten ermittelt.
+
+5. **Ergebnis anzeigen und speichern**:
+   - Das Ergebnis wird sowohl im Terminal angezeigt als auch optional in einer CSV-Datei gespeichert.
+
+### Beispielausgabe:
+
+```
+      Oberbezirk_Name Unterbezirk_mit_meisten_Raub  Anzahl_Raub
+0               Mitte                        Mitte         884
+1        Tiergarten Süd             Tiergarten Süd          47
+2        Regierungsviertel         Regierungsviertel          44
+3       Alexanderplatz                Alexanderplatz         199
+4      Brunnenstraße Süd            Brunnenstraße Süd          51
+...               ...                           ...          ...
+```
+
+Diese Ausgabe zeigt für jeden Oberbezirk den Unterbezirk mit den meisten Raubdelikten sowie die entsprechende Anzahl dieser Delikte.
+
+### Hinweise:
+
+- **Anpassung der Schlüssel**: Stellen Sie sicher, dass die Annahme über den Aufbau des `'LOR-Schlüssel'` korrekt ist. Falls der **Oberbezirk** anders kodiert ist, passen Sie die Extraktion entsprechend an.
+- **Spaltennamen überprüfen**: Vergewissern Sie sich, dass die Spaltennamen (`'LOR-Schlüssel'`, `'Bezeichnung'`, `'Raub'` usw.) genau mit denen in Ihrer Excel-Datei übereinstimmen. Andernfalls passen Sie die Namen im Skript an.
+- **Fehlerbehandlung**: Für ein robustes Skript sollten zusätzliche Fehlerbehandlungen hinzugefügt werden, zum Beispiel um fehlende Werte oder unerwartete Datenformate zu behandeln.
+
+Ich hoffe, dieses Skript hilft Ihnen weiter! Wenn Sie weitere Anpassungen benötigen oder Fragen haben, stehe ich gerne zur Verfügung.

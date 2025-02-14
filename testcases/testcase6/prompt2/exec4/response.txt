@@ -1,0 +1,152 @@
+Hier ist ein Python-Skript, das Ihre Anforderungen erfüllt. Das Skript verwendet die Bibliothek `pandas`, um die Excel-Datei zu verarbeiten, die Daten zu filtern und die gewünschten Ergebnisse zu aggregieren.
+
+Stellen Sie sicher, dass Sie `pandas` und `openpyxl` installiert haben. Falls nicht, können Sie sie mit `pip` installieren:
+
+```bash
+pip install pandas openpyxl
+```
+
+### Python-Skript
+
+```python
+import pandas as pd
+
+# Dateipfad zur Excel-Datei
+file_path = 'Fallzahlen&HZ 2014-2023.xlsx'
+
+# Liste der Oberbezirke
+oberbezirke = [
+    'Mitte',
+    'Friedrichshain-Kreuzberg',
+    'Pankow',
+    'Charlottenburg-Wilmersdorf',
+    'Spandau',
+    'Steglitz-Zehlendorf',
+    'Tempelhof-Schöneberg',
+    'Neukölln',
+    'Treptow-Köpenick',
+    'Marzahn-Hellersdorf',
+    'Lichtenberg',
+    'Reinickendorf'
+]
+
+# Generiere die Liste der Sheet-Namen von 2014 bis 2023
+sheet_names = [f'Fallzahlen_{year}' for year in range(2014, 2024)]
+
+# Lese alle relevanten Sheets ein und speichere sie in einer Liste
+dfs = []
+for sheet in sheet_names:
+    try:
+        df = pd.read_excel(file_path, sheet_name=sheet)
+        dfs.append(df)
+    except ValueError:
+        print(f"Sheet {sheet} nicht gefunden in der Datei.")
+
+# Kombiniere alle DataFrames zu einem einzigen DataFrame
+combined_df = pd.concat(dfs, ignore_index=True)
+
+# Bereinige die Spaltennamen: Entferne Zeilenumbrüche und führende/trailende Leerzeichen
+combined_df.columns = combined_df.columns.str.replace('\n', ' ').str.strip()
+
+# Identifiziere die Spalte für "Straftaten -insgesamt-"
+# Diese Annahme basiert auf den bereitgestellten Beispieldaten
+straftaten_spalte = 'Straftaten -insgesamt-'
+
+if straftaten_spalte not in combined_df.columns:
+    # Falls die Spalte nicht exakt gefunden wird, suche ähnlich benannte Spalten
+    mögliche_spalten = [col for col in combined_df.columns if 'Straftaten' in col and 'insgesamt' in col.lower()]
+    if mögliche_spalten:
+        straftaten_spalte = mögliche_spalten[0]
+    else:
+        raise ValueError('Die Spalte für "Straftaten -insgesamt-" wurde nicht gefunden.')
+
+# Filtere nur die Unterbezirke:
+# - Schließe die Oberbezirke aus
+# - Schließe Zeilen aus, die "nicht zuzuordnen" enthalten
+unterbezirke_df = combined_df[
+    (~combined_df['Bezeichnung (Bezirksregion)'].isin(oberbezirke)) &
+    (~combined_df['Bezeichnung (Bezirksregion)'].str.contains('nicht zuzuordnen', case=False, na=False))
+]
+
+# Stelle sicher, dass die Straftaten-Spalte numerisch ist
+unterbezirke_df[straftaten_spalte] = pd.to_numeric(unterbezirke_df[straftaten_spalte], errors='coerce').fillna(0)
+
+# Aggregiere die Straftaten über alle Jahre hinweg pro Unterbezirk
+aggregated_df = unterbezirke_df.groupby('Bezeichnung (Bezirksregion)')[straftaten_spalte].sum().reset_index()
+
+# Ermittele die Top 10 Unterbezirke mit den meisten Straftaten
+top10_df = aggregated_df.sort_values(by=straftaten_spalte, ascending=False).head(10)
+
+# Benenne die Spalten für den finalen DataFrame um (optional)
+final_df = top10_df.rename(columns={
+    'Bezeichnung (Bezirksregion)': 'Unterbezirk',
+    straftaten_spalte: 'Straftaten_Gesamt'
+})
+
+# Optional: Setze die Spalten in eine bestimmte Reihenfolge
+final_df = final_df[['Unterbezirk', 'Straftaten_Gesamt']]
+
+# Ausgabe des finalen DataFrames
+print(final_df)
+
+# Optional: Speichere das Ergebnis in eine neue Excel-Datei
+# final_df.to_excel('Top10_Unterbezirke_Straftaten.xlsx', index=False)
+```
+
+### Erklärung der einzelnen Schritte
+
+1. **Import der Bibliotheken**: Das Skript verwendet `pandas` zur Datenverarbeitung.
+
+2. **Dateipfad und Oberbezirke definieren**: Der Pfad zur Excel-Datei und die Liste der Oberbezirke werden festgelegt.
+
+3. **Sheet-Namen generieren**: Erzeugt eine Liste der Sheet-Namen von `Fallzahlen_2014` bis `Fallzahlen_2023`.
+
+4. **Einlesen der Excel-Sheets**: Iteriert über die Sheet-Namen, liest jedes Sheet ein und fügt es der Liste `dfs` hinzu. Falls ein Sheet nicht gefunden wird, gibt das Skript eine Warnung aus.
+
+5. **Kombinieren der DataFrames**: Alle einzelnen DataFrames werden zu einem großen DataFrame `combined_df` zusammengeführt.
+
+6. **Bereinigen der Spaltennamen**: Entfernt Zeilenumbrüche und unnötige Leerzeichen aus den Spaltennamen, um eine konsistente Datenverarbeitung zu gewährleisten.
+
+7. **Identifizieren der Straftaten-Spalte**: Überprüft, ob die Spalte `Straftaten -insgesamt-` vorhanden ist. Falls nicht, sucht das Skript nach einer ähnlichen Spalte.
+
+8. **Filtern der Unterbezirke**:
+    - Schließt alle Oberbezirke aus der Liste aus.
+    - Entfernt alle Zeilen, die den Begriff "nicht zuzuordnen" enthalten.
+
+9. **Konvertieren der Straftaten-Spalte in numerische Werte**: Stellt sicher, dass die Straftatenzahlen als numerische Werte vorliegen, und füllt fehlende Werte mit 0.
+
+10. **Aggregieren der Straftaten**: Summiert die Straftaten über alle Jahre hinweg für jeden Unterbezirk.
+
+11. **Ermitteln der Top 10 Unterbezirke**: Sortiert die Unterbezirke nach der Gesamtzahl der Straftaten in absteigender Reihenfolge und wählt die Top 10 aus.
+
+12. **Formatieren des finalen DataFrames**: Benennt die Spalten um und ordnet sie für eine bessere Lesbarkeit.
+
+13. **Ausgabe und optionales Speichern**: Gibt das finale Ergebnis aus und bietet die Möglichkeit, es in eine neue Excel-Datei zu speichern.
+
+### Beispielausgabe
+
+Die Ausgabe könnte wie folgt aussehen (Beispielwerte):
+
+```
+          Unterbezirk  Straftaten_Gesamt
+0            Kreuzberg            150000
+1             Tempelhof            140000
+2             Neukölln            130000
+3              Lichtenberg       120000
+4             Friedrichshain-Kreuzberg 110000
+5             Treptow-Köpenick     100000
+6             Steglitz-Zehlendorf   90000
+7             Marzahn-Hellersdorf   80000
+8             Reinickendorf         70000
+9             Pankow               60000
+```
+
+### Hinweise
+
+- **Spaltennamen**: Stellen Sie sicher, dass die Spaltennamen in Ihren Excel-Sheets mit denen im Skript übereinstimmen. Falls nicht, müssen Sie die Namen im Skript entsprechend anpassen.
+
+- **Fehlende Daten**: Das Skript geht davon aus, dass alle relevanten Sheets vorhanden sind. Falls einige Sheets fehlen, wird eine Warnung ausgegeben, und das Skript fährt mit den verfügbaren Daten fort.
+
+- **Speichern des Ergebnisses**: Die letzte Zeile im Skript, die das Ergebnis in eine neue Excel-Datei speichert, ist auskommentiert. Entfernen Sie das Kommentarzeichen (`#`), wenn Sie das Ergebnis speichern möchten.
+
+Dieses Skript sollte Ihnen helfen, die gewünschten Daten effizient zu verarbeiten und die Top 10 Unterbezirke mit den meisten Straftaten zu ermitteln.

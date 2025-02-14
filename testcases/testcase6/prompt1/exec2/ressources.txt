@@ -1,0 +1,44 @@
+Wichtige Spalten fehlen im Sheet Fallzahlen_2014. Überspringe dieses Sheet.
+Wichtige Spalten fehlen im Sheet Fallzahlen_2015. Überspringe dieses Sheet.
+Wichtige Spalten fehlen im Sheet Fallzahlen_2016. Überspringe dieses Sheet.
+Wichtige Spalten fehlen im Sheet Fallzahlen_2017. Überspringe dieses Sheet.
+Wichtige Spalten fehlen im Sheet Fallzahlen_2018. Überspringe dieses Sheet.
+Wichtige Spalten fehlen im Sheet Fallzahlen_2019. Überspringe dieses Sheet.
+Wichtige Spalten fehlen im Sheet Fallzahlen_2020. Überspringe dieses Sheet.
+Wichtige Spalten fehlen im Sheet Fallzahlen_2021. Überspringe dieses Sheet.
+Wichtige Spalten fehlen im Sheet Fallzahlen_2022. Überspringe dieses Sheet.
+Wichtige Spalten fehlen im Sheet Fallzahlen_2023. Überspringe dieses Sheet.
+Traceback (most recent call last):
+  File "/home/mauke/Documents/Uni/Bachelorarbeit/testcases/testcase6/prompt1/exec2/script.py", line 52, in <module>
+    top_10_unterbezirke = get_top_10_unterbezirke(excel_datei)
+  File "/home/mauke/Documents/Uni/Bachelorarbeit/testcases/testcase6/prompt1/exec2/script.py", line 43, in get_top_10_unterbezirke
+    aggregierte_daten_sorted = aggregierte_daten.sort_values(by='Straftaten insgesamt', ascending=False)
+  File "/home/mauke/Documents/Uni/Bachelorarbeit/venv/lib/python3.13/site-packages/pandas/core/frame.py", line 7189, in sort_values
+    k = self._get_label_or_level_values(by[0], axis=axis)
+  File "/home/mauke/Documents/Uni/Bachelorarbeit/venv/lib/python3.13/site-packages/pandas/core/generic.py", line 1911, in _get_label_or_level_values
+    raise KeyError(key)
+KeyError: 'Straftaten insgesamt'
+Command exited with non-zero status 1
+	Command being timed: "python testcase6/prompt1/exec2/script.py"
+	User time (seconds): 5.21
+	System time (seconds): 0.25
+	Percent of CPU this job got: 151%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:03.61
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 157956
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 171520
+	Voluntary context switches: 36
+	Involuntary context switches: 508
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 1

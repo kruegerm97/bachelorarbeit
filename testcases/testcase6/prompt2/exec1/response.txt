@@ -1,0 +1,173 @@
+Natürlich, hier ist ein Python-Skript, das die beschriebenen Anforderungen erfüllt. Das Skript verwendet die `pandas` Bibliothek, um die Excel-Datei zu verarbeiten und die gewünschten Daten zu extrahieren und zu aggregieren.
+
+Stelle sicher, dass du die `pandas` und `openpyxl` Bibliotheken installiert hast. Falls nicht, kannst du sie mit `pip` installieren:
+
+```bash
+pip install pandas openpyxl
+```
+
+Hier ist das vollständige Skript:
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+excel_datei = 'Fallzahlen&HZ 2014-2023.xlsx'
+
+# Liste der Oberbezirke
+oberbezirke = [
+    'Mitte',
+    'Friedrichshain-Kreuzberg',
+    'Pankow',
+    'Charlottenburg-Wilmersdorf',
+    'Spandau',
+    'Steglitz-Zehlendorf',
+    'Tempelhof-Schöneberg',
+    'Neukölln',
+    'Treptow-Köpenick',
+    'Marzahn-Hellersdorf',
+    'Lichtenberg',
+    'Reinickendorf'
+]
+
+# Liste der Sheet-Namen von Fallzahlen_2014 bis Fallzahlen_2023
+jahre = list(range(2014, 2024))
+sheet_namen = [f'Fallzahlen_{jahr}' for jahr in jahre]
+
+# Leere Liste zur Speicherung der DataFrames
+df_list = []
+
+# Iteriere über jedes Sheet und lese die Daten
+for sheet in sheet_namen:
+    try:
+        df = pd.read_excel(excel_datei, sheet_name=sheet)
+        df_list.append(df)
+    except Exception as e:
+        print(f"Fehler beim Lesen des Sheets {sheet}: {e}")
+
+# Zusammenführen aller DataFrames
+gesamt_df = pd.concat(df_list, ignore_index=True)
+
+# Entfernen der Oberbezirke und nicht zugeordneten Zeilen
+# Bedingungen:
+# 1. 'Bezeichnung (Bezirksregion)' nicht in oberbezirke
+# 2. 'Bezeichnung (Bezirksregion)' enthält nicht 'nicht zuzuordnen'
+
+# Erste Bedingung
+bedingung_1 = ~gesamt_df['Bezeichnung (Bezirksregion)'].isin(oberbezirke)
+
+# Zweite Bedingung: Ausschließen von Zeilen, die 'nicht zuzuordnen' enthalten
+bedingung_2 = ~gesamt_df['Bezeichnung (Bezirksregion)'].str.contains('nicht zuzuordnen', case=False, na=False)
+
+# Anwenden der Bedingungen
+unterbezirke_df = gesamt_df[bedingung_1 & bedingung_2]
+
+# Sicherstellen, dass die Spalte 'Straftaten -insgesamt-' numerisch ist
+# Eventuell müssen Nicht-Nummerische Werte (z.B. NaN) behandelt werden
+unterbezirke_df['Straftaten -insgesamt-'] = pd.to_numeric(unterbezirke_df['Straftaten -insgesamt-'], errors='coerce').fillna(0)
+
+# Aggregieren der Straftaten über alle Jahre hinweg
+aggregiert_df = unterbezirke_df.groupby('Bezeichnung (Bezirksregion)')['Straftaten -insgesamt-'].sum().reset_index()
+
+# Sortieren nach absteigender Anzahl der Straftaten und Auswahl der Top 10
+top10_df = aggregiert_df.sort_values(by='Straftaten -insgesamt-', ascending=False).head(10)
+
+# Optional: Zurücksetzen des Indexes
+top10_df = top10_df.reset_index(drop=True)
+
+# Ausgabe des finalen DataFrames
+print(top10_df)
+
+# Optional: Speichern des Ergebnisses in eine neue Excel-Datei
+# top10_df.to_excel('Top10_Unterbezirke_Straftaten.xlsx', index=False)
+```
+
+### Erklärung des Skripts
+
+1. **Importieren der benötigten Bibliotheken:**
+   ```python
+   import pandas as pd
+   ```
+
+2. **Definieren des Pfads zur Excel-Datei und der Liste der Oberbezirke:**
+   ```python
+   excel_datei = 'Fallzahlen&HZ 2014-2023.xlsx'
+   
+   oberbezirke = [
+       'Mitte',
+       'Friedrichshain-Kreuzberg',
+       'Pankow',
+       'Charlottenburg-Wilmersdorf',
+       'Spandau',
+       'Steglitz-Zehlendorf',
+       'Tempelhof-Schöneberg',
+       'Neukölln',
+       'Treptow-Köpenick',
+       'Marzahn-Hellersdorf',
+       'Lichtenberg',
+       'Reinickendorf'
+   ]
+   ```
+
+3. **Erstellen der Liste der Sheet-Namen für die Jahre 2014 bis 2023:**
+   ```python
+   jahre = list(range(2014, 2024))
+   sheet_namen = [f'Fallzahlen_{jahr}' for jahr in jahre]
+   ```
+
+4. **Lesen der Daten aus jedem Sheet und Zusammenführen zu einem einzigen DataFrame:**
+   ```python
+   df_list = []
+
+   for sheet in sheet_namen:
+       try:
+           df = pd.read_excel(excel_datei, sheet_name=sheet)
+           df_list.append(df)
+       except Exception as e:
+           print(f"Fehler beim Lesen des Sheets {sheet}: {e}")
+
+   gesamt_df = pd.concat(df_list, ignore_index=True)
+   ```
+
+5. **Filtern der Unterbezirke:**
+   - Ausschluss der Oberbezirke.
+   - Ausschluss der Zeilen, die nicht zugeordnet sind (enthält 'nicht zuzuordnen').
+   ```python
+   bedingung_1 = ~gesamt_df['Bezeichnung (Bezirksregion)'].isin(oberbezirke)
+   bedingung_2 = ~gesamt_df['Bezeichnung (Bezirksregion)'].str.contains('nicht zuzuordnen', case=False, na=False)
+   unterbezirke_df = gesamt_df[bedingung_1 & bedingung_2]
+   ```
+
+6. **Sicherstellen, dass die Spalte 'Straftaten -insgesamt-' numerisch ist und fehlende Werte behandeln:**
+   ```python
+   unterbezirke_df['Straftaten -insgesamt-'] = pd.to_numeric(unterbezirke_df['Straftaten -insgesamt-'], errors='coerce').fillna(0)
+   ```
+
+7. **Aggregieren der Straftaten über alle Jahre und Ermitteln der Top 10 Unterbezirke:**
+   ```python
+   aggregiert_df = unterbezirke_df.groupby('Bezeichnung (Bezirksregion)')['Straftaten -insgesamt-'].sum().reset_index()
+   top10_df = aggregiert_df.sort_values(by='Straftaten -insgesamt-', ascending=False).head(10)
+   top10_df = top10_df.reset_index(drop=True)
+   ```
+
+8. **Ausgabe des finalen DataFrames:**
+   ```python
+   print(top10_df)
+   ```
+
+9. **Optional: Speichern des Ergebnisses in eine neue Excel-Datei:**
+   ```python
+   # top10_df.to_excel('Top10_Unterbezirke_Straftaten.xlsx', index=False)
+   ```
+
+### Hinweise
+
+- **Fehlerbehandlung:** Das Skript enthält einen `try-except` Block, um eventuelle Fehler beim Lesen der einzelnen Sheets abzufangen und auszugeben, ohne das gesamte Skript zu stoppen.
+
+- **Spaltennamen prüfen:** Stelle sicher, dass die Spaltennamen in deinen Excel-Sheets exakt mit den im Skript verwendeten Namen übereinstimmen. Falls die Spalte beispielsweise 'Straftaten \n-insgesamt-' anstelle von 'Straftaten -insgesamt-' heißt, musst du den Spaltennamen entsprechend anpassen.
+
+- **Leistung:** Bei sehr großen Excel-Dateien kann das Laden und Verarbeiten einige Zeit in Anspruch nehmen. Stelle sicher, dass dein System ausreichend Ressourcen hat.
+
+- **Datentypen:** Die Konvertierung der 'Straftaten -insgesamt-' Spalte zu numerischen Werten ist wichtig, um korrekte Aggregationen durchführen zu können. Nicht-numerische Werte werden hierbei als 0 behandelt.
+
+Dieses Skript sollte dir dabei helfen, die gewünschten Unterbezirke zu identifizieren und die Top 10 mit den meisten Straftaten zu ermitteln. Passe das Skript bei Bedarf an deine spezifischen Datenstrukturen an.

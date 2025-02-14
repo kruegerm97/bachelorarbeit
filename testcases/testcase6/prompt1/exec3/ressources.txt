@@ -1,0 +1,36 @@
+Die Top 10 Unterbezirke mit den meisten Straftaten (2014-2023):
+Bezeichnung (Bezirksregion)
+Berlin (PKS gesamt)                     5269896
+Mitte                                    878048
+Friedrichshain-Kreuzberg                 579591
+Charlottenburg-Wilmersdorf               519706
+Stadtgebiet Berlin, nicht zuzuordnen     512158
+Neukölln                                 436568
+Tempelhof-Schöneberg                     398767
+Pankow                                   393574
+Reinickendorf                            284193
+Lichtenberg                              279018
+Name: Straftaten \n-insgesamt-, dtype: int64
+	Command being timed: "python testcase6/prompt1/exec3/script.py"
+	User time (seconds): 5.34
+	System time (seconds): 0.24
+	Percent of CPU this job got: 153%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:03.65
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 157480
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 171785
+	Voluntary context switches: 38
+	Involuntary context switches: 271
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

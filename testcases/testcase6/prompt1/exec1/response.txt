@@ -1,0 +1,118 @@
+Gerne helfe ich dir dabei, ein Python-Skript zu erstellen, das die gewünschten Daten aus deiner Excel-Datei verarbeitet. Wir werden die Bibliothek `pandas` verwenden, die hervorragend für Datenanalyse-Aufgaben geeignet ist.
+
+### Voraussetzungen
+
+1. **Python installieren**: Stelle sicher, dass Python auf deinem Computer installiert ist. Du kannst es von [python.org](https://www.python.org/downloads/) herunterladen.
+
+2. **Benötigte Bibliotheken installieren**: Öffne dein Terminal oder die Eingabeaufforderung und installiere die notwendigen Bibliotheken mit `pip`:
+
+   ```bash
+   pip install pandas openpyxl
+   ```
+
+   - `pandas`: Für die Datenverarbeitung.
+   - `openpyxl`: Zum Lesen von Excel-Dateien.
+
+### Skript erstellen
+
+Erstelle eine neue Python-Datei, z.B. `top_unterbezirke.py`, und füge folgenden Code ein:
+
+```python
+import pandas as pd
+
+def get_top_unterbezirke(excel_file, sheets_prefix='Fallzahlen_', start_year=2014, end_year=2023, top_n=10):
+    # Liste zur Speicherung der DataFrames aus allen Jahren
+    df_list = []
+    
+    for year in range(start_year, end_year + 1):
+        sheet_name = f"{sheets_prefix}{year}"
+        try:
+            # Lade das jeweilige Sheet
+            df = pd.read_excel(excel_file, sheet_name=sheet_name)
+            
+            # Überprüfe, ob die notwendigen Spalten vorhanden sind
+            if 'LOR-Schlüssel (Bezirksregion)' in df.columns and 'Straftaten insgesamt' in df.columns:
+                # Wähle relevante Spalten
+                df_subset = df[['LOR-Schlüssel (Bezirksregion)', 'Bezeichnung (Bezirksregion)', 'Straftaten insgesamt']].copy()
+                
+                # Falls es weitere Bereinigungen benötigt, kann dies hier eingefügt werden
+                
+                df_list.append(df_subset)
+            else:
+                print(f"Wichtige Spalten fehlen im Sheet {sheet_name}.")
+        except Exception as e:
+            print(f"Fehler beim Laden des Sheets {sheet_name}: {e}")
+    
+    if not df_list:
+        print("Keine Daten zum Verarbeiten gefunden.")
+        return
+    
+    # Kombiniere alle DataFrames
+    combined_df = pd.concat(df_list, ignore_index=True)
+    
+    # Gruppiere nach Unterbezirk und summiere die Straftaten insgesamt
+    aggregated_df = combined_df.groupby(['LOR-Schlüssel (Bezirksregion)', 'Bezeichnung (Bezirksregion)'])['Straftaten insgesamt'].sum().reset_index()
+    
+    # Sortiere nach den meisten Straftaten und wähle die Top N
+    top_unterbezirke = aggregated_df.sort_values(by='Straftaten insgesamt', ascending=False).head(top_n)
+    
+    return top_unterbezirke
+
+if __name__ == "__main__":
+    excel_file = 'Fallzahlen&HZ 2014-2023.xlsx'  # Pfad zu deiner Excel-Datei
+    top_n = 10  # Anzahl der Top-Unterbezirke
+    
+    top_unterbezirke = get_top_unterbezirke(excel_file, top_n=top_n)
+    
+    if top_unterbezirke is not None:
+        print(f"Top {top_n} Unterbezirke mit den meisten Straftaten insgesamt (2014-2023):")
+        print(top_unterbezirke.to_string(index=False))
+```
+
+### Erklärung des Skripts
+
+1. **Funktion `get_top_unterbezirke`**:
+    - **Parameter**:
+        - `excel_file`: Pfad zur Excel-Datei.
+        - `sheets_prefix`: Prefix der Sheet-Namen (standardmäßig `'Fallzahlen_'`).
+        - `start_year` und `end_year`: Jahrsspanne (standardmäßig 2014 bis 2023).
+        - `top_n`: Anzahl der Top-Unterbezirke, die zurückgegeben werden sollen.
+    - **Ablauf**:
+        - Iteriert über die angegebenen Jahre und lädt jedes entsprechende Sheet.
+        - Überprüft, ob die notwendigen Spalten (`'LOR-Schlüssel (Bezirksregion)'` und `'Straftaten insgesamt'`) vorhanden sind.
+        - Extrahiert die relevanten Spalten und fügt sie einer Liste hinzu.
+        - Nach dem Laden aller Sheets kombiniert den DataFrame und gruppiert die Daten nach Unterbezirk, wobei die Straftaten summiert werden.
+        - Sortiert die Ergebnisse nach der Anzahl der Straftaten und gibt die Top N zurück.
+
+2. **Hauptteil des Skripts**:
+    - Definiert den Pfad zur Excel-Datei und die gewünschte Anzahl der Top-Unterbezirke.
+    - Ruft die Funktion auf und gibt das Ergebnis aus.
+
+### Skript ausführen
+
+Speichere die Datei `top_unterbezirke.py` und führe sie über das Terminal oder die Eingabeaufforderung aus:
+
+```bash
+python top_unterbezirke.py
+```
+
+### Beispielausgabe
+
+```
+Top 10 Unterbezirke mit den meisten Straftaten insgesamt (2014-2023):
+ LOR-Schlüssel (Bezirksregion) Bezeichnung (Bezirksregion)  Straftaten insgesamt
+                     999999             Berlin (PKS gesamt)              XXXXXXX
+                     10000                     Mitte                  XXXXXXX
+                     11003            Alexanderplatz                  XXXXXXX
+                     ...                           ...                  ...
+```
+
+*(Hinweis: `XXXXXXX` steht hier für die tatsächlichen summierten Straftaten.)*
+
+### Anpassungen und Erweiterungen
+
+- **Weitere Analysen**: Das Skript kann erweitert werden, um detailliertere Analysen durchzuführen, z.B. nach spezifischen Straftatenarten.
+- **Visualisierung**: Mit Bibliotheken wie `matplotlib` oder `seaborn` kannst du die Ergebnisse visualisieren.
+- **Fehlerbehandlung**: Das Skript enthält grundlegende Fehlerbehandlungen. Je nach Struktur deiner Daten könnten weitere Anpassungen notwendig sein.
+
+Ich hoffe, dieses Skript hilft dir weiter! Wenn du weitere Fragen hast oder Unterstützung benötigst, stehe ich gerne zur Verfügung.

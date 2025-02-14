@@ -104,7 +104,7 @@ if __name__ == "__main__":
         - **Einlesen der Excel-Datei**: Verwendet `pd.read_excel` und behandelt mögliche Fehler wie fehlende Dateien oder Sheets.
         - **Überprüfung der erforderlichen Spalten**: Stellt sicher, dass sowohl `'LOR-Schlüssel'` als auch `'Straftaten_insgesamt'` vorhanden sind.
         - **Konvertierung des `'LOR-Schlüssel'`**: Stellt sicher, dass die LOR-Schlüssel als Ganzzahlen vorliegen, um die Filterung korrekt durchführen zu können.
-        - **Trennen der Bezirke und Nicht-Bezirke**: Teilt den DataFrame in zwei Teile – Bezirke und die speziellen Einträge mit den LOR-Schlüsseln `999900` und `999999`.
+        - **Trennen der Bezirke und Nicht-Bezirke**: Teilt den DataFrame in zwei Teile - Bezirke und die speziellen Einträge mit den LOR-Schlüsseln `999900` und `999999`.
         - **Sortieren der Bezirke**: Sortiert die Bezirke basierend auf `'Straftaten_insgesamt'` in absteigender Reihenfolge.
         - **Kombinieren der DataFrames**: Fügt die sortierten Bezirke und die Nicht-Bezirke wieder zusammen.
 

@@ -1,0 +1,144 @@
+Natürlich, ich helfe Ihnen gerne dabei, ein Python-Skript zu erstellen, das Ihre Excel-Daten verarbeitet und die gewünschten Analysen durchführt. Unten finden Sie ein ausführliches Skript mit Kommentaren, die die einzelnen Schritte erläutern.
+
+### Voraussetzungen
+
+Stellen Sie sicher, dass die folgenden Python-Bibliotheken installiert sind:
+
+- `pandas` zum Datenmanagement
+- `openpyxl` als Engine zum Lesen von Excel-Dateien
+
+Sie können diese Bibliotheken mit `pip` installieren, falls Sie sie noch nicht installiert haben:
+
+```bash
+pip install pandas openpyxl
+```
+
+### Python-Skript
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+excel_datei = 'Fallzahlen&HZ 2014-2023.xlsx'
+
+# Liste der Oberbezirke, die ausgeschlossen werden sollen
+oberbezirke = [
+    'Mitte', 'Friedrichshain-Kreuzberg', 'Pankow',
+    'Charlottenburg-Wilmersdorf', 'Spandau', 'Steglitz-Zehlendorf',
+    'Tempelhof-Schöneberg', 'Neukölln', 'Treptow-Köpenick',
+    'Marzahn-Hellersdorf', 'Lichtenberg', 'Reinickendorf'
+]
+
+# Erstellen einer Liste der Sheet-Namen von 2014 bis 2023
+jahreszahlen = range(2014, 2024)  # 2014 bis 2023 inklusive
+sheet_namen = [f'Fallzahlen_{jahr}' for jahr in jahreszahlen]
+
+# Lesen aller relevanten Sheets und Speichern in einer Liste von DataFrames
+dataframes = []
+for sheet in sheet_namen:
+    try:
+        df = pd.read_excel(excel_datei, sheet_name=sheet, engine='openpyxl')
+        dataframes.append(df)
+        print(f"Sheet '{sheet}' erfolgreich gelesen.")
+    except Exception as e:
+        print(f"Fehler beim Lesen von Sheet '{sheet}': {e}")
+
+# Zusammenführen aller DataFrames zu einem einzigen DataFrame
+if dataframes:
+    kombiniertes_df = pd.concat(dataframes, ignore_index=True)
+    print("Alle Sheets erfolgreich zusammengeführt.")
+else:
+    raise ValueError("Keine Daten zum Verarbeiten gefunden.")
+
+# Überprüfen der Spaltennamen
+print("Spaltennamen im kombinierten DataFrame:")
+print(kombiniertes_df.columns.tolist())
+
+# Bereinigung der Spaltennamen (Entfernen von Zeilenumbrüchen und Leerzeichen)
+kombiniertes_df.columns = kombiniertes_df.columns.str.replace('\n', ' ', regex=True).str.strip()
+
+# Überprüfen der bereinigten Spaltennamen
+print("Bereinigte Spaltennamen:")
+print(kombiniertes_df.columns.tolist())
+
+# Filtern der Unterbezirke (Ausschließen der Oberbezirke und nicht zugeordneten Einträge)
+unterbezirke_df = kombiniertes_df[~kombiniertes_df['Bezeichnung (Bezirksregion)'].isin(oberbezirke)]
+print(f"Anzahl der Unterbezirke nach Filter: {unterbezirke_df.shape[0]}")
+
+# Weitere Filterung: Entfernen von nicht zugeordneten Zeilen
+# Angenommen, nicht zugeordnete Zeilen enthalten bestimmte Schlüsselwörter
+nicht_zugeordnet_keywords = ['nicht zuzuordnen', 'Berlin (PKS gesamt)']
+unterbezirke_df = unterbezirke_df[~unterbezirke_df['Bezeichnung (Bezirksregion)'].str.contains('|'.join(nicht_zugeordnet_keywords), case=False, na=False)]
+print(f"Anzahl der Unterbezirke nach Entfernen nicht zugeordneter Zeilen: {unterbezirke_df.shape[0]}")
+
+# Sicherstellen, dass die Spalte 'Straftaten -insgesamt-' vorhanden ist
+straftaten_spalte = 'Straftaten -insgesamt-'
+if straftaten_spalte not in unterbezirke_df.columns:
+    raise ValueError(f"Die Spalte '{straftaten_spalte}' wurde nicht gefunden. Bitte überprüfen Sie die Spaltennamen.")
+
+# Gruppieren nach Unterbezirk und Summieren der Straftaten
+aggregiertes_df = unterbezirke_df.groupby('Bezeichnung (Bezirksregion)')[straftaten_spalte].sum().reset_index()
+
+# Sortieren nach der Anzahl der Straftaten in absteigender Reihenfolge
+aggregiertes_df = aggregiertes_df.sort_values(by=straftaten_spalte, ascending=False)
+
+# Auswahl der Top 10 Unterbezirke mit den meisten Straftaten
+top10_df = aggregiertes_df.head(10)
+
+# Finale Darstellung mit nur den gewünschten Spalten
+final_df = top10_df[['Bezeichnung (Bezirksregion)', strafftaten_spalte]]
+
+# Ausgabe des finalen DataFrames
+print("Top 10 Unterbezirke mit den meisten Straftaten:")
+print(final_df)
+
+# Optional: Speichern des finalen DataFrames in eine neue Excel-Datei
+final_df.to_excel('Top10_Unterbezirke_Straftaten.xlsx', index=False)
+print("Das finale DataFrame wurde in 'Top10_Unterbezirke_Straftaten.xlsx' gespeichert.")
+```
+
+### Erklärung der Schritte
+
+1. **Import der Bibliotheken:**
+   - `pandas` wird für die Datenmanipulation verwendet.
+
+2. **Definieren des Excel-Dateipfades und der Oberbezirke:**
+   - Legen Sie den Pfad zur Excel-Datei fest.
+   - Listen Sie alle Oberbezirke auf, die ausgeschlossen werden sollen.
+
+3. **Generierung der Sheet-Namen:**
+   - Erstellen Sie eine Liste der Sheet-Namen von `Fallzahlen_2014` bis `Fallzahlen_2023`.
+
+4. **Lesen der Excel-Sheets:**
+   - Iterieren Sie über alle Sheet-Namen und lesen Sie jeden Sheet in ein DataFrame ein.
+   - Bei Fehlern wird eine Meldung ausgegeben, aber das Skript versucht, mit den verfügbaren Daten fortzufahren.
+
+5. **Zusammenführen der DataFrames:**
+   - Kombinieren Sie alle gelesenen DataFrames zu einem einzigen DataFrame.
+
+6. **Bereinigung der Spaltennamen:**
+   - Entfernen Sie Zeilenumbrüche und überflüssige Leerzeichen aus den Spaltennamen, um Konsistenz zu gewährleisten.
+
+7. **Filtern der Unterbezirke:**
+   - Entfernen Sie alle Zeilen, die zu den definierten Oberbezirken gehören.
+   - Zusätzlich werden Zeilen entfernt, die nicht zugeordnet sind, basierend auf spezifischen Schlüsselwörtern.
+
+8. **Aggregation der Straftaten:**
+   - Gruppieren Sie die Daten nach Unterbezirken und summieren Sie die Gesamtzahl der Straftaten über alle Jahre hinweg.
+
+9. **Ermittlung der Top 10 Unterbezirke:**
+   - Sortieren Sie die Unterbezirke nach der Anzahl der Straftaten in absteigender Reihenfolge und wählen Sie die Top 10 aus.
+
+10. **Finalisierung des DataFrames:**
+    - Wählen Sie nur die erforderlichen Spalten aus und speichern Sie die Ergebnisse.
+    - Optional können Sie das finale DataFrame in eine neue Excel-Datei exportieren.
+
+### Hinweise
+
+- **Spaltennamen überprüfen:** Stellen Sie sicher, dass die Spaltennamen in Ihrem Excel genau mit den im Skript verwendeten Namen übereinstimmen. Eventuell müssen Sie die Namen anpassen, insbesondere wenn Zeilenumbrüche oder unerwartete Leerzeichen vorhanden sind.
+
+- **Fehlerbehandlung:** Das Skript enthält grundlegende Fehlerbehandlungen, wie das Überprüfen der Existenz der notwendigen Spalten und das Fortsetzen bei fehlenden Sheets. Je nach Datenqualität und -struktur können weitere Anpassungen erforderlich sein.
+
+- **Anpassung der Schlüsselwörter:** Falls die nicht zugeordneten Zeilen andere Schlüsselwörter enthalten, müssen diese in der Liste `nicht_zugeordnet_keywords` ergänzt werden.
+
+Ich hoffe, dieses Skript erfüllt Ihre Anforderungen. Bei weiteren Fragen oder Anpassungswünschen stehe ich Ihnen gerne zur Verfügung!

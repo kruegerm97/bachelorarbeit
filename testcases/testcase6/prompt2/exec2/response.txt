@@ -1,0 +1,146 @@
+Hier ist ein Python-Skript, das die beschriebenen Anforderungen erfüllt. Das Skript verwendet die Bibliothek `pandas`, um die Excel-Datei zu lesen, die Daten zu verarbeiten und die gewünschten Ergebnisse zu erzielen.
+
+```python
+import pandas as pd
+
+# Pfad zur Excel-Datei
+excel_file = 'Fallzahlen&HZ 2014-2023.xlsx'
+
+# Liste der Oberbezirke
+oberbezirke = [
+    'Mitte',
+    'Friedrichshain-Kreuzberg',
+    'Pankow',
+    'Charlottenburg-Wilmersdorf',
+    'Spandau',
+    'Steglitz-Zehlendorf',
+    'Tempelhof-Schöneberg',
+    'Neukölln',
+    'Treptow-Köpenick',
+    'Marzahn-Hellersdorf',
+    'Lichtenberg',
+    'Reinickendorf'
+]
+
+# Generiere die Liste der Sheet-Namen Fallzahlen_2014 bis Fallzahlen_2023
+jahre = range(2014, 2024)
+sheet_names = [f'Fallzahlen_{jahr}' for jahr in jahre]
+
+# Liste zur Speicherung der einzelnen DataFrames
+df_list = []
+
+# Iteriere über alle Sheet-Namen und lese die Daten
+for sheet in sheet_names:
+    try:
+        df = pd.read_excel(excel_file, sheet_name=sheet)
+        df_list.append(df)
+        print(f'Sheet {sheet} erfolgreich gelesen.')
+    except Exception as e:
+        print(f'Fehler beim Lesen des Sheets {sheet}: {e}')
+
+# Zusammenführen aller DataFrames in einen einzigen DataFrame
+combined_df = pd.concat(df_list, ignore_index=True)
+print('Alle Sheets wurden erfolgreich zusammengeführt.')
+
+# Anzeige der Spalten zur Überprüfung (optional)
+# print(combined_df.columns)
+
+# Filtern der Unterbezirke:
+# - Entfernen der Oberbezirke
+# - Entfernen von Zeilen, die "nicht zuzuordnen" enthalten
+
+# Bedingung für Unterbezirke:
+# - 'Bezeichnung (Bezirksregion)' ist nicht in der Liste der Oberbezirke
+# - 'Bezeichnung (Bezirksregion)' enthält nicht 'nicht zuzuordnen' (case insensitive)
+
+filtered_df = combined_df[
+    (~combined_df['Bezeichnung (Bezirksregion)'].isin(oberbezirke)) &
+    (~combined_df['Bezeichnung (Bezirksregion)'].str.contains('nicht zuzuordnen', case=False, na=False))
+]
+
+print(f'Anzahl der Zeilen nach Filtern: {filtered_df.shape[0]}')
+
+# Sicherstellen, dass die Spalte 'Straftaten -insgesamt-' numerisch ist
+# Entfernen von Tausenderpunkten und Umwandeln in Integer
+filtered_df['Straftaten -insgesamt-'] = filtered_df['Straftaten -insgesamt-'].astype(str).str.replace('.', '').astype(int)
+
+# Aggregieren der Straftaten pro Unterbezirk über alle Jahre hinweg
+aggregated_df = filtered_df.groupby('Bezeichnung (Bezirksregion)', as_index=False)['Straftaten -insgesamt-'].sum()
+
+# Sortieren nach der aggregierten Anzahl der Straftaten in absteigender Reihenfolge
+sorted_df = aggregated_df.sort_values(by='Straftaten -insgesamt-', ascending=False)
+
+# Auswahl der Top 10 Unterbezirke mit den meisten Straftaten
+top_10_df = sorted_df.head(10)
+
+# Auswahl der gewünschten Spalten
+final_df = top_10_df[['Bezeichnung (Bezirksregion)', 'Straftaten -insgesamt-']]
+
+# Optional: Umbenennen der Spalten für bessere Verständlichkeit
+final_df.rename(columns={
+    'Bezeichnung (Bezirksregion)': 'Unterbezirk',
+    'Straftaten -insgesamt-': 'Gesamtstraftaten'
+}, inplace=True)
+
+# Anzeige des finalen DataFrames
+print('Top 10 Unterbezirke mit den meisten Straftaten:')
+print(final_df)
+
+# Optional: Speichern des finalen DataFrames in eine neue Excel-Datei
+# final_df.to_excel('Top_10_Unterbezirke_Straftaten.xlsx', index=False)
+```
+
+### Erklärung des Skripts
+
+1. **Importieren der benötigten Bibliothek:**
+   - `pandas` wird verwendet, um Excel-Dateien zu lesen und Daten zu verarbeiten.
+
+2. **Definieren des Pfads zur Excel-Datei:**
+   - Stellen Sie sicher, dass sich die Datei `'Fallzahlen&HZ 2014-2023.xlsx'` im gleichen Verzeichnis wie das Skript befindet oder passen Sie den Pfad entsprechend an.
+
+3. **Erstellen einer Liste der Oberbezirke:**
+   - Diese Liste wird verwendet, um die Oberbezirke aus den Daten zu filtern.
+
+4. **Generieren der Sheet-Namen:**
+   - Die Sheets sind von `'Fallzahlen_2014'` bis `'Fallzahlen_2023'`. Diese werden dynamisch anhand der Jahreszahlen generiert.
+
+5. **Lesen und Zusammenführen der Daten:**
+   - Das Skript iteriert über alle Sheet-Namen, liest die Daten und fügt sie zu einer Liste von DataFrames zusammen.
+   - Anschließend werden alle DataFrames mit `pd.concat` zu einem einzigen DataFrame kombiniert.
+
+6. **Filtern der Daten:**
+   - Entfernen der Zeilen, die zu den Oberbezirken gehören.
+   - Entfernen der Zeilen, die "nicht zuzuordnen" enthalten, um sicherzustellen, dass nur gültige Unterbezirke berücksichtigt werden.
+
+7. **Datenbereinigung:**
+   - Sicherstellen, dass die Spalte `'Straftaten -insgesamt-'` numerisch ist. Falls die Zahlen Tausenderpunkte enthalten, werden diese entfernt und die Spalte in Ganzzahlen umgewandelt.
+
+8. **Aggregation und Sortierung:**
+   - Aggregieren der Gesamtanzahl der Straftaten pro Unterbezirk über alle Jahre hinweg.
+   - Sortieren der Ergebnisse in absteigender Reihenfolge, um die Unterbezirke mit den meisten Straftaten zu identifizieren.
+
+9. **Auswahl der Top 10:**
+   - Auswahl der obersten 10 Unterbezirke basierend auf der aggregierten Anzahl der Straftaten.
+
+10. **Bereinigung des finalen DataFrames:**
+    - Auswahl der gewünschten Spalten und Umbenennung für bessere Verständlichkeit.
+
+11. **Ausgabe:**
+    - Das Skript gibt den finalen DataFrame mit den Top 10 Unterbezirken und deren Gesamtanzahl der Straftaten aus.
+    - Optional kann das Ergebnis auch in eine neue Excel-Datei gespeichert werden, indem die entsprechende Zeile entkommentiert wird.
+
+### Hinweise
+
+- **Fehlerbehandlung beim Lesen der Sheets:**
+  - Das Skript enthält eine `try-except`-Struktur, um Fehler beim Lesen einzelner Sheets zu handhaben. So wird das Skript nicht abgebrochen, wenn ein bestimmtes Sheet fehlt oder einen Fehler enthält.
+
+- **Anpassung der Spaltennamen:**
+  - Stellen Sie sicher, dass die Spaltennamen in Ihren Excel-Sheets exakt mit denen im Skript übereinstimmen. Falls nötig, passen Sie die Namen im Skript an.
+
+- **Performance:**
+  - Bei sehr großen Excel-Dateien kann das Lesen und Verarbeiten einige Zeit in Anspruch nehmen. Optimierungen können je nach Bedarf vorgenommen werden.
+
+- **Abhängigkeiten:**
+  - Stellen Sie sicher, dass `pandas` installiert ist. Falls nicht, können Sie es mit `pip install pandas` installieren.
+
+Dieses Skript bietet eine umfassende Lösung für die beschriebenen Anforderungen und kann nach Bedarf weiter angepasst werden.

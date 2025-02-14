@@ -1,0 +1,122 @@
+Hier ist ein Python-Skript, das die von dir beschriebenen Schritte ausführt. Das Skript verwendet die Bibliotheken `pandas` zum Datenhandling und `openpyxl` zum Lesen von Excel-Dateien. Stelle sicher, dass diese Bibliotheken installiert sind, bevor du das Skript ausführst. Du kannst sie mit `pip` installieren, falls noch nicht geschehen:
+
+```bash
+pip install pandas openpyxl
+```
+
+Hier ist das vollständige Skript:
+
+```python
+import pandas as pd
+
+# 1. Definiere den Dateinamen und die zu lesenden Sheets
+excel_file = 'Fallzahlen&HZ 2014-2023.xlsx'
+jahre = list(range(2014, 2024))  # 2014 bis 2023
+sheet_names = [f'Fallzahlen_{jahr}' for jahr in jahre]
+
+# 2. Lese alle Sheets ein und speichere sie in einer Liste von DataFrames
+dataframes = []
+for sheet in sheet_names:
+    df = pd.read_excel(excel_file, sheet_name=sheet)
+    dataframes.append(df)
+
+# 3. Füge alle DataFrames zu einem einheitlichen DataFrame zusammen
+all_data = pd.concat(dataframes, ignore_index=True)
+
+# 4. Definiere die Oberbezirke
+oberbezirke = [
+    'Mitte', 'Friedrichshain-Kreuzberg', 'Pankow', 'Charlottenburg-Wilmersdorf',
+    'Spandau', 'Steglitz-Zehlendorf', 'Tempelhof-Schöneberg', 'Neukölln',
+    'Treptow-Köpenick', 'Marzahn-Hellersdorf', 'Lichtenberg', 'Reinickendorf'
+]
+
+# Zusätzliche nicht zuzuordnende Einträge
+nicht_zuordenbar = [
+    'Berlin (PKS gesamt)',
+    'Bezirk (Rd), nicht zuzuordnen',
+    'Stadtgebiet Berlin, nicht zuzuordnen'
+]
+
+# 5. Entferne alle Zeilen, die Oberbezirke oder nicht zuordenbare Einträge enthalten
+filtered_data = all_data[~all_data['Bezeichnung (Bezirksregion)'].isin(oberbezirke + nicht_zuordenbar)]
+
+# 6. Entferne weitere allgemeine Einträge, falls vorhanden (optional)
+# Falls es noch andere allgemeine Einträge gibt, können diese hier hinzugefügt werden
+# Beispielsweise: 'Gesamt Berlin' oder ähnliche
+
+# 7. Aggregiere die Straftaten pro Unterbezirk über alle Jahre hinweg
+# Zuerst sicherstellen, dass die Spalte korrekt benannt ist
+# Manchmal können Leerzeichen oder Zeilenumbrüche Probleme verursachen
+
+# Liste der möglichen Spaltennamen für 'Straftaten -insgesamt-'
+straftaten_spalten = [
+    'Straftaten \n-insgesamt-',
+    'Straftaten -insgesamt-',
+    'Straftaten - insgesamt -'  # Falls es Varianten gibt
+]
+
+# Finde die existierende Spalte
+straftaten_spalte = None
+for col in straftaten_spalten:
+    if col in filtered_data.columns:
+        straftaten_spalte = col
+        break
+
+if not straftaten_spalte:
+    raise ValueError("Die Spalte für 'Straftaten insgesamt' wurde nicht gefunden.")
+
+# Gruppiere nach 'Bezeichnung (Bezirksregion)' und summiere die Straftaten
+aggregated = filtered_data.groupby('Bezeichnung (Bezirksregion)')[straftaten_spalte].sum().reset_index()
+
+# 8. Sortiere die Unterbezirke absteigend nach der aggregierten Anzahl an Straftaten
+aggregated_sorted = aggregated.sort_values(by=straftaten_spalte, ascending=False)
+
+# 9. Wähle die Top 10 Unterbezirke mit den höchsten Gesamtstraftaten aus
+top_10 = aggregated_sorted.head(10)
+
+# 10. Erstelle den finalen DataFrame mit den gewünschten Spalten
+final_df = top_10[['Bezeichnung (Bezirksregion)', straftaten_spalte]].copy()
+final_df = final_df.rename(columns={
+    'Bezeichnung (Bezirksregion)': 'Unterbezirk',
+    straftaten_spalte: 'Gesamtstraftaten'
+})
+
+# 11. Ausgabe des finalen DataFrames
+print(final_df)
+```
+
+### Erklärung der Schritte:
+
+1. **Datei und Sheets definieren**: Das Skript definiert den Dateinamen und erstellt eine Liste der relevanten Sheet-Namen von 2014 bis 2023.
+
+2. **Sheets einlesen**: Es liest jedes Sheet einzeln ein und speichert die resultierenden DataFrames in einer Liste.
+
+3. **DataFrames zusammenführen**: Alle einzelnen DataFrames werden zu einem großen DataFrame zusammengeführt, der alle Jahre umfasst.
+
+4. **Oberbezirke und nicht zuordenbare Einträge definieren**: Eine Liste der Oberbezirke sowie weiterer Einträge, die ausgeschlossen werden sollen, wird erstellt.
+
+5. **Filtern der Daten**: Das Skript entfernt alle Zeilen, die zu den Oberbezirken oder den nicht zuordenbaren Einträgen gehören.
+
+6. **Optionales Entfernen weiterer Einträge**: Falls es weitere allgemeine Einträge gibt, können diese hier hinzugefügt und entfernt werden.
+
+7. **Aggregieren der Straftaten**: Die Straftaten werden pro Unterbezirk über alle Jahre hinweg summiert. Dabei wird sichergestellt, dass die richtige Spalte verwendet wird, auch wenn sie unterschiedliche Namen aufgrund von Leerzeichen oder Zeilenumbrüchen haben könnte.
+
+8. **Sortieren**: Die Unterbezirke werden absteigend nach der Gesamtanzahl der Straftaten sortiert.
+
+9. **Top 10 auswählen**: Die zehn Unterbezirke mit den höchsten Gesamtstraftaten werden ausgewählt.
+
+10. **Finalen DataFrame erstellen**: Ein neuer DataFrame wird erstellt, der nur die Unterbezirke und ihre aggregierten Straftaten enthält und entsprechend umbenannt wird.
+
+11. **Ausgabe**: Der finale DataFrame wird ausgegeben.
+
+### Beispielhafte Ausgabe:
+
+```
+               Unterbezirk  Gesamtstraftaten
+0  ...                      ...
+1  ...                      ...
+...
+9  ...                      ...
+```
+
+Das Skript gibt die Top 10 Unterbezirke mit den höchsten Gesamtstraftaten über den Zeitraum von 2014 bis 2023 aus. Stelle sicher, dass die Spaltennamen exakt mit denen in deiner Excel-Datei übereinstimmen. Falls die Spalte für die Straftaten leicht abweicht, kannst du die Liste `straftaten_spalten` entsprechend anpassen.
