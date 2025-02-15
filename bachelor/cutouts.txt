@@ -7,3 +7,15 @@ Section 2.1
 
 sec methodik 5
  und auch mit den Ergebnissen anderer Arbeiten, wie etwa von Chen et al. (2021)\cite{chen2021evaluatinglargelanguagemodels} und Liu et al. (2023)\cite{NEURIPS2023_43e9d647} verglichen.
+
+ausblick
+Die steigende Leistungsfähigkeit von LLMs lässt erwarten, dass die automatische Code-Generierung in den kommenden Jahren eine immer größere Rolle in Datenanalyse- und Data-Science-Projekten spielen wird. Insbesondere die folgenden Entwicklungen erscheinen relevant:
+
+\begin{itemize} 
+    \item \textbf{Spezialisierte Modelle und Fine-Tuning:}\\Mit zunehmender Verfügbarkeit von domänenspezifischen Datensätzen für Code-Generierung könnten LLMs besser auf bestimmte Aufgaben, wie z.B. Datenbereinigung oder automatisiertes Exploratory Data Analysis (EDA), optimiert werden. Eine engere Anbindung an unternehmenseigene Datenbanken ist ebenfalls denkbar.
+    \item \textbf{Bessere Kontextverarbeitung:}\\Aktuelle LLMs haben eine begrenzte Kontextlänge. Künftige Modelle werden voraussichtlich größere Kontextfenster bieten und so umfangreichere Code-Dateien oder Datenschemata verarbeiten können. Damit würden komplexere Use Cases (etwa umfangreiche ETL-Pipelines) in den Bereich des Möglichen rücken.
+    \item \textbf{Integrierte Fehlersuche und Debugging:}\\Erste Ansätze zeigen, dass LLMs nicht nur Code generieren, sondern auch zum Debugging eingesetzt werden können. Wenn die Modelle direkt während der Code-Erstellung mögliche Probleme erkennen und Lösungsvorschläge machen, könnte die Produktivität bei Datenanalyse-Projekten weiter gesteigert werden.
+    \item \textbf{Erweiterte Qualitäts- und Sicherheitstests:}\\Wie in aktuellen Studien – beispielsweise von Liu et al. (2023) – diskutiert, bedarf es verbesserter Evaluationsmethoden (etwa \emph{EvalPlus}), um die tatsächliche Funktionalität und Sicherheit des generierten Codes sicherzustellen. Automatisierte Unit-Tests und Code-Audits im Prompt bzw. Post-Processing könnten ein wesentlicher Baustein sein.
+\end{itemize}
+
+\noindent Zusammenfassend lässt sich festhalten, dass LLMs bereits heute in der Lage sind, für standardisierte Datenanalyseschritte in Python zuverlässig einsatzfähigen Code zu erstellen. Dies kann den Einstieg in die Datenanalyse vereinfachen und auch erfahrenen Anwendern mühsame Routineaufgaben abnehmen. Allerdings bleibt ein gewisses Maß an menschlicher Kontrolle weiterhin unverzichtbar: Sei es zur Prüfung potenzieller Halluzinationen, zur Anpassung spezieller Projektanforderungen oder zur Qualitätssicherung komplexer Analysen. Das Potenzial für zukünftige Anwendungen ist groß – insbesondere, wenn die Modelle durch spezialisierte Trainingsdaten, fortgeschrittene Prompting-Techniken und integrierte Debugging-Funktionen weiter verbessert werden.

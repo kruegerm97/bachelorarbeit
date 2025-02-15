@@ -21,6 +21,9 @@
 \usepackage{amsmath}
 \usepackage{textcomp}
 \usepackage{bookmark}
+\usepackage{pgffor}
+\usepackage{pdfpages}
+\usepackage{tabularx}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -99,15 +102,40 @@
 
 \end{titlepage}
 
+\section*{Eigenständigkeitserklärung}
+\label{sec:eigenstaendigkeitserklaerung}
+Ich versichere hiermit, dass ich die vorliegende Bachelorthesis selbstständig und ohne fremde Hilfe angefertigt und keine andere als die angegebene Literatur benutzt habe. Alle von anderen Autoren wörtlich übernommenen Stellen wie auch die sich an die Gedankengänge anderer Autoren eng anlehnenden Ausführungen meiner Arbeit sind besonders gekennzeichnet. Diese Arbeit wurde bisher in gleicher oder ähnlicher Form keiner anderen Prüfungsbehörde vorgelegt und auch nicht veröffentlicht.
+\\\\
+
+\begin{center}
+    \hspace{6cm} \includegraphics[width=2cm]{./bilder/unterschrift.png}\\
+    \vspace{-0.9cm}
+    Berlin, den \today \hspace{5cm} \rule{5cm}{0.5pt}\\
+    \hspace*{7cm} Krüger, Maurice
+\end{center}
+\newpage
+
 \textbf{
     Abstract\\
-    Diese Bachelorarbeit untersucht die Eignung moderner Large Language Models (LLMs) für die automatisierte Generierung von Python-Code im Kontext typischer Datenanalyseaufgaben. Dabei wird zunächst ein Überblick über die theoretischen Grundlagen von LLMs und der Programmiersprache Python gegeben. Anschließend werden in einer empirischen Untersuchung Codebeispiele durch den Marktführer ChatGPT mit dem Sprachmodell GPTo1 erzeugt und mit manuell geschriebenen Skripten verglichen. Die Bewertung erfolgt anhand mehrerer Kriterien wie Korrektheit, Performanz sowie Verständlichkeit des generierten Codes. Abschließend werden Empfehlungen für den praktischen Einsatz von LLMs in der Datenanalyse abgeleitet sowie ein Ausblick auf zukünftige Entwicklungen gegeben.
+    Die rasante Entwicklung von Large Language Models (LLMs) hat neue Möglichkeiten für die automatisierte Code-Generierung eröffnet. Insbesondere für datenanalytische Aufgaben in Python könnten LLMs zukünftig manuelle Programmierung ersetzen oder ergänzen. Diese Arbeit untersucht die Eignung von LLMs zur Generierung von Python-Code für Datenanalyse-Aufgaben anhand einer empirischen Studie mit Kriminalitätsstatistiken der Stadt Berlin.
+    Dazu wurden sechs spezifische Testfälle mit typischen datenanalytischen Aufgaben definiert. Die Code-Generierung erfolgte mithilfe von ChatGPT (GPTo1-mini) unter Anwendung von drei Prompting-Strategien: Zero-Shot, Instruction-based und Chain of Thought. Die generierten Skripte wurden hinsichtlich Korrektheit, Performanz, Wartbarkeit und Code-Qualität evaluiert.
+    Die Ergebnisse zeigen, dass die Wahl der Prompting-Strategie entscheidend für die Erfolgsquote ist. Während Zero-Shot-Prompting nur eine 23\%ige Erfolgsquote erreichte, erzielte Chain of Thought-Prompting mit 87\% die besten Ergebnisse. Die generierten Skripte waren in vielen Fällen gut strukturiert, verständlich und performant, zeigten jedoch Schwächen bei komplexeren Aufgaben, insbesondere wenn unklare Spaltennamen oder unerwartete Datenstrukturen auftraten.
+    Zusammenfassend verdeutlicht die Untersuchung, dass LLMs bereits leistungsfähige Werkzeuge für die Code-Generierung in der Datenanalyse sind, jedoch von präzisen Prompts und kontrollierten Evaluierungen profitieren.
 }
 \newpage
 
 % Inhaltsverzeichnis
-
+\section{Inhaltsverzeichnis}
+\label{sec:inhaltsverzeichnis}
 \tableofcontents
+\newpage
+\section{Abbildungsverzeichnis}
+\label{sec:abbildungsverzeichnis}
+\listoffigures
+\newpage
+\section{Tabellenverzeichnis}
+\label{sec:tabellenverzeichnis}
+\listoftables
 \newpage
 
 % Einleitung
@@ -116,7 +144,7 @@
 \label{sec:einleitung}
 \subsection{Problemstellung und Forschungsfragen}
 \label{sec:forschungsfragen}
-Die schnelle Entwicklung von Large Language Models (LLMs), wie zum Beispiel ChatGPT, hat in den letzten Jahren sowohl im privaten als auch im beruflichen Bereich viel Aufmerksamkeit erregt. Ursprünglich wurden LLMs hauptsächlich zur Lösung alltäglicher Probleme und der Verarbeitung und Erzeugung menschlicher Sprache eingesetzt, doch zunehmend zeigt sich, dass sie auch Programmiercode in verschiedenen Sprachen erstellen können. Besonders in der Programmiersprache Python – einer weit verbreiteten Sprache für Datenanalyse und Machine Learning – sind die Fortschritte in der automatisierten Code-Generierung durch LLMs bereits bemerkenswert\cite{NEURIPS2023_43e9d647,chen2021evaluatinglargelanguagemodels}.
+Die schnelle Entwicklung von Large Language Models (LLMs), wie zum Beispiel ChatGPT, hat in den letzten Jahren sowohl im privaten als auch im beruflichen Bereich viel Aufmerksamkeit erregt. Ursprünglich wurden LLMs hauptsächlich zur Lösung alltäglicher Probleme und der Verarbeitung und Erzeugung menschlicher Sprache eingesetzt, doch zunehmend zeigt sich, dass sie auch Programmiercode in verschiedenen Sprachen erstellen können. Besonders in der Programmiersprache Python – einer weit verbreiteten Sprache für Datenanalyse und Machine Learning – sind die Fortschritte in der automatisierten Code-Generierung durch LLMs bereits bemerkenswert, wie Liu et al. (2023)\cite{NEURIPS2023_43e9d647} und Chen et al. (2021)\cite{chen2021evaluatinglargelanguagemodels} zeigen.
 
 Aktuelle Forschungsarbeiten konzentrieren sich auf die systematische Bewertung von solch generierten Codes, um Fehlerquellen und Qualitätsmerkmale zu bemessen. Die Bereitstellung öffentlicher Evaluierungsdatensätze und -frameworks, wie etwa \emph{HumanEval}\cite{chen2021evaluatinglargelanguagemodels} oder \emph{EvalPlus}\cite{evalplus}, ermöglicht standardisierte Vergleichsstudien verschiedener LLMs. Dies eröffnet neue Anwendungsfelder im Bereich der Datenanalyse: Anstatt den Code manuell zu schreiben, könnten Nutzer in Zukunft lediglich ihre Anforderungen in natürlicher Sprache formulieren und das Modell würde diese für den Nutzer umsetzen.
 
@@ -140,34 +168,34 @@ Zur weiteren Strukturierung dieser Hauptfrage werden mehrere Unterfragen hinzuge
 Die Fähigkeit, Programmiercode mit Hilfe von LLMs zu erstellen, könnte die Entwicklungsprozesse erheblich beschleunigen und neue Nutzergruppen anziehen, die bisher wenig Erfahrung mit Programmierung hatten. Besonders in der Datenanalyse können viele Arbeitsschritte – vor allem wiederkehrende Aufgaben, wie das Erstellen von Standard-Pipelines zur Datenbeschaffung- und bereinigung – automatisiert werden. Gleichzeitig gibt es jedoch Herausforderungen in Bezug auf Performanz, Wartbarkeit und Transparenz.
 
 \subsection{Zielsetzung}
-Das Ziel dieser Arbeit ist es, herauszufinden, wie gut moderne LLMs (Large Language Models) für die automatische Code-Generierung in der Datenanalyse mit Python geeignet sind. Dafür wird in einem Experiment Code von einem LLM generiert und mit manuell geschriebenem Code verglichen. Der Vergleich basiert auf Kriterien wie Korrektheit, Performance und Wartbarkeit. Auf Basis der Ergebnisse werden Empfehlungen für den Einsatz von LLMs in der Praxis gegeben und deren Grenzen diskutiert. Zum Schluss wird ein Ausblick darauf gegeben, wie sich diese Technologie in Zukunft weiterentwickeln könnte und welche Auswirkungen das auf Aufgaben in der Datenanalyse haben könnte.
+Das Ziel dieser Arbeit ist es, herauszufinden, wie gut moderne LLMs für die automatische Code-Generierung in der Datenanalyse mit Python geeignet sind. Dafür wird in einem Experiment Code von einem LLM generiert und mit manuell geschriebenem Code verglichen. Der Vergleich basiert auf Kriterien wie Korrektheit, Performanz und Wartbarkeit. Auf Basis der Ergebnisse werden Empfehlungen für den Einsatz von LLMs in der Praxis gegeben und deren Grenzen diskutiert. Zum Schluss wird ein Ausblick darauf gegeben, wie sich diese Technologie in Zukunft weiterentwickeln könnte und welche Auswirkungen das auf Aufgaben in der Datenanalyse haben könnte.
 
 \subsection{Aufbau der Arbeit}
-Nach dieser Einleitung (Kapitel \ref{sec:einleitung}) folgt in Kapitel \ref{sec:grundlagen} eine Darstellung der \textbf{Grundlagen}, dazu gehört eine Einführung in Large Language Models, die Programmiersprache Python, die automatisierte Code-Generierung und Prompting. Kapitel \ref{sec:llms_programmierung} gibt einen Überblick über den aktuellen Stand der Forschung, in dem verschiedene LLM-Modelle, Publikationen und Evaluationstechniken vorgestellt werden. Darauf aufbauend werden in Kapitel \ref{sec:spezifikation} die \textbf{Ausgangsdaten} und eine genaue \textbf{Testfallspezifikation} und in Kapitel \ref{sec:methodik} die \textbf{Methodik} der Arbeit erläutert. Kapitel \ref{sec:auswertung} enthält dann die \textbf{Auswertung} der gewonnenen Daten sowie den Vergleich von durch ein LLM generierten und manuell geschriebenen Code. Kapitel \ref{sec:fazit} fasst die Ergebnisse zusammen, beantwortet die Forschungsfragen und gibt einen \textbf{Ausblick} auf weitere Entwicklungen. Schließlich enthält Kapitel \ref{sec:anhang} den \textbf{Anhang}, einschließlich Literaturverzeichnis und relevanter Dokumentationen.
+Nach dieser Einleitung (Kapitel \ref{sec:einleitung}) folgt in Kapitel \ref{sec:grundlagen} eine Darstellung der \textbf{Grundlagen}, dazu gehört eine Einführung in LLMs, die Programmiersprache Python, die automatisierte Code-Generierung und Prompting. Kapitel \ref{sec:llms_programmierung} gibt einen Überblick über den aktuellen Stand der Forschung, in dem verschiedene LLM-Modelle, Publikationen und Evaluationstechniken vorgestellt werden. Darauf aufbauend werden in Kapitel \ref{sec:spezifikation} die \textbf{Ausgangsdaten} und eine genaue \textbf{Testfallspezifikation} und in Kapitel \ref{sec:methodik} die \textbf{Methodik} der Arbeit erläutert. Kapitel \ref{sec:auswertung} enthält dann die \textbf{Auswertung} der gewonnenen Daten sowie den Vergleich von durch ein LLM generierten und manuell geschriebenen Code. Kapitel \ref{sec:fazit} fasst die Ergebnisse zusammen, beantwortet die Forschungsfragen und gibt einen \textbf{Ausblick} auf weitere Entwicklungen. Schließlich enthält Kapitel \ref{sec:anhang} den \textbf{Anhang}, einschließlich Literaturverzeichnis und relevanter Dokumentationen.
 
 % Theorieteil
 
 \section{Grundlagen}
 \label{sec:grundlagen}
-Im folgenden Kapitel werden die theoretischen und technischen Grundlagen vorgestellt, die für das Verständnis dieser Arbeit notwendig sind. Abschnitt~\ref{sec:LLMs} beschäftigt sich mit den Large Language Models, ihrer Funktionsweise und ihrer Bedeutung in der Code-Generierung. Danach wird in Abschnitt~\ref{sec:Python} das Potenzial der Programmiersprache Python für die Datenanalyse erläutert, bevor Abschnitt~\ref{sec:AutoCode} das Konzept der automatisierten Code-Generierung behandelt und Abschnitt~\ref{sec:prompting} eine kurze Einführung in Prompting gibt.
+Im folgenden Kapitel werden die theoretischen und technischen Grundlagen vorgestellt, die für das Verständnis dieser Arbeit notwendig sind. Abschnitt~\ref{sec:LLMs} beschäftigt sich mit den LLMs, ihrer Funktionsweise und ihrer Bedeutung in der Code-Generierung. Danach wird in Abschnitt~\ref{sec:Python} das Potenzial der Programmiersprache Python für die Datenanalyse erläutert, bevor Abschnitt~\ref{sec:AutoCode} das Konzept der automatisierten Code-Generierung behandelt und Abschnitt~\ref{sec:prompting} eine kurze Einführung in Prompting gibt.
 
 \subsection{Einführung Large Language Models}
 \label{sec:LLMs}
-Bei Large Language Models (LLMs) handelt es sich um eine spezielle Klasse von vortrainierten Sprachmodellen (so genannten \emph{Pre-trained Language Models} (PLMs)) mit einer besonders großen Anzahl an Parametern – typischerweise im Bereich von mehreren zehn bis hunderten Milliarden. Sie entstanden als Weiterentwicklung früherer Sprachmodellierungsansätze, die sich über viele Jahre hinweg von \emph{Statistical Language Models} (SLMs) hin zu \emph{Neural Language Models} (NLMs) entwickelt haben. Ein wesentlicher Meilenstein in dieser Entwicklung war die Einführung von Transformer-basierten PLMs, die auf großen Textkorpora trainiert wurden und herausragende Leistungen bei verschiedenen Aufgaben der natürlichen Sprachverarbeitung (\emph{Natural Language Processing} (NLP)) erzielten. In den Forschungen entdeckte man, dass eine Vergrößerung der Modellgröße nicht nur zu erheblichen Leistungssteigerungen führt, sondern dass LLMs ab einer bestimmten Größenordnung auch neue Fähigkeiten entwickeln – beispielsweise \emph{In-Context Learning}, das es ihnen ermöglicht, Aufgaben ohne explizites Nachtrainieren zu lösen. Um diese leistungsfähigeren Modelle von kleineren abzugrenzen, hat sich der Begriff Large Language Models (LLMs) etabliert\cite{zhao2024surveylargelanguagemodels}.\\
+Zhao et al.(2024)\cite{zhao2024surveylargelanguagemodels} erklären in ihrer Forschung, dass es sich bei LLMs um eine spezielle Klasse von vortrainierten Sprachmodellen (so genannten \emph{Pre-trained Language Models} (PLMs)) mit einer besonders großen Anzahl an Parametern handelt – typischerweise im Bereich von mehreren zehn bis hunderten Milliarden. Sie entstanden als Weiterentwicklung früherer Sprachmodellierungsansätze, die sich über viele Jahre hinweg von \emph{Statistical Language Models} (SLMs) hin zu \emph{Neural Language Models} (NLMs) entwickelt haben. Ein wesentlicher Meilenstein in dieser Entwicklung war die Einführung von Transformer-basierten PLMs, die auf großen Textkorpora trainiert wurden und herausragende Leistungen bei verschiedenen Aufgaben der natürlichen Sprachverarbeitung (\emph{Natural Language Processing} (NLP)) erzielten. In den Forschungen entdeckte man, dass eine Vergrößerung der Modellgröße nicht nur zu erheblichen Leistungssteigerungen führt, sondern dass LLMs ab einer bestimmten Größenordnung auch neue Fähigkeiten entwickeln – beispielsweise \emph{In-Context Learning}, das es ihnen ermöglicht, Aufgaben ohne explizites Nachtrainieren zu lösen. Um diese leistungsfähigeren Modelle von kleineren abzugrenzen, hat sich der Begriff LLMs etabliert\cite{zhao2024surveylargelanguagemodels}.\\
 Die schon genannten Transformer-Architekturen, welche einen Self-Attention-Mechanismus nutzen, ermöglichen es dem Modell Beziehungen zwischen verschiedenen Wörtern oder Tokens in einer Eingabe zu erkennen, wobei es nicht von Bedeutung ist, an welcher Position diese stehen. Die Transformer-Architektur unterscheidet sich desweiteren von früheren Architekturen, wie zum Beispiel \emph{Recurrent Neuronal Networks} (RNNs) dadurch, dass sie auf die rekursive Verarbeitung der Tokens verzichtet und stattdessen alle Tokens parallel verarbeitet, wodurch die LLMs deutlich effizienter auf Eingaben reagieren können. Diese Leistung der LLMs korreliert jedoch stark mit der größe der Modelle und der Menge an Trainingsdaten, was dazu führt, dass besonders gute Modelle einen deutlich höheren Ressourcenbedarf und eine deutlich größere Menge an Trainingsdaten benötigen\cite{jiang2024surveylargelanguagemodels}.\\
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{./bilder/performance_comparison.png}
-    \caption{Leistungsvergleich verschiedener Modellgrößen (nach Jiang et al. (2024), basierend auf 'A Survey on Large Language Models for Code Generation').}
-    \label{fig:performance_comparison}
-\end{figure}
 In den letzten Jahren wurden mehrere Benchmarks und Evaluierungsdatensätze speziell für die Code-Generierung entwickelt. Beispiele dafür sind \emph{HumanEval}\cite{chen2021evaluatinglargelanguagemodels} und \emph{EvalPlus}\cite{evalplus}, die genutzt werden, um die Genauigkeit und Zuverlässigkeit von LLMs in verschiedenen Programmiersprachen zu testen. Erste Studien zeigen, dass LLMs einfache bis mittelschwere Aufgaben oft vollständig lösen können. Bei komplexeren oder sehr speziellen Aufgabenbereichen stoßen sie aber noch an ihre Grenzen\cite{NEURIPS2023_43e9d647}.
 Obwohl LLMs in vielen Sprachen Code generieren können, hat sich Python als einer der Hauptfoki herauskristallisiert. Dies liegt an der weit verbreiteten Nutzung von Python in Wissenschaft und Industrie, insbesondere in den Bereichen Datenanalyse und Machine Learning.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{./bilder/performance_comparison.png}
+    \caption{Leistungsvergleich verschiedener Modellgrößen (nach Jiang et al. (2024), basierend auf 'A Survey on Large Language Models for Code Generation'\cite{jiang2024surveylargelanguagemodels}).}
+    \label{fig:performance_comparison}
+\end{figure}
 
 \subsection{Einführung Python}
 \label{sec:Python}
 \subsubsection{Bedeutung und Bibliotheken}
-Python ist dank seiner Syntax, aktiven Community und vielen hilfreichen Bibliotheken eine der am weitesten verbreiteten Sprachen für Datenanalyse. Ein paar der wichtigsten Bibliotheken, die in der Datenanalyse verwendet werden, sind:
+Python ist dank seiner Syntax, aktiven Community und vielen hilfreichen Bibliotheken eine der am weitesten verbreiteten Sprachen für Datenanalyse\cite{raschka2020machinelearningpythonmain}. Ein paar der wichtigsten Bibliotheken, die in der Datenanalyse verwendet werden, sind:
 \begin{itemize}
     \item \textbf{pandas} -- Datenstrukturen und -bearbeitung,
     \item \textbf{NumPy} -- numerische Berechnungen,
@@ -203,7 +231,7 @@ Wie präsent diese Herausforderungen in datenanalytischen Aufgaben sind, soll in
 
 \subsection{Prompting mit Sprachmodellen}
 \label{sec:prompting}
-Mit dem Begriff \emph{Prompting} wird das Verfahren beschrieben, ein zuvor trainiertes Sprachmodell allein durch spezifische Eingabetexte (\emph{Prompts}) zu steuern, ohne weiteres trainieren des Modells. Im Gegensatz zur zuvor verbreiteten Vorgehensweise, ein vortrainiertes Modell für jede Aufgabe mit allen notwendigen Parametern komplett anzupassen, wird beim Prompting direkt auf das bereits eingearbeitete Wissen des Modells zurückgegriffen und steuert dadurch dessen Ausgabe durch passende Formulierungen\cite{liu2021pretrainpromptpredictsystematic}. Mit der Veröffentlichung großer Modelle wie GPT-3 zog dieses Vorgehen große Aufmerksamkeit auf sich, weil es diesen Modellen ermöglichte, durch spezifische Anweisungen in einer Prompt, komplexe Aufgaben zu lösen, wie Brown et al.(2020)\cite{brown2020languagemodelsfewshotlearners} zeigten.
+Mit dem Begriff \emph{Prompting} wird das Verfahren beschrieben, ein zuvor trainiertes Sprachmodell allein durch spezifische Eingabetexte (\emph{Prompts}) zu steuern, ohne weiteres trainieren des Modells. Im Gegensatz zur zuvor verbreiteten Vorgehensweise, ein vortrainiertes Modell für jede Aufgabe mit allen notwendigen Parametern komplett anzupassen, wird beim Prompting mit LLMs direkt auf das bereits eingearbeitete Wissen des Modells zurückgegriffen und steuert dadurch dessen Ausgabe durch passende Formulierungen\cite{liu2021pretrainpromptpredictsystematic}. Mit der Veröffentlichung großer Modelle wie GPT-3 zog dieses Vorgehen große Aufmerksamkeit auf sich, weil es diesen Modellen ermöglichte, durch spezifische Anweisungen in einer Prompt, komplexe Aufgaben zu lösen, wie Brown et al.(2020)\cite{brown2020languagemodelsfewshotlearners} zeigten.
 
 \paragraph{Grundlegende Strategien}
 \begin{itemize}
@@ -220,15 +248,15 @@ Mit dem Begriff \emph{Prompting} wird das Verfahren beschrieben, ein zuvor train
 
 \section{LLMs in der Programmierung – aktueller Stand}
 \label{sec:llms_programmierung}
-Die Entwicklung von Large Language Models (LLMs) hat in den letzten Jahren nicht nur die Art und Weise, wie natürliche Sprache verarbeitet und generiert wird, verändert, sondern auch große Fortschritte in der automatisierten Code-Erstellung ermöglicht. Durch die Kombination aus leistungsstarken Modellarchitekturen wie Transformers, großen Mengen an Trainingsdaten und moderner Hardware haben LLMs heute eine große Präsemz in vielen Bereichen der Softwareentwicklung.
-In diesem Kapitel werden die aktuellen Entwicklungen und verfügbaren Modelle vorgestellt. Außerdem wird ein Überblick über ihre Einsatzmöglichkeiten in der Softwareentwicklung und Datenanalyse gegeben. Zum Schluss werden wichtige Studien und Arbeiten zur Code-Generierung betrachtet, darunter etwa die von Chen et al. (2021) vorgestellte Arbeit zu Codex, einem Modell, das speziell für die automatisierte Programmierung entwickelt wurde\cite{chen2021evaluatinglargelanguagemodels} und die von Liu et al. (2023) veröffentlichte Arbeit zur Evaluation von generiertem Code mithilfe von \emph{EvalPlus}\cite{NEURIPS2023_43e9d647}.
+Die Entwicklung von LLMs hat in den letzten Jahren nicht nur die Art und Weise, wie natürliche Sprache verarbeitet und generiert wird, verändert, sondern auch große Fortschritte in der automatisierten Code-Erstellung ermöglicht. Durch die Kombination aus leistungsstarken Modellarchitekturen wie Transformers, großen Mengen an Trainingsdaten und moderner Hardware haben LLMs heute eine große Präsenz in vielen Bereichen der Softwareentwicklung.
+In diesem Kapitel werden die aktuellen Entwicklungen und verfügbaren Modelle vorgestellt. Außerdem wird ein Überblick über ihre Einsatzmöglichkeiten in der Softwareentwicklung gegeben. Zum Schluss werden wichtige Studien und Arbeiten zur Code-Generierung betrachtet, darunter etwa die von Chen et al. (2021) vorgestellte Arbeit zu Codex, einem Modell, das speziell für die automatisierte Programmierung entwickelt wurde\cite{chen2021evaluatinglargelanguagemodels} und die von Liu et al. (2023) veröffentlichte Arbeit zur Evaluation von generiertem Code mithilfe von \emph{EvalPlus}\cite{NEURIPS2023_43e9d647}.
 
 \subsection{Überblick und Vergleich von verschiedenen LLMs}
 Derzeit existiert eine Vielzahl an LLMs, darunter auch viele, die gezielt zur Code-Generierung entwickelt wurden. Zu den bekanntesten Beispielen zählen ChatGPT (GPTo1 als das modernste Modell), OpenAI Codex, Code Llama\cite{rozière2024codellamaopenfoundation}, StarCoder \cite{li2023starcodersourceyou}, CodeT5\cite{wang2021codet5identifierawareunifiedpretrained} oder CodeGen\cite{nijkamp2023codegenopenlargelanguage}.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{./bilder/LLMs_for_coding.png}
-    \caption{Chronologische Übersicht von Large Language Models für die Code Generierung der letzten Jahre (nach Jiang et al. (2024), basierend auf 'A Survey on Large Language Models for Code Generation').}
+    \caption{Chronologische Übersicht von Large Language Models für die Code Generierung der letzten Jahre (nach Jiang et al. (2024), basierend auf 'A Survey on Large Language Models for Code Generation')\cite{jiang2024surveylargelanguagemodels}.}
     \label{fig:llms_for_coding}
 \end{figure}
 
@@ -247,7 +275,7 @@ Ein Vergleich der LLMs lässt sich anhand verschiedener Kriterien vornehmen:
 
 \subsection{Einsatzgebiete von LLMs in der Programmierung}
 \label{sec:einsatzgebiete}
-Die zunehmende Leistungsfähigkeit von Large Language Models (LLMs) ermöglicht es, Programmieraufgaben in diversen Bereichen zu automatisieren oder zu beschleunigen. Häufig genannte \emph{Einsatzgebiete} sind dabei:
+Die zunehmende Leistungsfähigkeit von LLMs ermöglicht es, Programmieraufgaben in diversen Bereichen zu automatisieren oder zu beschleunigen. Häufig genannte \emph{Einsatzgebiete} sind dabei:
 \begin{itemize}
     \item \textbf{Code-Generierung}:
     Ermöglicht die Code-Generierung auf Grundlage von Beschreibungen aus natürlicher Sprache\cite{chen2021evaluatinglargelanguagemodels}. Ebenso bieten manche Modelle die Möglichkeit zu fertigen Funktionen Tests zu generieren, um dessen Funktionalität zu überprüfen.
@@ -274,7 +302,7 @@ Die Forschung zur automatisierten Code-Generierung hat in den letzten Jahren ein
 Im Folgenden werden einige vergangene Studien/Arbeiten zur Code Generierung mit LLMs vorgestellt:
 \begin{enumerate}
     \item \textbf{``Is Your Code Generated by ChatGPT Really Correct? Rigorous Evaluation of Large Language Models for Code Generation''} von Liu et al. (2023) \cite{NEURIPS2023_43e9d647}:\\
-    In diesem Paper wird untersucht, wie korrekt der von LLMs wie ChatGPT, Code Llama etc. generierte Code ist. Dafür wird \emph{EvalPlus} eingeführt. Dies ist ein neues Evaluierungsframework, das bestehende Testdatensätze wie \emph{HumanEval} durch weitere automatisierte Testfälle erweitert. Hier kommen Liu et al. zu dem Ergebnis, dass bisher viele Fehler in generiertem Code nicht erkannt wurden, wodurch die Modelle in ihrer Leistung überschätzt wurden. Die Autoren weisen darauf hin, wie wichtig umfassendene Tests sind, um die tatsächliche Funktionalität der LLMs für die Codegenerierung zu bewerten.
+    In diesem Paper wird untersucht, wie korrekt der von LLMs wie ChatGPT, Code Llama etc. generierte Code ist. Dafür wird \emph{EvalPlus} eingeführt. Dies ist ein neues Evaluierungsframework, das bestehende Testdatensätze wie \emph{HumanEval} durch weitere automatisierte Testfälle erweitert. Hier kommen Liu et al. zu dem Ergebnis, dass bisher viele Fehler in generiertem Code nicht erkannt wurden, wodurch die Modelle in ihrer Leistung überschätzt wurden. Die Autoren weisen darauf hin, wie wichtig umfassendene Tests sind, um die tatsächliche Funktionalität der LLMs für die Codegenerierung zu bewerten. In Abbildung \ref{fig:results_evalplus} sind die Ergebnisse von \emph{HumanEval} und \emph{EvalPlus} gegenübergestellt.
 
     \item \textbf{``Evaluating Large Language Models Trained on Code''} von Chen et al. (2021) \cite{chen2021evaluatinglargelanguagemodels}:\\
     In diesem Paper wird Codex vorgestellt. Dies ist ein LLM, das speziell auf öffentlich verfügbarem Code von Github trainiert wurde, um dessen Fähigkeiten Python Code zu schreiben zu analysieren. Dies wird mithilfe des HumanEval-Datensatzes untersucht. Hierbei soll im genauen Python-Code aus Docstrings generiert und dieser dann bewertet werden. Die Ergebnisse zeigen, dass Codex im Vergleich zu anderen Modellen wie GPT-3 deutlich besser abschneidet, jedoch bei komplexeren Aufgaben seine Grenzen erreicht. Eine mehrfach wiederholte Lösungsgenerierung verbessert die Erfolgsrate, was das Potenzial ihres Ansatzes verdeutlicht.
@@ -308,8 +336,8 @@ Anschließend werden zwei weitere Testfälle durchgeführt, bei denen mit dem or
 \subsection{Umwandlung in Pandas DataFrames}
 Jedes für den jeweiligen Testfall notwendige Jahr (bzw. jedes Sheet) soll in einer separaten \texttt{pandas}-DataFrame-Tabelle abgebildet werden. Dies geschieht folgendermaßen:
 \begin{enumerate}
-    \item \textbf{Reduzieren der Datengrundlage}: Entfernen der Unterbezirke, um nur die Oberbezirke zu behalten.
-    \item \textbf{Bereinigung und Umbenennung}: Unnötige Spalten werden entfernt, Spaltennamen ggf. standardisiert (z.\,B. \enquote{Bezirk}, \enquote{Straftaten\_insgesamt}).
+    \item \textbf{Reduzieren der Datengrundlage}: Entfernen der Unterbezirke, um nur die Oberbezirke zu behalten (findet vor dem Einlesen mit Python statt).
+    \item \textbf{Bereinigung und Umbenennung}: Unnötige Spalten werden entfernt, Spaltennamen ggf. standardisiert (z.\,B. \enquote{Bezirk}, \enquote{Straftaten\_insgesamt})(findet vor dem Einlesen mit Python statt).
     \item \textbf{Einlesen der Excel-Sheets}: Mit \texttt{pandas.read\_excel(...)} wird jede Jahres-Tabelle eingelesen.
     \item \textbf{Speicherung in DataFrame}: Pro Sheet entsteht ein bereinigtes und vereinheitlichtes DataFrame.
 \end{enumerate}
@@ -319,11 +347,11 @@ Hierbei ist wieder zu beachten, dass die ersten beiden Schritte lediglich für d
 Insgesamt sind sechs Testfälle definiert, die unterschiedliche Aspekte der Datenanalyse abdecken. Für jeden Testfall werden \textbf{15 Ausführungen} erzeugt, wobei drei verschiedene Prompting-Strategien (jeweils fünf Wiederholungen) zum Einsatz kommen:
 \begin{itemize}
     \label{itemize:promptingstrategien}
-    \item \textbf{Strategie A: Prompt wie ein \enquote{normaler User}}\\
+    \item \textbf{Strategie A: Zero-Shot (Prompt wie ein \enquote{normaler User})}\\
     Hier wird eine einfache, natürlichsprachliche Anfrage formuliert, ohne viele zusätzliche Informationen.
-    \item \textbf{Strategie B: Prompt mit Metadaten}\\
+    \item \textbf{Strategie B: Instruction-based (Prompt mit Metadaten und genaueren Anweisungen)}\\
     In diesem Ansatz werden neben der eigentlichen Anfrage auch relevante Details wie Spaltennamen oder Strukturhinweise explizit übergeben.
-    \item \textbf{Strategie C: Prompt mit \emph{Chain of Thought}}\\
+    \item \textbf{Strategie C: Chain of Thought}\\
     Das Modell erhält schrittweise Gedankenanstöße oder Zwischenlogik (z.\,B. \enquote{Zuerst filtern, dann sortieren, ...}), um den Code schrittweise aufzubauen und zu erklären.
 \end{itemize}
 
@@ -491,9 +519,9 @@ Ein Pandas-DataFrame mit folgender Struktur:
 \section{Methodik}
 \label{sec:methodik}
 \subsection{Vorgehensweise der Untersuchung}
-    In der Untersuchung soll geprüft werden, inwieweit Large Language Models in der Lage sind gängige Datenanalyse-Schritte auf Grundlage eines gegebenen Datensatzes durchzuführen. Hierbei wird ChatGPT als aktueller Marktführer mit dem Sprachmodell GPTo1-mini, welches das neueste Modell ist, verwendet. Ebenso gilt es herauszufinden wie qualitativ und effizient diese Lösung ist. Hierbei bezieht es sich auf die Forschungsfragen aus Kapitel \ref{sec:forschungsfragen}.
+    In der Untersuchung soll geprüft werden, inwieweit LLMs in der Lage sind gängige Datenanalyse-Schritte auf Grundlage eines gegebenen Datensatzes durchzuführen. Hierbei wird ChatGPT als aktueller Marktführer mit dem Sprachmodell GPTo1-mini, welches das neueste Modell ist, verwendet. Ebenso gilt es herauszufinden wie qualitativ und effizient diese Lösung ist. Hierbei bezieht es sich auf die Forschungsfragen aus Kapitel \ref{sec:forschungsfragen}.
     Für die Vorgehensweise hierbei wird zuerst der verwendete Datensatz von Berlin Open Data, wie in Kapitel\ref{sec:spezifikation} beschrieben, heruntergebrochen und dann an das Modell übergeben und dazu, zu jeder verwendeten Prompting Strategie, eine Prompt verfasst. Diese Prompts können in Kapitel \ref{sec:testfaelle} eingesehen werden.
-    Im Anschluss wird der Code ausgeführt, wobei seine Performanz gemessen wird, und es werden manuelle Analysen durchgeführt um die Qualität und Effizienz des generierten Codes zu bewerten. Die genauen Auswertungskriterien sind in Kapitel \ref{sec:auswertungskriterien} aufgeführt.
+    Im Anschluss wird der Code ausgeführt, wobei seine Performanz mit Hilfe des Befehls \texttt{/usr/bin/time -v python} gemessen wird, und es werden manuelle Analysen durchgeführt um die Qualität und Effizienz des generierten Codes zu bewerten. Die genauen Auswertungskriterien sind in Kapitel \ref{sec:auswertungskriterien} aufgeführt.
     Die Ergebnisse der Auswertung werden in Kapitel \ref{sec:auswertung} detailliert dargestellt.
 
 \subsection{Testfälle der Datenanalyse}
@@ -506,7 +534,7 @@ Ein Pandas-DataFrame mit folgender Struktur:
         \item \textbf{Chain-of-Thought Prompting}: \emph{Ich habe eine Excel Datei mit dem Namen 'Fallzahlen.xlsx'. Der Inhalt des Sheets ist als pandas DataFrame \texttt{[DataFrame]} gegeben. Bitte erstelle mir ein Python-Skript, das die folgenden Schritte ausführt:\\1. Lies die Daten des Sheets 'Fallzahlen\_2023' der Excel-Datei 'Fallzahlen.xlsx' ein.\\2. Sortiere die Daten nach der Spalte 'Straftaten\_insgesamt' absteigend. Zur Sortierung sollen die Zeilen mit den LOR-Schlüsseln 999900 und 999999 nicht beachtet werden, da es sich bei diesen nicht um Bezirke handelt. Sie sollen aber am Ende des Dataframes stehen bleiben.\\3. Speichere das Ergebnis der Sortierung in einem Pandas Dataframe ab.\\Achte darauf, dass das Skript robust ist und potentielle Fehler, wie fehlende Spalten berücksichtigt.}
     \end{itemize}
 
-\subsubsection{Testfall 2 Verbund und Aggregation}
+\subsubsection{Testfall 2}
     Für den zweiten Testfall sollen die Tabellen der Excel Datei durch einen Join zusammengeführt und dann die Bezirke nach den Straftaten insgesamt von allen Jahren kombiniert geliefert werden. Die Prompts für diese Aufgabe lauten:
     \begin{itemize}
         \item \textbf{Zero-Shot Prompting}: \emph{Ich habe eine Excel Datei mit dem Namen 'Fallzahlen.xlsx'. Erstelle mir ein Python Skript, das die Daten aller Sheets zusammenliest, sie nach der Anzahl der Straftaten insgesamt pro Bezirk sortiert und in einem Pandas DataFrame speichert. Hier sind die Daten eines der Sheets als Beispiel: \texttt{[DataFrame]}}
@@ -556,38 +584,25 @@ Ein Pandas-DataFrame mit folgender Struktur:
         \item \textbf{Zero-Shot Prompting}: \emph{Ich habe eine Excel Datei mit dem Namen 'Fallzahlen\&HZ 2014-2023.xlsx'. Erstelle mir ein Skript, dass die Daten aus den Sheets 'Fallzahlen\_2014' bis 'Fallzahlen\_2023' einliest die 10 Unterbezirke mit den meisten Straftaten insgesamt ueber alle Jahre hinweg addiert ermittelt und zurückgibt.
         Hier sind die Daten des Sheets 'Fallzahlen\_2023' als Beispiel: \texttt{[DataFrame]}}
         \item \textbf{Instruction Prompting}: \emph{Ich habe eine Excel-Datei mit dem Namen 'Fallzahlen\&HZ 2014-2023.xlsx', die die Sheets Fallzahlen\_2014 bis Fallzahlen\_2023 enthält. Erstelle ein Python-Skript, das diese Daten ausliest und in einem einheitlichen Pandas DataFrame zusammenführt.
-        Anschließend sollen nur die Unterbezirke berücksichtigt und alle Oberbezirke sowie nicht zugeordneten Zeilen entfernt werden. Die Oberbezirke lassen sich anhand folgender Werte in der Spalte 'Bezeichnung (Bezirksregion)' identifizieren: Mitte, Friedrichshain-Kreuzberg, Pankow, Charlottenburg-Wilmersdorf, Spandau, Steglitz-Zehlendorf, Tempelhof-Schöneberg, Neukölln, Treptow-Köpenick, Marzahn-Hellersdorf, Lichtenberg, Reinickendorf.
+        Anschließend sollen nur die Unterbezirke berücksichtigt und alle Oberbezirke sowie nicht zugeordneten Zeilen entfernt werden. Die Oberbezirke lassen sich anhand folgender Werte in der Spalte 'Bezeichnung (Bezirksregion)' identifizieren: Mitte, Friedrichshain-Kreuzberg, Pankow, Charlottenburg-Wilmersdorf, Spandau, Steglitz-Zehlendorf, Tempelhof-Schöneberg, Neukölln, Treptow-Köpenick, Marzahn-\\Hellersdorf, Lichtenberg, Reinickendorf.
         Für die verbleibenden Unterbezirke soll die Gesamtanzahl der Spalte 'Straftaten \textbackslash n-insgesamt-' über alle Jahre hinweg aufsummiert und anschließend die Top 10 Unterbezirke mit den meisten Straftaten ermittelt werden. Der finale DataFrame soll nur die Spalten 'Bezeichnung (Bezirksregion)' (Unterbezirke) und die aggregierte Anzahl der Spalte 'Straftaten \textbackslash n-insgesamt-' enthalten.
         Hier sind die Daten des Sheets Fallzahlen\_2023 zur Orientierung: \texttt{[DataFrame]}}
-        \item \textbf{Chain-of-Thought Prompting}: \emph{Ich habe eine Excel-Datei mit dem Namen 'Fallzahlen\&HZ 2014-2023.xlsx'. Diese Datei enthält unter anderem die Sheets 'Fallzahlen\_2014' bis 'Fallzahlen\_2023'. 
-        Erstelle ein Python-Skript, das die folgenden Schritte ausführt:
-        1. Lese alle Sheets der Excel-Datei ein und speichere jedes Sheet in einem separaten Pandas DataFrame.
-        2. Füge alle DataFrames zu einem einzigen zusammen, sodass ein einheitlicher DataFrame entsteht, der alle Jahre umfasst.
-        3. Identifiziere die Oberbezirke anhand der folgenden Werte in der Spalte 'Bezeichnung (Bezirksregion)': 
-           Mitte, Friedrichshain-Kreuzberg, Pankow, Charlottenburg-Wilmersdorf, Spandau, Steglitz-Zehlendorf, Tempelhof-Schöneberg, Neukölln, Treptow-Köpenick, Marzahn-Hellersdorf, Lichtenberg, Reinickendorf.
-        4. Entferne alle Zeilen, die Oberbezirke, Berlin (PKS gesamt) oder Stadt Berlin nicht zuzuordnende Einträge enthalten, sodass nur Unterbezirke übrig bleiben.
-        5. Summiere für jeden Unterbezirk die Werte der Spalte 'Straftaten \textbackslash n-insgesamt-' über alle Jahre hinweg auf.
-        6. Sortiere die Unterbezirke absteigend nach der aggregierten Anzahl an Straftaten.
-        7. Wähle die 10 Unterbezirke mit den höchsten Gesamtstraftaten aus.
-        8. Erstelle einen neuen DataFrame, der nur die Spalten 'Bezeichnung (Bezirksregion)' (Unterbezirke) und die aggregierte Anzahl der Spalte 'Straftaten \textbackslash n-insgesamt-' enthält.
-        9. Gib den finalen DataFrame aus.
-        
-        Achte bei der Umsetzung genau auf die genannten Schritte, Spaltennamen und Sheetnamen.
-        Hier sind die Daten des Sheets 'Fallzahlen\_2023' zur Orientierung:
-        DataFrame}
+        \item \textbf{Chain-of-Thought Prompting}: \emph{Ich habe eine Excel-Datei mit dem Namen 'Fallzahlen\&HZ 2014-2023.xlsx'. Diese Datei enthält unter anderem die Sheets 'Fallzahlen\_2014' bis 'Fallzahlen\_2023'.\\Erstelle ein Python-Skript, das die folgenden Schritte ausführt:\\1. Lese alle Sheets der Excel-Datei ein und speichere jedes Sheet in einem separaten Pandas DataFrame.\\2. Füge alle DataFrames zu einem einzigen zusammen, sodass ein einheitlicher DataFrame entsteht, der alle Jahre umfasst.\\3. Identifiziere die Oberbezirke anhand der folgenden Werte in der Spalte 'Bezeichnung (Bezirksregion)':\\Mitte, Friedrichshain-Kreuzberg, Pankow, Charlottenburg-Wilmersdorf, Spandau, Steglitz-Zehlendorf, Tempelhof-Schöneberg, Neukölln, Treptow-Köpenick, Marzahn-Hellersdorf, Lichtenberg, Reinickendorf.\\4. Entferne alle Zeilen, die Oberbezirke, Berlin (PKS gesamt) oder Stadt Berlin nicht zuzuordnende Einträge enthalten, sodass nur Unterbezirke übrig bleiben.\\5. Summiere für jeden Unterbezirk die Werte der Spalte 'Straftaten \textbackslash n-insgesamt-' über alle Jahre hinweg auf.\\Sortiere die Unterbezirke absteigend nach der aggregierten Anzahl an Straftaten.\\Wähle die 10 Unterbezirke mit den höchsten Gesamtstraftaten aus.\\8. Erstelle einen neuen DataFrame, der nur die Spalten 'Bezeichnung (Bezirksregion)' (Unterbezirke) und die aggregierte Anzahl der Spalte 'Straftaten \textbackslash n-insgesamt-' enthält.\\9. Gib den finalen DataFrame aus.\\\\Achte bei der Umsetzung genau auf die genannten Schritte, Spaltennamen und Sheetnamen.\\Hier sind die Daten des Sheets 'Fallzahlen\_2023' zur Orientierung:\texttt{[DataFrame]}}
     \end{itemize}
 
 
 \subsection{Auswertungskriterien}
 \label{sec:auswertungskriterien}
-    Die Auswertung der generierten Python Skripte erfolgt anhand der in Kapitel \ref{sec:forschungsfragen} definierten Kriterien. Um die Korrektheit des Codes zu messen wird das Pass@k Verfahren verwendet, dabei steht "k" für die Anzahl der ausgeführten Versuche pro Testfall. In diesem Experiment wird sich auf k=5 pro Prompt beschränkt, um eine gute Balance zwischen Genauigkeit und Rechenzeit zu finden. Bei diesem Verfahren ergibt sich als Ergebnis ein Prozentsatz über die Anzahl der erfolgreichen Versuche. Die ausgeführten Versuche werden anschließend in erfolgreich und nicht erfolgreich unterteilt und getrennt genauer betrachtet. Um zu entscheiden, ob ein Versuch erfolgreich war, wird darauf geachtet, ob die Ausführung fehlerfrei verläuft und ob das Ergebnis wie erwartet ist. Hierbei wird strikt darauf geachtet, ob das Ergebnis genau dem gewünschten Ergebnis entspricht, demnach zählt ein Testfall als nicht erfolgreich, wenn zwar die grundlegende Anforderung erfüllt ist, jedoch auch Daten im Ergebnis stehen, die dort nicht gewünscht waren. Ebenso wird ein Testfall als nicht erfolgreich betrachtet, sollte er Fehler oder Warnungen ausgeben, auch wenn dennoch ein richtiges Ergebnis dabei rauskommt. Im Code wird dabei darauf geschaut, welche Bibliotheken, Funktionen und Pandas Dataframes benutzt wurden.
+    Üblicherweise werden Benchmarks, wie beispielsweise die zuvor erwähnten \emph{HumanEval}\cite{chen2021evaluatinglargelanguagemodels} und \emph{EvalPlus}\cite{evalplus}, zur Bewertung von LLMs eingesetzt, um deren Leistungsfähigkeit im Bereich der Code Generierung zu vergleichen. Diese Benchmarks basieren jedoch oft auf Aufgaben, die einfache logische oder mathematische Schlussfolgerungen erfordern. In dieser Arbeit liegt der Fokus jedoch auf datenanalytischen Aufgaben, die eine komplexere Aufgabenstellung aus Datenverarbeitung und Analysen erfordern. Daher sind die bestehenden Benchmarks nicht direkt anwendbar, da sie keine realistischen Anforderungen an die datengetriebene Problemlösung stellen. Aufgrund der begrenzten Zeitvorgabe für diese Arbeit wurde auch davon abgesehen, selbst einen neuen Benchmark dafür einzuführen. Stattdessen wird die Leistung der Modelle anhand der in Kapitel \ref{sec:forschungsfragen} definierten Kriterien manuell vorgenommen.
+    
+    Um die Korrektheit des Codes zu messen wird das Pass@k Verfahren verwendet, dabei steht "k" für die Anzahl der ausgeführten Versuche pro Testfall. In diesem Experiment wird sich auf k=5 pro Prompt beschränkt, um eine gute Balance zwischen Genauigkeit und Rechenzeit zu finden. Bei diesem Verfahren ergibt sich als Ergebnis ein Prozentsatz über die Anzahl der erfolgreichen Versuche. Die ausgeführten Versuche werden anschließend in erfolgreich und nicht erfolgreich unterteilt und getrennt genauer betrachtet. Um zu entscheiden, ob ein Versuch erfolgreich war, wird darauf geachtet, ob die Ausführung fehlerfrei verläuft und ob das Ergebnis wie erwartet ist. Hierbei wird strikt darauf geachtet, ob das Ergebnis genau dem gewünschten Ergebnis entspricht, demnach zählt ein Testfall als nicht erfolgreich, wenn zwar die grundlegende Anforderung erfüllt ist, jedoch auch Daten im Ergebnis stehen, die dort nicht gewünscht waren. Ebenso wird ein Testfall als nicht erfolgreich betrachtet, sollte er Fehler oder Warnungen ausgeben, auch wenn dennoch ein richtiges Ergebnis dabei rauskommt. Im Code wird dabei darauf geschaut, welche Bibliotheken, Funktionen und Pandas Dataframes benutzt wurden.
     In der genaueren Analyse des Codes wird bei den nicht erfolgreichen Versuchen untersucht, warum der Code nicht korrekt ausgeführt wurde und was für Verbesserungen vorgenommen werden können. Bei den erfolgreichen Versuchen hingegen wird analysiert, wie der Code strukturiert ist, ob er gut dokumentiert ist, ob er erweiterbar ist und wie die Laufzeit und Ressourcennutzung des Codes abschneidet.
 
 \subsection{Verwendete Tools und Daten}
     \begin{enumerate}
         \item \textbf{Large Language Model}: Als Large Language Model wird ChatGPT mit GPTo1-mini verwendet, da ChatGPT als aktueller Marktführer gilt und GPTo1-mini das neueste und leistungsfähigste Modell ist, welches mit der OpenAI API verfügbar ist.
         \item \textbf{Libraries}: Für die Datenanalyse wird die Python-Bibliothek \texttt{pandas} verwendet, um die Excel-Dateien einzulesen und zu verarbeiten.
-        \item \textbf{Datenquelle}: Die Daten stammen aus den Kriminalitätsstatistiken der Stadt Berlin, die auf der Plattform Berlin Open Data veröffentlicht wurden.
+        \item \textbf{Datenquelle}: Die Daten stammen aus den Kriminalitätsstatistiken der Stadt Berlin, die auf der Plattform Berlin Open Data veröffentlicht wurden\cite{opendataberlin}.
     \end{enumerate}
 
 \section{Auswertung der Python-Code-Generierung zur Datenanalyse durch LLMs}
@@ -625,24 +640,24 @@ Berücksichtigt man die Teilerfolge als fehlgeschlagen, wie zuvor beschrieben, e
     }
 \end{table}
 
-\paragraph{Performance und Ressourcenverbrauch:}
+\paragraph{Performanz und Ressourcenverbrauch:}
 \begin{itemize}
     \item Die Laufzeit betrug bei allen erfolgreichen und teils erfolgreichen Skripten nur wenige Zehntelsekunden (zwischen 0,49 und 0,56 Sekunden).
-    \item Der Speicherverbrauch bewegte sich bei rund 150,MB \emph{Maximum Resident Set Size}, was für diesen kleinen Datensatz sehr effizient ist.
+    \item Der Speicherverbrauch bewegte sich bei rund 150MB \emph{Maximum Resident Set Size}, was für diesen kleinen Datensatz sehr effizient ist.
     \item Die CPU-Auslastung lag bei allen Ausführungen zwischen 445\% und 498\%, was auf eine effiziente Nutzung der verfügbaren Ressourcen hinweist.
 \end{itemize}
     
 \paragraph{Codequalität und Wartbarkeit:}
 \begin{itemize}
-    \item \textbf{Struktur}: Die meisten Skripte bestanden aus wenigen, übersichtlichen Schritten: \emph{Daten einlesen}, \emph{sortieren}, \emph{Datei abspeichern}. Die Skripte von Prompt 3 waren dabei am strukturiertesten und enthielten zusätzliche Kommentare zur Dokumentation und Schritte zur Fehlerbehandlung und Robustheit des Codes.
+    \item \textbf{Struktur}: Die meisten Skripte bestanden aus wenigen, übersichtlichen Schritten: \emph{Daten einlesen}, \emph{sortieren}, \emph{Daten abspeichern}. Die Skripte von Prompt 3 waren dabei am strukturiertesten und enthielten zusätzliche Kommentare zur Dokumentation und Schritte zur Fehlerbehandlung und Robustheit des Codes.
     \item \textbf{Dokumentation}: Die Skripte waren in der Regel gut kommentiert und erklärten die Schritte und die Funktionsweise. Dies war insbesondere bei den Skripten von Prompt 3 der Fall, die zusätzliche Kommentare zur Fehlerbehandlung und zur Logik des Codes enthielten.
-    \item \textbf{Erweiterbarkeit}: Die Skripte von Prompt 3 waren am einfachsten zu erweitern, da sie bereits eine robuste Fehlerbehandlung enthielten und die Logik der Sortierung klar dokumentiert war. Die Skripte von Prompt 1 und 2 waren weniger robust, da sie wenig zur Fehlerbehandlung enthielten.
+    \item \textbf{Erweiterbarkeit}: Die Skripte von Prompt 3 waren am einfachsten zu erweitern, da sie bereits eine robuste Fehlerbehandlung enthielten und die Logik der Sortierung klar dokumentiert war. Die Skripte von Prompt 1 und 2 waren sind auch gut erweiterbar, benötigen aber mehr Anpassungen zur Fehlerbehandlung.
 \end{itemize}
     
 \paragraph{Fazit zu Testfall 1:}
-Die Ergebnisse zeigen, dass die \textbf{Prompting-Strategie C (Chain of Thought)} die zuverlässigste Methode zur Generierung von Python-Code für die Sortierung eines Excel-Datensatzes ist. Diese Strategie lieferte in allen Fällen korrekte und robuste Skripte, die den Anforderungen entsprachen. Die Strategien A und B waren weniger zuverlässig, da sie entweder die Sortierung nicht komplett korrekt durchführten oder die Daten unvollständig zurückgaben.
+Die Ergebnisse zeigen, dass die \textbf{Prompting-Strategie C (Chain of Thought)} die zuverlässigste Methode zur Generierung von Python-Code für die Sortierung eines Excel-Datensatzes ist. Diese Strategie lieferte in allen Fällen Skripte zurück, die beinahe komplett den Anforderungen entsprachen. Die Strategien A und B waren weniger zuverlässig, da sie entweder die Sortierung nicht komplett korrekt durchführten oder die Daten unvollständig zurückgaben.
 
-In Bezug auf \textbf{Performance} gab es keine Probleme und alle Skripte waren effizient. Die Codequalität war bei den Skripten von Prompt 3 am höchsten, da sie besser dokumentiert und robuster waren. Für produktive Einsätze ist daher die Verwendung von \textbf{Chain of Thought}-Prompts zu empfehlen, um sicherzustellen, dass der generierte Code den Anforderungen entspricht und leicht erweitert werden kann.
+In Bezug auf \textbf{Performanz} gab es keine Probleme und alle Skripte waren effizient. Die Codequalität war bei den Skripten von Prompt 3 am höchsten, da sie besser dokumentiert und robuster waren. Für produktive Einsätze ist daher die Verwendung von \textbf{Chain of Thought}-Prompts zu empfehlen, um sicherzustellen, dass der generierte Code den Anforderungen entspricht und leicht erweitert werden kann.
 
 \subsection{Testfall 2: Join aller Tabellen und Bezirks-Topwert}
 \label{subsec:auswertung_testfall2}
@@ -652,7 +667,7 @@ Im zweiten Testfall wurde ein Python-Skript generiert, das die Daten aller Excel
 \begin{itemize}
     \item \textbf{Prompt 1 (Zero-Shot Prompting)}: Drei von fünf Ausführungen waren teils erfolgreich. Die Daten wurden korrekt zusammengeführt und sortiert, jedoch wurden die unerwünschten LOR-Schlüssel (999900 und 999999) nicht korrekt behandelt. Zwei Ausführungen scheiterten vollständig, da sie die Daten nicht korrekt aggregierten. Nach Analyse des Codes fällt auf, dass die Ursache dafür ein fehlendes \texttt{groupby} war.
     \item \textbf{Prompt 2 (Instruction Prompting)}: Zwei von fünf Ausführungen waren teilweise erfolgreich. Die Ausführungen vier und fünf haben die Daten korrekt eingelesen, zusammengefügt und sortiert, haben jedoch beide die Zeilen mit den LOR-Schlüsseln 999900 und 999999 komplett entfernt, was nicht erwünscht war. Zusätzlich hat Ausführung fünf noch mehrere \texttt{SettingWithCopyWarning} ausgegeben, was auf eine fehlerhafte Verwendung einer Funktion der Pandas Bibliothek hinweist. Die anderen Ausführungen gaben komplett fehlerhafte Ergebnisse zurück.
-    \item \textbf{Prompt 3 (Chain of Thought Prompting)}: Alle Ausführungen waren komplett erfolgreich. Die Ergebnisse waren korrekt, die Daten wurden korrekt zusammengeführt, gruppiert, aggregiert und sortiert. Ebenso wurden sie fehlerfrei in einem Pandas DataFrame abgespeichert. Die unerwünschten LOR-Schlüssel wurden korrekt behandelt und am Ende des DataFrames mit den gruppierten Werten belassen.
+    \item \textbf{Prompt 3 (Chain of Thought Prompting)}: Alle Ausführungen waren komplett erfolgreich. Die Ergebnisse waren korrekt, die Daten wurden wie erwartet zusammengeführt, gruppiert, aggregiert und sortiert. Ebenso wurden sie fehlerfrei in einem Pandas DataFrame abgespeichert. Die unerwünschten LOR-Schlüssel wurden korrekt behandelt und am Ende des DataFrames mit den gruppierten Werten belassen.
 \end{itemize}
 Die Gesamterfolgsquote beträgt \textbf{33\%} (5 von 15 Ausführungen waren vollständig erfolgreich).
 
@@ -677,7 +692,7 @@ Die Gesamterfolgsquote beträgt \textbf{33\%} (5 von 15 Ausführungen waren voll
     }
 \end{table}
 
-\paragraph{Performance und Ressourcenverbrauch:}
+\paragraph{Performanz und Ressourcenverbrauch:}
 \begin{itemize}
     \item Die Laufzeit betrug bei allen Ausführungen zwischen 2,83 und 3,28 Sekunden, was für die Verarbeitung von 10 Excel-Sheets mit insgesamt 140 Zeilen sehr effizient ist.
     \item Der Speicherverbrauch bewegte sich bei rund 150--155\,MB \emph{Maximum Resident Set Size}, was für diesen Datensatz angemessen ist.
@@ -692,7 +707,7 @@ Die Gesamterfolgsquote beträgt \textbf{33\%} (5 von 15 Ausführungen waren voll
 \end{itemize}
 
 \paragraph{Fazit zu Testfall 2:}
-Die Ergebnisse zeigen, dass die \textbf{Chain of Thought}-Strategie die zuverlässigste Methode zur Generierung von Python-Code für die Zusammenführung und Sortierung von Excel-Daten ist. Diese Strategie lieferte in den meisten Fällen korrekte und robuste Skripte, die den Anforderungen entsprachen. Die \textbf{Zero-Shot}- und \textbf{Instruction Prompting}-Strategien waren weniger zuverlässig, da sie entweder die Filterung nicht korrekt durchführten oder die Daten unvollständig zurückgaben. In Bezug auf \textbf{Performance} gab es keine Probleme, und alle Skripte waren effizient.
+Die Ergebnisse zeigen, dass die \textbf{Chain of Thought}-Strategie die zuverlässigste Methode zur Generierung von Python-Code für die Zusammenführung und Sortierung von Excel-Daten ist. Diese Strategie lieferte in allen Fällen korrekte und robuste Skripte, die den Anforderungen entsprachen. Die \textbf{Zero-Shot}- und \textbf{Instruction Prompting}-Strategien waren weniger zuverlässig, da sie entweder die Filterung nicht korrekt durchführten oder die Daten unvollständig zurückgaben. In Bezug auf \textbf{Performanz} gab es keine Probleme und alle Skripte waren effizient.
 
 \subsection{Testfall 3: Prozentuale Verteilung der Straftaten}
 \label{subsec:auswertung_testfall3}
@@ -701,9 +716,9 @@ Im dritten Testfall wurde ein Python-Skript generiert, das den prozentualen Ante
 
 \paragraph{Erfolgsquote (Pass@15):}
 \begin{itemize}
-    \item \textbf{Prompt 1 (Zero-Shot)}: Alle fünf Ausführungen waren erfolgreich. Die Skripte berechneten die prozentualen Anteile korrekt und speicherten die Ergebnisse in einer Excel-Datei.
-    \item \textbf{Prompt 2 (Instruction Prompting)}: Alle fünf Ausführungen waren erfolgreich. Die Skripte berechneten die prozentualen Anteile korrekt und speicherten die Ergebnisse in einer Excel-Datei.
-    \item \textbf{Prompt 3 (Chain of Thought)}: Vier von fünf Ausführungen waren erfolgreich. Eine Ausführung scheiterte aufgrund eines Syntaxfehlers, bei dem zwei Python-Schlüsselwörter („if“ und „not“) ins Deutsche übersetzt wurde.
+    \item \textbf{Prompt 1 (Zero-Shot)}: Alle fünf Ausführungen waren erfolgreich. Die Skripte berechneten die prozentualen Anteile korrekt.
+    \item \textbf{Prompt 2 (Instruction Prompting)}: Auch hier waren alle fünf Ausführungen erfolgreich. Die prozentualen Anteile wurden korrekt berechnet.
+    \item \textbf{Prompt 3 (Chain of Thought)}: Vier von fünf Ausführungen waren erfolgreich. Eine Ausführung scheiterte aufgrund eines Syntaxfehlers, bei dem zwei Python-Schlüsselwörter („if“ und „not“) ins Deutsche übersetzt wurden.
 \end{itemize}
 Die Gesamterfolgsquote beträgt \textbf{93\%} (14 von 15 Ausführungen waren erfolgreich).
 \begin{table}[h]
@@ -727,7 +742,7 @@ Die Gesamterfolgsquote beträgt \textbf{93\%} (14 von 15 Ausführungen waren erf
     }
 \end{table}
 
-\paragraph{Performance und Ressourcenverbrauch:}
+\paragraph{Performanz und Ressourcenverbrauch:}
 \begin{itemize}
     \item Die Laufzeit betrug bei allen erfolgreichen Ausführungen zwischen 0,51 und 0,59 Sekunden, was für die Berechnung der prozentualen Anteile sehr effizient ist.
     \item Der Speicherverbrauch bewegte sich bei rund 150--155\,MB \emph{Maximum Resident Set Size}, was für diesen Datensatz angemessen ist.
@@ -742,9 +757,9 @@ Die Gesamterfolgsquote beträgt \textbf{93\%} (14 von 15 Ausführungen waren erf
 \end{itemize}
 
 \paragraph{Fazit zu Testfall 3:}
-Die Ergebnisse zeigen, dass die \textbf{Zero-Shot}- und \textbf{Instruction Prompting}-Strategien in allen Fällen erfolgreich waren, während die \textbf{Chain of Thought (CoT)}-Strategie aufgrund eines Syntaxfehlers in einer Ausführung scheiterte. Jedoch wurden hier die zwei Python-Schlüsselwörter „if“ und „not“ ins Deutsche übersetzt, was zu einem Syntaxfehler führte. Es ist unklar, ob dies darauf zurückzuführen ist, dass die Beschreibung der Aufgabenstellung zu lang war und das Modell dadurch verwirrt wurde, oder ob es sich um einen Zufallsfehler handelt.
+Die Ergebnisse zeigen, dass die \textbf{Zero-Shot}- und \textbf{Instruction Prompting}-Strategien in allen Fällen erfolgreich waren, während die \textbf{Chain of Thought (CoT)}-Strategie aufgrund eines Syntaxfehlers, bei welchem an zwei Stellen die Python-Schlüsselwörter "if" und "not" ins Deutsche übersetzt wurden, in einer Ausführung scheiterte. Es ist unklar, ob dies darauf zurückzuführen ist, dass die Beschreibung der Aufgabenstellung zu lang war und das Modell dadurch verwirrt wurde, oder ob es sich um einen Zufallsfehler handelt.
 
-In Bezug auf \textbf{Performance} gab es keine Probleme, und alle Skripte waren effizient. Für Aufgaben dieses Umfangs lässt sich daher keine signifikante Verbesserung der Performance durch die Wahl einer bestimmten Prompting-Strategie feststellen.
+In Bezug auf \textbf{Performanz} gab es keine Probleme, und alle Skripte waren effizient. Für Aufgaben dieses Umfangs lässt sich daher keine signifikante Verbesserung der Performanz durch die Wahl einer bestimmten Prompting-Strategie feststellen.
 
 \subsection{Testfall 4: Zeitreihe über die Jahre 2014--2023}
 \label{subsec:auswertung_testfall4}
@@ -779,7 +794,7 @@ Die Gesamterfolgsquote beträgt \textbf{73\%} (11 von 15 Ausführungen waren erf
     }
 \end{table}
 
-\paragraph{Performance und Ressourcenverbrauch:}
+\paragraph{Performanz und Ressourcenverbrauch:}
 \begin{itemize}
     \item Die Laufzeit betrug bei allen erfolgreichen Ausführungen zwischen 2,85 und 3,47 Sekunden, was für die Berechnung der prozentualen Veränderung sehr effizient ist.
     \item Der Speicherverbrauch bewegte sich bei rund 150--160\,MB \emph{Maximum Resident Set Size}, was für diesen Datensatz angemessen ist.
@@ -794,9 +809,9 @@ Die Gesamterfolgsquote beträgt \textbf{73\%} (11 von 15 Ausführungen waren erf
 \end{itemize}
 
 \paragraph{Fazit zu Testfall 4:}
-Die Ergebnisse zeigen, dass die \textbf{Instruction Prompting}- und \textbf{Chain of Thought}-Strategien die besten Ergebnisse liefern, während die \textbf{Zero-Shot}-Strategie aufgrund von Problemen mit den Sheet-Namen und Syntaxfehlern in drei von fünf Ausführungen scheiterte. Anders als bei den vorherigen Testfällen war die \textbf{Chain of Thought}-Strategie nicht die zuverlässigste, da sie in einer Ausführung eine Warnung aufgrund einer veralteten Pandas-Funktionalität ausgab. Stattdessen war die \textbf{Instruction Prompting}-Strategie die am besten zu bewertende Prompting-Strategie.
+Die Ergebnisse zeigen, dass die \textbf{Instruction Prompting}- und \textbf{Chain of Thought}-Strategien die besten Ergebnisse liefern, während die \textbf{Zero-Shot}-Strategie aufgrund von Problemen mit den Sheet-Namen und Syntaxfehlern in drei von fünf Ausführungen scheiterte. Anders als bei den vorherigen Testfällen war die \textbf{Chain of Thought}-Strategie nicht die zuverlässigste, da sie in einer Ausführung eine Warnung aufgrund einer veralteten Pandas-Funktionalität ausgab. Dies ist aber nicht auf die genutzte Prompting-Strategie zurückzuführen. Dennoch war statt \textbf{Chain of Thought Prompting} \textbf{Instruction Prompting} die am besten zu bewertende Prompting-Strategie.
 
-In Bezug auf \textbf{Performance} gab es keine Probleme, und alle Skripte waren effizient. Die Codequalität war bei den Skripten von Prompt 2 am höchsten, da sie gut dokumentiert und robust waren.
+In Bezug auf \textbf{Performanz} gab es keine Probleme, und alle Skripte waren effizient. Die Codequalität war bei den Skripten von Prompt 2 am höchsten, da sie gut dokumentiert und robust waren.
 
 \subsection{Testfall 5: Ermittlung des Unterbezirks mit den meisten Raubdelikten pro Oberbezirk}
 
@@ -804,37 +819,53 @@ Im fünften Testfall wurde ein Python-Skript generiert, das für jeden Oberbezir
 
 \paragraph{Erfolgsquote (Pass@5):}
 \begin{itemize}
-    \item \textbf{Zero-Shot Prompting}: Nur ein von fünf Versuchen war erfolgreich (\textbf{20 \%}). Hauptprobleme waren falsche Spaltennamen und fehlerhafte Gruppierung.
-    \item \textbf{Instruction-based Prompting}: Alle fünf Ausführungen waren erfolgreich (\textbf{100 \%}).
-    \item \textbf{Chain of Thought Prompting}: Alle fünf Ausführungen waren erfolgreich (\textbf{100 \%}).
+    \item \textbf{Zero-Shot Prompting}: Keine Ausführung war komplett erfolgreich. Hauptprobleme waren falsche Spaltennamen und fehlerhafte Gruppierung.
+    \item \textbf{Instruction-based Prompting}: Keine Ausführung war erfolgreich, die Daten wurden zwar korrekt eingelesen und zugeordnet, jedoch wurden sie nicht als Dataframe ausgegeben.
+    \item \textbf{Chain of Thought Prompting}: Alle fünf Ausführungen waren erfolgreich.
 \end{itemize}
 
 \begin{table}[h]
     \centering
-    \caption{Erfolgsquote der generierten Skripte}
+    \caption{Ergebnisse von Testfall 5}
     \label{tab:testcase5_ergebnisse}
+    \resizebox{\textwidth}{!}{%
     \begin{tabular}{|l|c|c|}
         \hline
         \textbf{Prompting-Strategie} & \textbf{Erfolgreiche Ausführungen} & \textbf{Fehlgeschlagene Ausführungen} \\
         \hline
-        Zero-Shot Prompting    & 1 / 5 (20\%) & 4 / 5 (80\%) \\
-        Instruction-based Prompting  & 5 / 5 (100\%) & 0 / 5 (0\%) \\
+        Zero-Shot Prompting    & 0 / 5 (0\%) & 5 / 5 (100\%) \\
+        \hline
+        Instruction-based Prompting  & 0 / 5 (0\%) & 5 / 5 (100\%) \\
+        \hline
         Chain of Thought Prompting  & 5 / 5 (100\%) & 0 / 5 (0\%) \\
         \hline
-        \textbf{Gesamt} & \textbf{11 / 15 (73\%)} & \textbf{4 / 15 (27\%)} \\
+        \textbf{Gesamt} & \textbf{5 / 15 (33\%)} & \textbf{10 / 15 (66\%)} \\
         \hline
     \end{tabular}
+    }
 \end{table}
 
-\paragraph{Codequalität und Performance:}
+\paragraph{Performanz und Ressourcenverbrauch:}
 \begin{itemize}
-    \item Die durchschnittliche Laufzeit lag bei \textbf{0,55 Sekunden}.
-    \item CPU-Auslastung lag zwischen \textbf{420 \% und 460 \%}.
-    \item Die besten Ergebnisse erzielten \textbf{Instruction-based} und \textbf{Chain of Thought Prompting}.
+    \item Die Laufzeit betrug bei allen erfolgreichen Ausführungen zwischen \textbf{0,51 und 0,58 Sekunden}, was für die Berechnung der aggregierten Werte sehr effizient ist.
+    \item Der Speicherverbrauch lag bei rund \textbf{150--155 MB} \emph{Maximum Resident Set Size}, was für diesen Datensatz als angemessen betrachtet werden kann.
+    \item Die CPU-Auslastung lag bei allen erfolgreichen Ausführungen zwischen \textbf{420 \% und 460 \%}, was auf eine effiziente Nutzung der verfügbaren Ressourcen hinweist.
+\end{itemize}
+
+\paragraph{Codequalität und Wartbarkeit:}
+\begin{itemize}
+    \item \textbf{Struktur}: Die Skripte von Prompt 2 und Prompt 3 waren klar strukturiert und enthielten die notwendigen Verarbeitungsschritte (\textit{Daten einlesen}, \textit{gruppieren}, \textit{maximale Werte extrahieren}, \textit{Daten speichern}). Die Skripte von Prompt 1 waren weniger strukturiert und enthielten teilweise ineffiziente Codeabschnitte.
+    \item \textbf{Dokumentation}: Alle erfolgreichen Skripte waren gut kommentiert und erklärten die Berechnungen nachvollziehbar. Die besten Dokumentationen fanden sich in den Skripten von Prompt 3.
+    \item \textbf{Erweiterbarkeit}: Die Skripte von Prompt 2 und 3 waren besonders gut erweiterbar, da sie eine klare Struktur aufwiesen und bereits eine robuste Fehlerbehandlung enthielten. Die Skripte von Prompt 1 waren ebenfalls erweiterbar, erforderten jedoch mehr Anpassungen, um fehlerhafte Gruppierungen zu korrigieren.
 \end{itemize}
 
 \paragraph{Fazit zu Testfall 5:}
-Instruction-based und Chain of Thought Prompting sind die besten Methoden für diesen Anwendungsfall, während Zero-Shot Prompting nicht empfohlen wird.
+Die Ergebnisse zeigen, dass die \textbf{Instruction Prompting}- und \textbf{Chain of Thought}-Strategien die zuverlässigsten Methoden zur Generierung von Python-Code für die Ermittlung des Unterbezirks mit den meisten Raubdelikten pro Oberbezirk sind. Beide Strategien erzielten eine Erfolgsquote von 100 \% und lieferten gut strukturierte, robuste und gut dokumentierte Skripte.
+
+Die \textbf{Zero-Shot Prompting}-Strategie hingegen war unzuverlässig, da sie in vier von fünf Fällen fehlerhafte Ergebnisse lieferte, insbesondere aufgrund fehlerhafter Spaltennamen und einer falschen Gruppierung der Daten.
+
+In Bezug auf \textbf{Performanz} gab es keine signifikanten Unterschiede zwischen den Strategien, da alle erfolgreichen Skripte in unter einer Sekunde ausgeführt wurden und einen moderaten Speicherverbrauch aufwiesen. Für produktive Einsätze ist daher die Verwendung von \textbf{Instruction Prompting} oder \textbf{Chain of Thought Prompting} zu empfehlen, um sicherzustellen, dass der generierte Code zuverlässig, verständlich und erweiterbar ist.
+
 
 \subsection{Testfall 6: Entwicklung der gefährlichsten Unterbezirke über die Jahre}
 \label{subsec:auswertung_testfall6}
@@ -870,7 +901,7 @@ Die Gesamterfolgsquote beträgt \textbf{20\%} (3 von 15 Ausführungen waren erfo
     }
 \end{table}
 
-\paragraph{Performance und Ressourcenverbrauch:}
+\paragraph{Performanz und Ressourcenverbrauch:}
 \begin{itemize}
     \item Die Laufzeit der erfolgreichen Skripte lag zwischen 3,38 und 3,70 Sekunden, was für die Berechnung von aggregierten Straftaten über zehn Jahre hinweg effizient ist.
     \item Der Speicherverbrauch variierte zwischen 156--160\,MB \emph{Maximum Resident Set Size}, was für diesen Datensatz als angemessen betrachtet werden kann.
@@ -880,14 +911,14 @@ Die Gesamterfolgsquote beträgt \textbf{20\%} (3 von 15 Ausführungen waren erfo
 \paragraph{Codequalität und Wartbarkeit:}
 \begin{itemize}
     \item \textbf{Struktur}: Die erfolgreichen Skripte waren gut strukturiert und in sinnvolle Abschnitte unterteilt. Sie führten die Schritte zur Datenaggregation in einer klar nachvollziehbaren Reihenfolge durch.
-    \item \textbf{Dokumentation}: Die Chain of Thought-Prompts enthielten in den erfolgreichen Skripten eine gute Dokumentation. Im Gegensatz dazu fehlte in den anderen Strategien oft eine klare Kommentierung der einzelnen Verarbeitungsschritte.
+    \item \textbf{Dokumentation}: Die \textbf{Chain of Thought}-Prompts enthielten in den erfolgreichen Skripten eine gute Dokumentation. In den anderen Prompts war auch eine gute Dokumentation vorhanden, jedoch nicht so ausführlich.
     \item \textbf{Erweiterbarkeit}: Die erfolgreichen Skripte waren flexibel und könnten leicht erweitert werden, z.B. durch zusätzliche Filter oder eine visuelle Darstellung der Daten in Form von Diagrammen.
 \end{itemize}
 
 \paragraph{Fazit zu Testfall 6:}
 Die Ergebnisse zeigen, dass die \textbf{Chain of Thought}-Strategie die besten Ergebnisse erzielte, da drei der fünf Ausführungen erfolgreich waren. Die \textbf{Zero-Shot}-Strategie und die \textbf{Instruction Prompting}-Strategie scheiterten in allen fünf Durchläufen, da sie nicht in der Lage waren, die korrekten Spaltennamen zu erkennen und entsprechend zu verarbeiten.
 
-In Bezug auf \textbf{Performance} gab es keine auffälligen Probleme, und alle erfolgreichen Skripte lieferten Ergebnisse in einem angemessenen Zeitrahmen. Die \textbf{Codequalität} war insbesondere in den erfolgreichen Chain of Thought-Skripten hoch, während die weniger erfolgreichen Prompts oft an unzureichender Fehlerbehandlung und mangelnder Dokumentation litten.
+In Bezug auf \textbf{Performanz} gab es keine auffälligen Probleme, und alle erfolgreichen Skripte lieferten Ergebnisse in einem angemessenen Zeitrahmen. Die \textbf{Codequalität} war insbesondere in den erfolgreichen Chain of Thought-Skripten hoch, während die weniger erfolgreichen Prompts oft an unzureichender Fehlerbehandlung und mangelnder Dokumentation litten.
 
 \textbf{Insgesamt zeigt sich, dass für diesen Testfall eine detaillierte und schrittweise Herangehensweise (Chain of Thought) die zuverlässigsten Ergebnisse liefert.} Ein robustes Handling von fehlerhaften oder unerwarteten Spaltennamen ist dabei entscheidend, um die Erfolgsquote zu verbessern.
 
@@ -895,61 +926,82 @@ In Bezug auf \textbf{Performance} gab es keine auffälligen Probleme, und alle e
 \subsection{Übersicht der Ergebnisse}
 \begin{table}[h!]
     \centering
-    \caption{Übersicht der Pass@15-Ergebnisse pro Testfall und Prompting-Strategie(Es wird nur die Erfolgsquote der komplett korrekten Ergebnisse angegeben)}
+    \caption{Übersicht der Pass@15-Ergebnisse pro Testfall und Prompting-Strategie}
     \label{tab:pass15}
-    \begin{tabular}{l|ccc}
+    \begin{tabular}{|l|c|c|c|}
     \hline
     \textbf{Testfall} & \textbf{Zero-Shot} & \textbf{Instruction} & \textbf{Chain of Thought} \\
     \hline
     1 & 0\% & 0\% & 100\% \\
+    \hline
     2 & 0\% & 0\% & 100\% \\
+    \hline
     3 & 100\% & 100\% & 80\% \\
+    \hline
     4 & 40\% & 100\% & 80\% \\
-    5 & 20\% & 100\% & 100\% \\
+    \hline
+    5 & 0\% & 0\% & 100\% \\
+    \hline
     6 & 0\% & 0\% & 60\% \\
+    \hline
+    Gesamt & 23\% & 33\% & 87\% \\
     \hline
     \end{tabular}
 \end{table}
 
 \subsection{Vergleich manuell erstellter Code}
 \label{sec:vergleich_manuell_llm}
-In dieser Untersuchung werden die durch Large Language Models (LLMs) generierten Python-Skripte mit manuell erstellten Skripten verglichen. Dabei liegt der Fokus auf der Korrektheit der Resultate, der Code-Qualität sowie der Wartbarkeit und Erweiterbarkeit der Lösungen. Ziel ist es, Unterschiede und Gemeinsamkeiten der beiden Ansätze herauszuarbeiten.
+In dieser Untersuchung werden die durch LLMs generierten Python-Skripte mit manuell erstellten Skripten verglichen. Dabei liegt der Fokus auf der Korrektheit der Resultate, der Code-Qualität sowie der Wartbarkeit und Erweiterbarkeit der Lösungen. Ziel ist es, Unterschiede und Gemeinsamkeiten der beiden Ansätze herauszuarbeiten.
 
 \paragraph{Korrektheit der Resultate}
-Ein wesentlicher Aspekt ist die inhaltliche Korrektheit der generierten Skripte. Während die manuell erstellten Skripte in allen Testfällen die erwarteten Ergebnisse lieferten – was darauf zurückzuführen ist, dass sie gezielt an die spezifischen Anforderungen angepasst wurden – traten bei den LLM-generierten Skripten vereinzelt Fehler auf. Diese Fehler betrafen insbesondere die falsche oder unvollständige Verarbeitung bestimmter Daten, beispielsweise durch nicht korrekt benannte Spalten, fehlerhafte Aggregationen oder eine nicht beachtete Filterung bestimmter Zeilen (LOR-Schlüssel). Dies führte in einigen Testfällen dazu, dass das Ergebnis nicht der gewünschten Spezifikation entsprach. Daher bedarf es bei den generierten Skripten teilweise weiterer Arbeit, insbesondere wenn die Prompt unpräzise formuliert war. Dies zeigt, dass die Qualität der Prompts eine entscheidende Rolle für die Korrektheit der generierten Skripte spielt.
+Ein wesentlicher Aspekt ist die inhaltliche Korrektheit der generierten Skripte. Während die manuell erstellten Skripte in allen Testfällen die erwarteten Ergebnisse lieferten – was darauf zurückzuführen ist, dass sie gezielt an die spezifischen Anforderungen angepasst wurden – traten bei den LLM-generierten Skripten vereinzelt Fehler auf. Diese Fehler betrafen insbesondere die falsche oder unvollständige Verarbeitung bestimmter Daten, beispielsweise durch nicht korrekt benannte Spalten, fehlerhafte Aggregationen oder eine nicht beachtete Filterung bestimmter Zeilen. Dies führte in einigen Testfällen dazu, dass das Ergebnis nicht der gewünschten Spezifikation entsprach. Daher bedarf es bei den generierten Skripten teilweise weiterer Arbeit, insbesondere wenn die Prompt unpräzise formuliert war. Dies zeigt, dass die Qualität der Prompts eine entscheidende Rolle für die Korrektheit der generierten Skripte spielt.
 
-\paragraph{Performance}
-Hinsichtlich der Laufzeiten und der Ressourcennutzung (z.\,B. CPU-Auslastung, Speicherbedarf) sind keine gravierenden Unterschiede zwischen den manuell erstellten Skripten und den generierten Skripten festzustellen. Beide Varianten führen die Analysen innerhalb weniger Sekunden aus und verbrauchen typischerweise zwischen 150\,MB und 160\,MB Maximum Resident Set Size. In diesem Anwendungsbereich -- also bei den vorliegenden Datensätzen und Aufgaben -- erweisen sich die Skripte beider Ansätze als annähernd gleichwertig in Bezug auf die Performance.
+\paragraph{Performanz}
+Hinsichtlich der Laufzeiten und der Ressourcennutzung (z.\,B. CPU-Auslastung, Speicherbedarf) sind keine gravierenden Unterschiede zwischen den manuell erstellten Skripten und den generierten Skripten festzustellen. Beide Varianten führen die Analysen innerhalb weniger Sekunden aus und verbrauchen typischerweise zwischen 150\,MB und 160\,MB Maximum Resident Set Size. In diesem Anwendungsbereich -- also bei den vorliegenden Datensätzen und Aufgaben -- erweisen sich die Skripte beider Ansätze als annähernd gleichwertig in Bezug auf die Performanz.
 
 \paragraph{Code-Struktur und Wartbarkeit}
-Aus der Perspektive von Codequalität und Wartbarkeit zeigen sich leichte Unterschiede. Die manuell geschriebenen Skripte sind in der Regel stärker auf die konkrete Aufgabenstellung zugeschnitten und enthalten genau die für die jeweilige Problemstellung nötige Logik. Bei den durch ein LLM generierten Skripten fällt hingegen auf, dass sie teils zusätzliche Codeabschnitte (z.\,B. zur Fehlerbehandlung) oder Kommentare bereitstellen, da das Modell versucht, einen möglichst robusten und verallgemeinerten Ansatz zu liefern. Dies kann den Quellcode einerseits etwas länger machen, andererseits erhöht es unter Umständen die Wiederverwendbarkeit und Anpassbarkeit. In Summe sind jedoch beide Varianten in klar nachvollziehbare Schritte gegliedert und somit gut wart- und erweiterbar.
+Aus der Perspektive von Codequalität und Wartbarkeit zeigen sich leichte Unterschiede. Die manuell geschriebenen Skripte sind in der Regel stärker auf die konkrete Aufgabenstellung zugeschnitten und enthalten genau die für die jeweilige Problemstellung nötige Logik. Bei den durch ein LLM generierten Skripten fällt hingegen auf, dass sie teils zusätzliche Codeabschnitte (z.B. zur Fehlerbehandlung) oder Kommentare bereitstellen, da das Modell versucht, einen möglichst robusten und verallgemeinerten Ansatz zu liefern. Dies kann den Quellcode einerseits etwas länger machen, andererseits erhöht es unter Umständen die Wiederverwendbarkeit und Anpassbarkeit. In Summe sind jedoch beide Varianten in klar nachvollziehbare Schritte gegliedert und somit gut wart- und erweiterbar.
 
-\section{Fazit und Ausblick}
+\section{Limitationen, Fazit und Ausblick}
+\subsection{Limitationen der Arbeit}
+\label{sec:limitationen}
+Die Untersuchung unterliegt einigen methodischen Einschränkungen, die bei der Interpretation der Ergebnisse berücksichtigt werden müssen:
+
+\begin{itemize}
+    \item \textbf{Eingeschränkte Vergleichbarkeit mit Benchmarks:} Wie bereits im Kapitel Methodik (\ref{sec:methodik}) erwähnt, basieren übliche Benchmarks für LLMs vor allem auf logischen und mathematischen Aufgaben. Da datenanalytische Aufgaben komplexere Anforderungen haben, konnten die bestehenden Benchmarks für diese Forschung nicht genutzt werden und stattdessen basiert die Evaluierung auf einer manuellen Untersuchung anhand der in der Einleitung (\ref{sec:einleitung}) gestellten Forschungsfragen.
+    \item \textbf{Limitierte Interaktionsmöglichkeiten mit ChatGPT:} ChatGPT erlaubt keine direkten Dateianhänge, wie Excel-Dateien. Daher wurden die Prompts über die OpenAI API als Requests gesendet. Diese Requests sind jedoch mit Kosten verbunden und unterliegen einer Limitierung von Tokens. Aufgrund dessen wurde sich auf eine kleinere Anzahl an Testfällen beschränkt.
+    \item \textbf{Zeitbeschränkungen:} Da die verfügbare Zeit für die Untersuchung begrenzt war, wurde sich auf eine kleinere Anzahl an Testfällen beschränkt. Zudem wurde ausschließlich ChatGPT mit GPTo1 untersucht, ohne weitere Sprachmodelle zu evaluieren.
+\end{itemize}
+
+\subsection{Fazit}
 \label{sec:fazit}
-TODO:check
-Die vorliegende Arbeit hat untersucht, wie gut sich moderne \emph{Large Language Models} (LLMs) – exemplarisch repräsentiert durch ChatGPT mit dem Modell „GPTo1“ – für die automatisierte Generierung von Python-Code im Kontext typischer Datenanalyseaufgaben eignen. Im Fokus standen vier typische Szenarien: das Sortieren und Filtern von Daten (Testfall1), das Zusammenführen und Aggregieren verschiedener Tabellen (Testfall2), die Berechnung prozentualer Anteile (Testfall3) sowie die Ermittlung von Zeitreihen mitsamt prozentualer Veränderung zum Vorjahr (Testfall4). Dabei wurden unterschiedliche Prompting-Strategien (Zero-Shot, Instruction Prompting und Chain of Thought) eingesetzt und die Qualität der resultierenden Skripte anhand von Kriterien wie Korrektheit, Performanz, Code-Struktur und Wartbarkeit evaluiert.
+Die vorliegende Arbeit hat untersucht, wie gut sich moderne \emph{Large Language Models} – exemplarisch repräsentiert durch ChatGPT mit dem Modell „GPTo1-mini“ – für die automatisierte Generierung von Python-Code im Kontext typischer Datenanalyseaufgaben eignen. Im Fokus standen vier typische Szenarien mit einem heruntergebrochenen Datensatz: das Sortieren und Filtern von Daten (Testfall1), das Zusammenführen und Aggregieren verschiedener Tabellen (Testfall2), die Berechnung prozentualer Anteile (Testfall3), die Ermittlung von Zeitreihen mitsamt prozentualer Veränderung zum Vorjahr (Testfall4) und zwei Testfälle mit dem Ausgangsdatensatz: Zugehörigkeit untergeordneter Zeilen mit Sortierung (Testfall 5) und Zusammenführen verschiedener Tabellen, Sortieren und Identifizieren von unter- und übergeordneten Zeilen (Testfall 6). Dabei wurden unterschiedliche Prompting-Strategien (Zero-Shot, Instruction Prompting und Chain of Thought) eingesetzt und die Qualität der resultierenden Skripte anhand von Kriterien wie Korrektheit, Performanz, Code-Struktur und Wartbarkeit evaluiert.
 
 \paragraph{Zentrale Erkenntnisse}
 \begin{itemize}
-    \item \textbf{Korrektheit und Erfolgsquote:}\\Die Ergebnisse zeigen, dass die Leistungsfähigkeit stark von der Art des Promptings abhängt. Während \emph{Chain of Thought}-Prompts im Durchschnitt sehr robuste und korrekte Lösungen lieferten, kam es bei Zero-Shot-Ansätzen häufiger zu Syntaxfehlern, falschen Sheet-Namen oder fehlerhafter Ausfilterung bestimmter Zeilen. Insgesamt bestätigte sich, dass \emph{strukturierte Prompt-Anweisungen} (Instruction oder Chain of Thought) zu einer höheren Erfolgsquote führen als ein unpräziser Zero-Shot-Ansatz.
-    \item \textbf{Performanz:}\\Bei allen Testfällen war die Ausführungszeit sehr kurz (teils nur wenige Zehntelsekunden bis wenige Sekunden), was für den überschaubaren Datensatz (mehrere Excel-Sheets, aber jeweils nur im Bereich einiger Zeilen pro Sheet) vollkommen ausreichend ist. Damit bestätigt sich, dass ein KI-basierter Code-Generator im Kontext kleiner bis mittlerer Datenanalysen in Sachen Laufzeit absolut konkurrenzfähig ist.
-    \item \textbf{Qualität und Wartbarkeit:}\\Die generierten Skripte weisen – insbesondere bei Chain of Thought – eine erstaunlich gute Code-Struktur auf. Sie sind in der Regel sinnvoll kommentiert, nutzen etablierte Python-Bibliotheken (z.B. \texttt{pandas}) und sind leicht erweiterbar. Limitationen zeigen sich jedoch in Fällen, in denen das Modell falsche oder irreführende Annahmen über Spaltennamen oder Datenstrukturen trifft. Solche Fehler entstehen meist durch Unklarheiten oder fehlende Details in den Prompts.
-    \item \textbf{Grenzen:}\\Trotz der teils hohen Erfolgsquote in den definierten Testfällen muss beachtet werden, dass in realen Szenarien Datenanalysen oft komplexere Anforderungen mit sich bringen: Ungewohnte Datenformate, aufwändige Vorverarbeitungs- und Qualitätschecks oder tiefergehende statistische Verfahren. Hier können LLMs ohne exakte Vorgaben schnell an ihre Grenzen gelangen. Die Modelle tendieren außerdem gelegentlich zu „Halluzinationen“, indem sie nicht-existente Funktionen oder Spalten vorschlagen.
+    \item \textbf{Korrektheit und Erfolgsquote:}\\Die Ergebnisse zeigen, dass die Leistungsfähigkeit stark von der Art des Promptings abhängt. Während \emph{Chain of Thought}-Prompts im Durchschnitt sehr robuste und korrekte Lösungen lieferten, mit einer insgesamten Erfolgsquote von 87\%, kam es bei Zero-Shot-Ansätzen häufiger zu Syntaxfehlern, falschen Sheet-Namen oder fehlerhafter Ausfilterung bestimmter Zeilen, was zu einer Erfolgsquote von 23\% führte. Insgesamt bestätigten sich die Erkenntnisse von Forschungen wie die von Wei et al. (2022)\cite{wei2023chainofthoughtpromptingelicitsreasoning}, dass \emph{strukturierte Prompt-Anweisungen} (Instruction oder noch besser Chain of Thought) zu einer höheren Erfolgsquote führen als ein unpräziser Zero-Shot-Ansatz. Dies wurde besonders deutlich durch die Testfälle fünf und sechs, welche komplexere Anforderungen hatten. Jedoch muss hier auch festgehalten werden, dass viele Skripte, die als nicht erfolgreich gewertet wurden, nur kleine Differenzen zu den erwarteten Ergebnissen aufwiesen, wie zum Beispiel eine falsche Darstellung der Daten oder eine Zeile zu viel oder zu wenig, was jedoch das Ergebnis der anderen Daten nicht beeinflusste. Bei einer sanfteren Bewertung wären die Erfolgsquoten also höher.
+    \item \textbf{Performanz:}\\Bei allen Testfällen war die Ausführungszeit sehr kurz (teils nur wenige Zehntelsekunden bis wenige Sekunden), was für den überschaubaren Datensatz vollkommen ausreichend ist. Auch in den Testfällen fünf und sechs gab es hierbei keine signifikante Veränderung. Damit bestätigt sich, dass ein KI-basierter Code-Generator im Kontext kleiner bis mittlerer Datenanalysen in Sachen Laufzeit schon jetzt gute Ergebnisse liefern kann.
+    \item \textbf{Qualität und Wartbarkeit:}\\Die generierten Skripte weisen – insbesondere bei Chain of Thought – eine erstaunlich gute Code-Struktur auf. Sie sind in der Regel sinnvoll kommentiert, nutzen etablierte Python-Bibliotheken (z.B. \texttt{pandas}) und sind leicht erweiterbar. Dazu kommt, dass neben der Dokumentation im Code noch weitere Erklärungen zum Code als  Limitationen zeigen sich jedoch in Fällen, in denen das Modell falsche oder irreführende Annahmen über Spaltennamen oder Datenstrukturen trifft. Solche Fehler entstehen meist durch Unklarheiten oder fehlende Details in den Prompts. Dies wird belegt durch die teils deutlich schlechteren Ergebnisse des \emph{Zero-Shot}-Promptings.
+    \item \textbf{Grenzen:}\\Trotz der teils hohen Erfolgsquote in den definierten Testfällen muss beachtet werden, dass in realen Szenarien Datenanalysen oft komplexere Anforderungen mit sich bringen: Ungewohnte Datenformate, aufwändige Vorverarbeitungs- und Qualitätschecks oder tiefergehende statistische Verfahren. Hier können LLMs ohne exakte Vorgaben schnell an ihre Grenzen gelangen. Die Modelle tendieren außerdem gelegentlich zu „Halluzinationen“, indem sie nicht-existente Funktionen oder Spalten vorschlagen. Dies zeigte sich insbesondere in Testfall 6, wo Zero-Shot und Instruction Prompting sehr negativ abschnitten und selbst Chain of Thought Prompting eine nur 60\%ige Erfolgsquote erreichte. Dies verdeutlicht, dass LLMs Schwierigkeiten mit komplexeren Datenstrukturen haben, insbesondere wenn sie sich über mehrere Tabellen erstrecken und es nicht normalisierte Spaltennamen gibt.
 \end{itemize}
 
 
 
-\paragraph{Ausblick}
-Die steigende Leistungsfähigkeit von LLMs lässt erwarten, dass die automatische Code-Generierung in den kommenden Jahren eine immer größere Rolle in Datenanalyse- und Data-Science-Projekten spielen wird. Insbesondere die folgenden Entwicklungen erscheinen relevant:
-
-\begin{itemize} 
-    \item \textbf{Spezialisierte Modelle und Fine-Tuning:}\\Mit zunehmender Verfügbarkeit von domänenspezifischen Datensätzen für Code-Generierung könnten LLMs besser auf bestimmte Aufgaben, wie z.,B. Datenbereinigung oder automatisiertes Exploratory Data Analysis (EDA), optimiert werden. Eine engere Anbindung an unternehmenseigene Datenbanken ist ebenfalls denkbar.
-    \item \textbf{Bessere Kontextverarbeitung:}\\Aktuelle LLMs haben eine begrenzte Kontextlänge. Künftige Modelle werden voraussichtlich größere Kontextfenster bieten und so umfangreichere Code-Dateien oder Datenschemata verarbeiten können. Damit würden komplexere Use Cases (etwa umfangreiche ETL-Pipelines) in den Bereich des Möglichen rücken.
-    \item \textbf{Integrierte Fehlersuche und Debugging:}\\Erste Ansätze zeigen, dass LLMs nicht nur Code generieren, sondern auch zum Debugging eingesetzt werden können. Wenn die Modelle direkt während der Code-Erstellung mögliche Probleme erkennen und Lösungsvorschläge machen, könnte die Produktivität bei Datenanalyse-Projekten weiter gesteigert werden.
-    \item \textbf{Erweiterte Qualitäts- und Sicherheitstests:}\\Wie in aktuellen Studien – beispielsweise von Liu et al. (2023) – diskutiert, bedarf es verbesserter Evaluationsmethoden (etwa \emph{EvalPlus}), um die tatsächliche Funktionalität und Sicherheit des generierten Codes sicherzustellen. Automatisierte Unit-Tests und Code-Audits im Prompt bzw. Post-Processing könnten ein wesentlicher Baustein sein.
+\subsection{Ausblick}
+\label{sec:ausblick}
+Während die Untersuchung gezeigt hat, dass LLMs großes Potenzial für die automatisierte Code-Generierung im Bereich der Datenanalyse haben, ergeben sich mehrere interessante Forschungsansätze, um die Leistungsfähigkeit dieser Modelle weiter zu verbessern und ihre praktischen Anwendungsmöglichkeiten zu erweitern.
+\paragraph{Erweiterung bestehender Benchmarks für datenanalytische Aufgaben}
+Die Evaluierung von LLMs für Code-Generierung basiert aktuell auf Benchmarks wie HumanEval oder EvalPlus, die einfache Programmieraufgaben bewerten. Diese Benchmarks erfassen jedoch nicht die spezifischen Herausforderungen datenanalytischer Aufgaben, die oft eine mehrstufige Datenverarbeitung erfordern.
+Zukünftige Forschungsarbeiten könnten bestehende Benchmarks erweitern oder neue Evaluationsmetriken für Datenanalyse-Aufgaben entwickeln, die unter anderem folgende Kriterien einbeziehen:
+\begin{itemize}
+    \item Umgang mit komplexen Datenstrukturen und unvollständigen Datensätzen,
+    \item Effizienz der generierten Skripte in Bezug auf Laufzeit und Speicherverbrauch,
+    \item Code-Qualität, Wartbarkeit und Verständlichkeit in realistischen Szenarien.
 \end{itemize}
 
-\noindent Zusammenfassend lässt sich festhalten, dass LLMs bereits heute in der Lage sind, für standardisierte Datenanalyseschritte in Python zuverlässig einsatzfähigen Code zu erstellen. Dies kann den Einstieg in die Datenanalyse vereinfachen und auch erfahrenen Anwendern mühsame Routineaufgaben abnehmen. Allerdings bleibt ein gewisses Maß an menschlicher Kontrolle weiterhin unverzichtbar: Sei es zur Prüfung potenzieller Halluzinationen, zur Anpassung spezieller Projektanforderungen oder zur Qualitätssicherung komplexer Analysen. Das Potenzial für zukünftige Anwendungen ist groß – insbesondere, wenn die Modelle durch spezialisierte Trainingsdaten, fortgeschrittene Prompting-Techniken und integrierte Debugging-Funktionen weiter verbessert werden.
+\paragraph{Vergleich verschiedener LLMs für datenanalytische Code-Generierung}
+Die Untersuchung beschränkte sich auf ChatGPT mit GPTo1, jedoch existieren zahlreiche weitere Modelle wie GPT-4 Turbo, Code Llama, StarCoder oder Claude, die ebenfalls für die Code-Generierung eingesetzt werden können. Ein Vergleich verschiedener Modelle hinsichtlich Genauigkeit, Korrektheit und Performanz wäre eine wertvolle Erweiterung zukünftiger Forschungen.
+Besonders spannend wäre die Frage, ob speziell für die Code-Generierung trainierte Modelle (z. B. Code Llama) besser für datenanalytische Aufgaben geeignet sind als generalisierte Modelle wie ChatGPT.
 
 \newpage
 % Literatur
@@ -957,159 +1009,282 @@ Die steigende Leistungsfähigkeit von LLMs lässt erwarten, dass die automatisch
 \label{sec:anhang}
 \subsection{Literaturverzeichnis}
 \printbibliography
-
+\newpage
+\subsection{KI Verzeichnis}
+\label{sec:anhang_ki}
+\begin{table}[h!]
+    \centering
+    \caption{KI-Verzeichnis}
+    \label{tab:ki_verzeichnis}
+    \begin{tabularx}{\textwidth}{|l|X|X|}
+    \hline
+    \textbf{KI-Tool} & \textbf{Teil der Arbeit (Seite)} & \textbf{Verwendungszweck} \\
+    \hline
+    ChatGPT & Auswertung der Python-Code-Generierung zur Datenanalyse durch LLMs (S. 29-38) & Unterstützung der Ausformulierung der Auswertung der Testfälle und Auswertung des Ressourcenverbrauchs \\
+    \hline
+    ChatGPT & Abstract (S. 2) & Generierung des Abstracts (manuelle Anpassung des Abstracts danach)\\
+    \hline
+    ChatGPT & Einführung Large Language Models (S. 10) & Umformulierung mancher Aussagen \\
+    \hline
+    ChatGPT & Fazit und Ausblick (S. 38-41) & Hilfestellung bei der Formulierung mancher Abschnitte/Aussagen (Performanz, Grenzen und Vergleich verschiedener LLMs für datenanalystische Code-Generierung) \\
+    \hline
+    ChatGPT & LaTeX Code & Hilfe bei der Umwandlung von geschriebenem Text zu LaTeX Code; Hilfe bei einigen LaTeX Funktionen/Fehlern \\
+    \hline
+    \end{tabularx}
+\end{table}
+\newpage
 \subsection{Quellcodeverzeichnis}
 \subsubsection{Testfall 1}
 \label{subsec:anhang_testfall1}
 \lstinputlisting[language=Python, caption={OpenAI API Request Skript}, label={lst:request1}]{../testcases/testcase1/prompt1/request.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 1 Ausführung 1}, label={lst:request1}]{../testcases/testcase1/prompt1/exec1/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 1 Ausführung 2}, label={lst:request1}]{../testcases/testcase1/prompt1/exec2/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 1 Ausführung 3}, label={lst:request1}]{../testcases/testcase1/prompt1/exec3/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 1 Ausführung 4}, label={lst:request1}]{../testcases/testcase1/prompt1/exec4/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 1 Ausführung 5}, label={lst:request1}]{../testcases/testcase1/prompt1/exec5/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 2 Ausführung 1}, label={lst:request1}]{../testcases/testcase1/prompt2/exec1/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 2 Ausführung 2}, label={lst:request1}]{../testcases/testcase1/prompt2/exec2/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 2 Ausführung 3}, label={lst:request1}]{../testcases/testcase1/prompt2/exec3/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 2 Ausführung 4}, label={lst:request1}]{../testcases/testcase1/prompt2/exec4/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 2 Ausführung 5}, label={lst:request1}]{../testcases/testcase1/prompt2/exec5/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 3 Ausführung 1}, label={lst:request1}]{../testcases/testcase1/prompt3/exec1/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 3 Ausführung 2}, label={lst:request1}]{../testcases/testcase1/prompt3/exec2/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 3 Ausführung 3}, label={lst:request1}]{../testcases/testcase1/prompt3/exec3/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 3 Ausführung 4}, label={lst:request1}]{../testcases/testcase1/prompt3/exec4/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 3 Ausführung 5}, label={lst:request1}]{../testcases/testcase1/prompt3/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 1 Ausführung 1}, label={lst:exec111}]{../testcases/testcase1/prompt1/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 1 Ausführung 2}, label={lst:exec112}]{../testcases/testcase1/prompt1/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 1 Ausführung 3}, label={lst:exec113}]{../testcases/testcase1/prompt1/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 1 Ausführung 4}, label={lst:exec114}]{../testcases/testcase1/prompt1/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 1 Ausführung 5}, label={lst:exec115}]{../testcases/testcase1/prompt1/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 2 Ausführung 1}, label={lst:exec121}]{../testcases/testcase1/prompt2/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 2 Ausführung 2}, label={lst:exec122}]{../testcases/testcase1/prompt2/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 2 Ausführung 3}, label={lst:exec123}]{../testcases/testcase1/prompt2/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 2 Ausführung 4}, label={lst:exec124}]{../testcases/testcase1/prompt2/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 2 Ausführung 5}, label={lst:exec125}]{../testcases/testcase1/prompt2/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 3 Ausführung 1}, label={lst:exec131}]{../testcases/testcase1/prompt3/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 3 Ausführung 2}, label={lst:exec132}]{../testcases/testcase1/prompt3/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 3 Ausführung 3}, label={lst:exec133}]{../testcases/testcase1/prompt3/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 3 Ausführung 4}, label={lst:exec134}]{../testcases/testcase1/prompt3/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 1 Prompt 3 Ausführung 5}, label={lst:exec135}]{../testcases/testcase1/prompt3/exec5/script.py}
 \subsubsection{Testfall 2}
 \label{subsec:anhang_testfall2}
-\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 1 Ausführung 1}, label={lst:request1}]{../testcases/testcase2/prompt1/exec1/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 1 Ausführung 2}, label={lst:request1}]{../testcases/testcase2/prompt1/exec2/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 1 Ausführung 3}, label={lst:request1}]{../testcases/testcase2/prompt1/exec3/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 1 Ausführung 4}, label={lst:request1}]{../testcases/testcase2/prompt1/exec4/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 1 Ausführung 5}, label={lst:request1}]{../testcases/testcase2/prompt1/exec5/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 2 Ausführung 1}, label={lst:request1}]{../testcases/testcase2/prompt2/exec1/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 2 Ausführung 2}, label={lst:request1}]{../testcases/testcase2/prompt2/exec2/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 2 Ausführung 3}, label={lst:request1}]{../testcases/testcase2/prompt2/exec3/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 2 Ausführung 4}, label={lst:request1}]{../testcases/testcase2/prompt2/exec4/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 2 Ausführung 5}, label={lst:request1}]{../testcases/testcase2/prompt2/exec5/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 3 Ausführung 1}, label={lst:request1}]{../testcases/testcase2/prompt3/exec1/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 3 Ausführung 2}, label={lst:request1}]{../testcases/testcase2/prompt3/exec2/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 3 Ausführung 3}, label={lst:request1}]{../testcases/testcase2/prompt3/exec3/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 3 Ausführung 4}, label={lst:request1}]{../testcases/testcase2/prompt3/exec4/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 3 Ausführung 5}, label={lst:request1}]{../testcases/testcase2/prompt3/exec5/script.py}
+\lstinputlisting[language=Python, caption={OpenAI API Request Skript}, label={lst:request2}]{../testcases/testcase2/prompt1/request.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 1 Ausführung 1}, label={lst:exec211}]{../testcases/testcase2/prompt1/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 1 Ausführung 2}, label={lst:exec212}]{../testcases/testcase2/prompt1/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 1 Ausführung 3}, label={lst:exec213}]{../testcases/testcase2/prompt1/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 1 Ausführung 4}, label={lst:exec214}]{../testcases/testcase2/prompt1/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 1 Ausführung 5}, label={lst:exec215}]{../testcases/testcase2/prompt1/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 2 Ausführung 1}, label={lst:exec221}]{../testcases/testcase2/prompt2/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 2 Ausführung 2}, label={lst:exec222}]{../testcases/testcase2/prompt2/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 2 Ausführung 3}, label={lst:exec223}]{../testcases/testcase2/prompt2/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 2 Ausführung 4}, label={lst:exec224}]{../testcases/testcase2/prompt2/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 2 Ausführung 5}, label={lst:exec225}]{../testcases/testcase2/prompt2/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 3 Ausführung 1}, label={lst:exec231}]{../testcases/testcase2/prompt3/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 3 Ausführung 2}, label={lst:exec232}]{../testcases/testcase2/prompt3/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 3 Ausführung 3}, label={lst:exec233}]{../testcases/testcase2/prompt3/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 3 Ausführung 4}, label={lst:exec234}]{../testcases/testcase2/prompt3/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 2 Prompt 3 Ausführung 5}, label={lst:exec235}]{../testcases/testcase2/prompt3/exec5/script.py}
 \subsubsection{Testfall 3}
 \label{subsec:anhang_testfall3}
-\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 1 Ausführung 1}, label={lst:request1}]{../testcases/testcase3/prompt1/exec1/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 1 Ausführung 2}, label={lst:request1}]{../testcases/testcase3/prompt1/exec2/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 1 Ausführung 3}, label={lst:request1}]{../testcases/testcase3/prompt1/exec3/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 1 Ausführung 4}, label={lst:request1}]{../testcases/testcase3/prompt1/exec4/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 1 Ausführung 5}, label={lst:request1}]{../testcases/testcase3/prompt1/exec5/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 2 Ausführung 1}, label={lst:request1}]{../testcases/testcase3/prompt2/exec1/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 2 Ausführung 2}, label={lst:request1}]{../testcases/testcase3/prompt2/exec2/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 2 Ausführung 3}, label={lst:request1}]{../testcases/testcase3/prompt2/exec3/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 2 Ausführung 4}, label={lst:request1}]{../testcases/testcase3/prompt2/exec4/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 2 Ausführung 5}, label={lst:request1}]{../testcases/testcase3/prompt2/exec5/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 3 Ausführung 1}, label={lst:request1}]{../testcases/testcase3/prompt3/exec1/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 3 Ausführung 2}, label={lst:request1}]{../testcases/testcase3/prompt3/exec2/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 3 Ausführung 3}, label={lst:request1}]{../testcases/testcase3/prompt3/exec3/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 3 Ausführung 4}, label={lst:request1}]{../testcases/testcase3/prompt3/exec4/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 3 Ausführung 5}, label={lst:request1}]{../testcases/testcase3/prompt3/exec5/script.py}
+\lstinputlisting[language=Python, caption={OpenAI API Request Skript}, label={lst:request3}]{../testcases/testcase3/prompt1/request.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 1 Ausführung 1}, label={lst:exec311}]{../testcases/testcase3/prompt1/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 1 Ausführung 2}, label={lst:exec312}]{../testcases/testcase3/prompt1/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 1 Ausführung 3}, label={lst:exec313}]{../testcases/testcase3/prompt1/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 1 Ausführung 4}, label={lst:exec314}]{../testcases/testcase3/prompt1/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 1 Ausführung 5}, label={lst:exec315}]{../testcases/testcase3/prompt1/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 2 Ausführung 1}, label={lst:exec321}]{../testcases/testcase3/prompt2/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 2 Ausführung 2}, label={lst:exec322}]{../testcases/testcase3/prompt2/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 2 Ausführung 3}, label={lst:exec323}]{../testcases/testcase3/prompt2/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 2 Ausführung 4}, label={lst:exec324}]{../testcases/testcase3/prompt2/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 2 Ausführung 5}, label={lst:exec325}]{../testcases/testcase3/prompt2/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 3 Ausführung 1}, label={lst:exec331}]{../testcases/testcase3/prompt3/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 3 Ausführung 2}, label={lst:exec332}]{../testcases/testcase3/prompt3/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 3 Ausführung 3}, label={lst:exec333}]{../testcases/testcase3/prompt3/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 3 Ausführung 4}, label={lst:exec334}]{../testcases/testcase3/prompt3/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 3 Prompt 3 Ausführung 5}, label={lst:exec335}]{../testcases/testcase3/prompt3/exec5/script.py}
 \subsubsection{Testfall 4}
 \label{subsec:anhang_testfall4}
-\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 1 Ausführung 1}, label={lst:request1}]{../testcases/testcase4/prompt1/exec1/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 1 Ausführung 2}, label={lst:request1}]{../testcases/testcase4/prompt1/exec2/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 1 Ausführung 3}, label={lst:request1}]{../testcases/testcase4/prompt1/exec3/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 1 Ausführung 4}, label={lst:request1}]{../testcases/testcase4/prompt1/exec4/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 1 Ausführung 5}, label={lst:request1}]{../testcases/testcase4/prompt1/exec5/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 2 Ausführung 1}, label={lst:request1}]{../testcases/testcase4/prompt2/exec1/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 2 Ausführung 2}, label={lst:request1}]{../testcases/testcase4/prompt2/exec2/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 2 Ausführung 3}, label={lst:request1}]{../testcases/testcase4/prompt2/exec3/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 2 Ausführung 4}, label={lst:request1}]{../testcases/testcase4/prompt2/exec4/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 2 Ausführung 5}, label={lst:request1}]{../testcases/testcase4/prompt2/exec5/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 3 Ausführung 1}, label={lst:request1}]{../testcases/testcase4/prompt3/exec1/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 3 Ausführung 2}, label={lst:request1}]{../testcases/testcase4/prompt3/exec2/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 3 Ausführung 3}, label={lst:request1}]{../testcases/testcase4/prompt3/exec3/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 3 Ausführung 4}, label={lst:request1}]{../testcases/testcase4/prompt3/exec4/script.py}
-\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 3 Ausführung 5}, label={lst:request1}]{../testcases/testcase4/prompt3/exec5/script.py}
+\lstinputlisting[language=Python, caption={OpenAI API Request Skript}, label={lst:request4}]{../testcases/testcase4/prompt1/request.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 1 Ausführung 1}, label={lst:exec411}]{../testcases/testcase4/prompt1/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 1 Ausführung 2}, label={lst:exec412}]{../testcases/testcase4/prompt1/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 1 Ausführung 3}, label={lst:exec413}]{../testcases/testcase4/prompt1/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 1 Ausführung 4}, label={lst:exec414}]{../testcases/testcase4/prompt1/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 1 Ausführung 5}, label={lst:exec415}]{../testcases/testcase4/prompt1/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 2 Ausführung 1}, label={lst:exec421}]{../testcases/testcase4/prompt2/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 2 Ausführung 2}, label={lst:exec422}]{../testcases/testcase4/prompt2/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 2 Ausführung 3}, label={lst:exec423}]{../testcases/testcase4/prompt2/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 2 Ausführung 4}, label={lst:exec424}]{../testcases/testcase4/prompt2/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 2 Ausführung 5}, label={lst:exec425}]{../testcases/testcase4/prompt2/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 3 Ausführung 1}, label={lst:exec431}]{../testcases/testcase4/prompt3/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 3 Ausführung 2}, label={lst:exec432}]{../testcases/testcase4/prompt3/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 3 Ausführung 3}, label={lst:exec433}]{../testcases/testcase4/prompt3/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 3 Ausführung 4}, label={lst:exec434}]{../testcases/testcase4/prompt3/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 4 Prompt 3 Ausführung 5}, label={lst:exec435}]{../testcases/testcase4/prompt3/exec5/script.py}
+\subsubsection{Testfall 5}
+\label{subsec:anhang_testfall5}
+\lstinputlisting[language=Python, caption={OpenAI API Request Skript}, label={lst:request5}]{../testcases/testcase5/prompt1/request.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 5 Prompt 1 Ausführung 1}, label={lst:exec511}]{../testcases/testcase5/prompt1/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 5 Prompt 1 Ausführung 2}, label={lst:exec512}]{../testcases/testcase5/prompt1/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 5 Prompt 1 Ausführung 3}, label={lst:exec513}]{../testcases/testcase5/prompt1/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 5 Prompt 1 Ausführung 4}, label={lst:exec514}]{../testcases/testcase5/prompt1/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 5 Prompt 1 Ausführung 5}, label={lst:exec515}]{../testcases/testcase5/prompt1/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 5 Prompt 2 Ausführung 1}, label={lst:exec521}]{../testcases/testcase5/prompt2/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 5 Prompt 2 Ausführung 2}, label={lst:exec522}]{../testcases/testcase5/prompt2/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 5 Prompt 2 Ausführung 3}, label={lst:exec523}]{../testcases/testcase5/prompt2/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 5 Prompt 2 Ausführung 4}, label={lst:exec524}]{../testcases/testcase5/prompt2/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 5 Prompt 2 Ausführung 5}, label={lst:exec525}]{../testcases/testcase5/prompt2/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 5 Prompt 3 Ausführung 1}, label={lst:exec531}]{../testcases/testcase5/prompt3/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 5 Prompt 3 Ausführung 2}, label={lst:exec532}]{../testcases/testcase5/prompt3/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 5 Prompt 3 Ausführung 3}, label={lst:exec533}]{../testcases/testcase5/prompt3/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 5 Prompt 3 Ausführung 4}, label={lst:exec534}]{../testcases/testcase5/prompt3/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 5 Prompt 3 Ausführung 5}, label={lst:exec535}]{../testcases/testcase5/prompt3/exec5/script.py}
+
+\subsubsection{Testfall 6}
+\label{subsec:anhang_testfall6}
+\lstinputlisting[language=Python, caption={OpenAI API Request Skript}, label={lst:request6}]{../testcases/testcase6/prompt1/request.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 6 Prompt 1 Ausführung 1}, label={lst:exec611}]{../testcases/testcase6/prompt1/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 6 Prompt 1 Ausführung 2}, label={lst:exec612}]{../testcases/testcase6/prompt1/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 6 Prompt 1 Ausführung 3}, label={lst:exec613}]{../testcases/testcase6/prompt1/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 6 Prompt 1 Ausführung 4}, label={lst:exec614}]{../testcases/testcase6/prompt1/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 6 Prompt 1 Ausführung 5}, label={lst:exec615}]{../testcases/testcase6/prompt1/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 6 Prompt 2 Ausführung 1}, label={lst:exec621}]{../testcases/testcase6/prompt2/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 6 Prompt 2 Ausführung 2}, label={lst:exec622}]{../testcases/testcase6/prompt2/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 6 Prompt 2 Ausführung 3}, label={lst:exec623}]{../testcases/testcase6/prompt2/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 6 Prompt 2 Ausführung 4}, label={lst:exec624}]{../testcases/testcase6/prompt2/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 6 Prompt 2 Ausführung 5}, label={lst:exec625}]{../testcases/testcase6/prompt2/exec5/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 6 Prompt 3 Ausführung 1}, label={lst:exec631}]{../testcases/testcase6/prompt3/exec1/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 6 Prompt 3 Ausführung 2}, label={lst:exec632}]{../testcases/testcase6/prompt3/exec2/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 6 Prompt 3 Ausführung 3}, label={lst:exec633}]{../testcases/testcase6/prompt3/exec3/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 6 Prompt 3 Ausführung 4}, label={lst:exec634}]{../testcases/testcase6/prompt3/exec4/script.py}
+\lstinputlisting[language=Python, caption={Skript Testfall 6 Prompt 3 Ausführung 5}, label={lst:exec635}]{../testcases/testcase6/prompt3/exec5/script.py}
+
 \subsubsection{Manuelle Skripte}
 \label{subsec:anhang_manuell}
 \lstinputlisting[language=Python, caption={Manuelles Skript Testfall 1}, label={lst:manualscript1}]{../testcases/testcase1/myscript.py}
 \lstinputlisting[language=Python, caption={Manuelles Skript Testfall 2}, label={lst:manualscript2}]{../testcases/testcase2/myscript.py}
 \lstinputlisting[language=Python, caption={Manuelles Skript Testfall 3}, label={lst:manualscript3}]{../testcases/testcase3/myscript.py}
 \lstinputlisting[language=Python, caption={Manuelles Skript Testfall 4}, label={lst:manualscript4}]{../testcases/testcase4/myscript.py}
-\subsubsection{Komplette Antworten der AI Requests}
-\label{subsec:anhang_ai_responses}
+\lstinputlisting[language=Python, caption={Manuelles Skript Testfall 5}, label={lst:manualscript5}]{../testcases/testcase5/myscript.py}
+\lstinputlisting[language=Python, caption={Manuelles Skript Testfall 6}, label={lst:manualscript6}]{../testcases/testcase6/myscript.py}
+\subsubsection{Komplette Antworten der API Requests Testfall 1}
+\label{subsec:anhang_API_responses_testfall1}
 % Testfall 1
-\lstinputlisting[caption={AI Response Testfall 1 Prompt 1 Ausführung 1}, label={lst:response111}]{../testcases/testcase1/prompt1/exec1/response.txt}
-\lstinputlisting[caption={AI Response Testfall 1 Prompt 1 Ausführung 2}, label={lst:response112}]{../testcases/testcase1/prompt1/exec2/response.txt}
-\lstinputlisting[caption={AI Response Testfall 1 Prompt 1 Ausführung 3}, label={lst:response113}]{../testcases/testcase1/prompt1/exec3/response.txt}
-\lstinputlisting[caption={AI Response Testfall 1 Prompt 1 Ausführung 4}, label={lst:response114}]{../testcases/testcase1/prompt1/exec4/response.txt}
-\lstinputlisting[caption={AI Response Testfall 1 Prompt 1 Ausführung 5}, label={lst:response115}]{../testcases/testcase1/prompt1/exec5/response.txt}
+\lstinputlisting[caption={API Response Testfall 1 Prompt 1 Ausführung 1}, label={lst:response111}]{../testcases/testcase1/prompt1/exec1/response.txt}
+\lstinputlisting[caption={API Response Testfall 1 Prompt 1 Ausführung 2}, label={lst:response112}]{../testcases/testcase1/prompt1/exec2/response.txt}
+\lstinputlisting[caption={API Response Testfall 1 Prompt 1 Ausführung 3}, label={lst:response113}]{../testcases/testcase1/prompt1/exec3/response.txt}
+\lstinputlisting[caption={API Response Testfall 1 Prompt 1 Ausführung 4}, label={lst:response114}]{../testcases/testcase1/prompt1/exec4/response.txt}
+\lstinputlisting[caption={API Response Testfall 1 Prompt 1 Ausführung 5}, label={lst:response115}]{../testcases/testcase1/prompt1/exec5/response.txt}
 
-\lstinputlisting[caption={AI Response Testfall 1 Prompt 2 Ausführung 1}, label={lst:response121}]{../testcases/testcase1/prompt2/exec1/response.txt}
-\lstinputlisting[caption={AI Response Testfall 1 Prompt 2 Ausführung 2}, label={lst:response122}]{../testcases/testcase1/prompt2/exec2/response.txt}
-\lstinputlisting[caption={AI Response Testfall 1 Prompt 2 Ausführung 3}, label={lst:response123}]{../testcases/testcase1/prompt2/exec3/response.txt}
-\lstinputlisting[caption={AI Response Testfall 1 Prompt 2 Ausführung 4}, label={lst:response124}]{../testcases/testcase1/prompt2/exec4/response.txt}
-\lstinputlisting[caption={AI Response Testfall 1 Prompt 2 Ausführung 5}, label={lst:response125}]{../testcases/testcase1/prompt2/exec5/response.txt}
+\lstinputlisting[caption={API Response Testfall 1 Prompt 2 Ausführung 1}, label={lst:response121}]{../testcases/testcase1/prompt2/exec1/response.txt}
+\lstinputlisting[caption={API Response Testfall 1 Prompt 2 Ausführung 2}, label={lst:response122}]{../testcases/testcase1/prompt2/exec2/response.txt}
+\lstinputlisting[caption={API Response Testfall 1 Prompt 2 Ausführung 3}, label={lst:response123}]{../testcases/testcase1/prompt2/exec3/response.txt}
+\lstinputlisting[caption={API Response Testfall 1 Prompt 2 Ausführung 4}, label={lst:response124}]{../testcases/testcase1/prompt2/exec4/response.txt}
+\lstinputlisting[caption={API Response Testfall 1 Prompt 2 Ausführung 5}, label={lst:response125}]{../testcases/testcase1/prompt2/exec5/response.txt}
 
-\lstinputlisting[caption={AI Response Testfall 1 Prompt 3 Ausführung 1}, label={lst:response131}]{../testcases/testcase1/prompt3/exec1/response.txt}
-\lstinputlisting[caption={AI Response Testfall 1 Prompt 3 Ausführung 2}, label={lst:response132}]{../testcases/testcase1/prompt3/exec2/response.txt}
-\lstinputlisting[caption={AI Response Testfall 1 Prompt 3 Ausführung 3}, label={lst:response133}]{../testcases/testcase1/prompt3/exec3/response.txt}
-\lstinputlisting[caption={AI Response Testfall 1 Prompt 3 Ausführung 4}, label={lst:response134}]{../testcases/testcase1/prompt3/exec4/response.txt}
-\lstinputlisting[caption={AI Response Testfall 1 Prompt 3 Ausführung 5}, label={lst:response135}]{../testcases/testcase1/prompt3/exec5/response.txt}
+\lstinputlisting[caption={API Response Testfall 1 Prompt 3 Ausführung 1}, label={lst:response131}]{../testcases/testcase1/prompt3/exec1/response.txt}
+\lstinputlisting[caption={API Response Testfall 1 Prompt 3 Ausführung 2}, label={lst:response132}]{../testcases/testcase1/prompt3/exec2/response.txt}
+\lstinputlisting[caption={API Response Testfall 1 Prompt 3 Ausführung 3}, label={lst:response133}]{../testcases/testcase1/prompt3/exec3/response.txt}
+\lstinputlisting[caption={API Response Testfall 1 Prompt 3 Ausführung 4}, label={lst:response134}]{../testcases/testcase1/prompt3/exec4/response.txt}
+\lstinputlisting[caption={API Response Testfall 1 Prompt 3 Ausführung 5}, label={lst:response135}]{../testcases/testcase1/prompt3/exec5/response.txt}
 
+\subsubsection{Komplette Antworten der API Requests Testfall 2}
+\label{subsec:anhang_API_responses_testfall2}
 % Testfall 2
-\lstinputlisting[caption={AI Response Testfall 2 Prompt 1 Ausführung 1}, label={lst:response211}]{../testcases/testcase2/prompt1/exec1/response.txt}
-\lstinputlisting[caption={AI Response Testfall 2 Prompt 1 Ausführung 2}, label={lst:response212}]{../testcases/testcase2/prompt1/exec2/response.txt}
-\lstinputlisting[caption={AI Response Testfall 2 Prompt 1 Ausführung 3}, label={lst:response213}]{../testcases/testcase2/prompt1/exec3/response.txt}
-\lstinputlisting[caption={AI Response Testfall 2 Prompt 1 Ausführung 4}, label={lst:response214}]{../testcases/testcase2/prompt1/exec4/response.txt}
-\lstinputlisting[caption={AI Response Testfall 2 Prompt 1 Ausführung 5}, label={lst:response215}]{../testcases/testcase2/prompt1/exec5/response.txt}
+\lstinputlisting[caption={API Response Testfall 2 Prompt 1 Ausführung 1}, label={lst:response211}]{../testcases/testcase2/prompt1/exec1/response.txt}
+\lstinputlisting[caption={API Response Testfall 2 Prompt 1 Ausführung 2}, label={lst:response212}]{../testcases/testcase2/prompt1/exec2/response.txt}
+\lstinputlisting[caption={API Response Testfall 2 Prompt 1 Ausführung 3}, label={lst:response213}]{../testcases/testcase2/prompt1/exec3/response.txt}
+\lstinputlisting[caption={API Response Testfall 2 Prompt 1 Ausführung 4}, label={lst:response214}]{../testcases/testcase2/prompt1/exec4/response.txt}
+\lstinputlisting[caption={API Response Testfall 2 Prompt 1 Ausführung 5}, label={lst:response215}]{../testcases/testcase2/prompt1/exec5/response.txt}
 
-\lstinputlisting[caption={AI Response Testfall 2 Prompt 2 Ausführung 1}, label={lst:response221}]{../testcases/testcase2/prompt2/exec1/response.txt}
-\lstinputlisting[caption={AI Response Testfall 2 Prompt 2 Ausführung 2}, label={lst:response222}]{../testcases/testcase2/prompt2/exec2/response.txt}
-\lstinputlisting[caption={AI Response Testfall 2 Prompt 2 Ausführung 3}, label={lst:response223}]{../testcases/testcase2/prompt2/exec3/response.txt}
-\lstinputlisting[caption={AI Response Testfall 2 Prompt 2 Ausführung 4}, label={lst:response224}]{../testcases/testcase2/prompt2/exec4/response.txt}
-\lstinputlisting[caption={AI Response Testfall 2 Prompt 2 Ausführung 5}, label={lst:response225}]{../testcases/testcase2/prompt2/exec5/response.txt}
+\lstinputlisting[caption={API Response Testfall 2 Prompt 2 Ausführung 1}, label={lst:response221}]{../testcases/testcase2/prompt2/exec1/response.txt}
+\lstinputlisting[caption={API Response Testfall 2 Prompt 2 Ausführung 2}, label={lst:response222}]{../testcases/testcase2/prompt2/exec2/response.txt}
+\lstinputlisting[caption={API Response Testfall 2 Prompt 2 Ausführung 3}, label={lst:response223}]{../testcases/testcase2/prompt2/exec3/response.txt}
+\lstinputlisting[caption={API Response Testfall 2 Prompt 2 Ausführung 4}, label={lst:response224}]{../testcases/testcase2/prompt2/exec4/response.txt}
+\lstinputlisting[caption={API Response Testfall 2 Prompt 2 Ausführung 5}, label={lst:response225}]{../testcases/testcase2/prompt2/exec5/response.txt}
 
-\lstinputlisting[caption={AI Response Testfall 2 Prompt 3 Ausführung 1}, label={lst:response231}]{../testcases/testcase2/prompt3/exec1/response.txt}
-\lstinputlisting[caption={AI Response Testfall 2 Prompt 3 Ausführung 2}, label={lst:response232}]{../testcases/testcase2/prompt3/exec2/response.txt}
-\lstinputlisting[caption={AI Response Testfall 2 Prompt 3 Ausführung 3}, label={lst:response233}]{../testcases/testcase2/prompt3/exec3/response.txt}
-\lstinputlisting[caption={AI Response Testfall 2 Prompt 3 Ausführung 4}, label={lst:response234}]{../testcases/testcase2/prompt3/exec4/response.txt}
-\lstinputlisting[caption={AI Response Testfall 2 Prompt 3 Ausführung 5}, label={lst:response235}]{../testcases/testcase2/prompt3/exec5/response.txt}
+\lstinputlisting[caption={API Response Testfall 2 Prompt 3 Ausführung 1}, label={lst:response231}]{../testcases/testcase2/prompt3/exec1/response.txt}
+\lstinputlisting[caption={API Response Testfall 2 Prompt 3 Ausführung 2}, label={lst:response232}]{../testcases/testcase2/prompt3/exec2/response.txt}
+\lstinputlisting[caption={API Response Testfall 2 Prompt 3 Ausführung 3}, label={lst:response233}]{../testcases/testcase2/prompt3/exec3/response.txt}
+\lstinputlisting[caption={API Response Testfall 2 Prompt 3 Ausführung 4}, label={lst:response234}]{../testcases/testcase2/prompt3/exec4/response.txt}
+\lstinputlisting[caption={API Response Testfall 2 Prompt 3 Ausführung 5}, label={lst:response235}]{../testcases/testcase2/prompt3/exec5/response.txt}
 
-\lstinputlisting[caption={AI Response Testfall 3 Prompt 1 Ausführung 1}, label={lst:response311}]{../testcases/testcase3/prompt1/exec1/response.txt}
-\lstinputlisting[caption={AI Response Testfall 3 Prompt 1 Ausführung 2}, label={lst:response312}]{../testcases/testcase3/prompt1/exec2/response.txt}
-\lstinputlisting[caption={AI Response Testfall 3 Prompt 1 Ausführung 3}, label={lst:response313}]{../testcases/testcase3/prompt1/exec3/response.txt}
-\lstinputlisting[caption={AI Response Testfall 3 Prompt 1 Ausführung 4}, label={lst:response314}]{../testcases/testcase3/prompt1/exec4/response.txt}
-\lstinputlisting[caption={AI Response Testfall 3 Prompt 1 Ausführung 5}, label={lst:response315}]{../testcases/testcase3/prompt1/exec5/response.txt}
+\subsubsection{Komplette Antworten der API Requests Testfall 3}
+\label{subsec:anhang_API_responses_testfall3}
+\lstinputlisting[caption={API Response Testfall 3 Prompt 1 Ausführung 1}, label={lst:response311}]{../testcases/testcase3/prompt1/exec1/response.txt}
+\lstinputlisting[caption={API Response Testfall 3 Prompt 1 Ausführung 2}, label={lst:response312}]{../testcases/testcase3/prompt1/exec2/response.txt}
+\lstinputlisting[caption={API Response Testfall 3 Prompt 1 Ausführung 3}, label={lst:response313}]{../testcases/testcase3/prompt1/exec3/response.txt}
+\lstinputlisting[caption={API Response Testfall 3 Prompt 1 Ausführung 4}, label={lst:response314}]{../testcases/testcase3/prompt1/exec4/response.txt}
+\lstinputlisting[caption={API Response Testfall 3 Prompt 1 Ausführung 5}, label={lst:response315}]{../testcases/testcase3/prompt1/exec5/response.txt}
 
-\lstinputlisting[caption={AI Response Testfall 3 Prompt 2 Ausführung 1}, label={lst:response321}]{../testcases/testcase3/prompt2/exec1/response.txt}
-\lstinputlisting[caption={AI Response Testfall 3 Prompt 2 Ausführung 2}, label={lst:response322}]{../testcases/testcase3/prompt2/exec2/response.txt}
-\lstinputlisting[caption={AI Response Testfall 3 Prompt 2 Ausführung 3}, label={lst:response323}]{../testcases/testcase3/prompt2/exec3/response.txt}
-\lstinputlisting[caption={AI Response Testfall 3 Prompt 2 Ausführung 4}, label={lst:response324}]{../testcases/testcase3/prompt2/exec4/response.txt}
-\lstinputlisting[caption={AI Response Testfall 3 Prompt 2 Ausführung 5}, label={lst:response325}]{../testcases/testcase3/prompt2/exec5/response.txt}
+\lstinputlisting[caption={API Response Testfall 3 Prompt 2 Ausführung 1}, label={lst:response321}]{../testcases/testcase3/prompt2/exec1/response.txt}
+\lstinputlisting[caption={API Response Testfall 3 Prompt 2 Ausführung 2}, label={lst:response322}]{../testcases/testcase3/prompt2/exec2/response.txt}
+\lstinputlisting[caption={API Response Testfall 3 Prompt 2 Ausführung 3}, label={lst:response323}]{../testcases/testcase3/prompt2/exec3/response.txt}
+\lstinputlisting[caption={API Response Testfall 3 Prompt 2 Ausführung 4}, label={lst:response324}]{../testcases/testcase3/prompt2/exec4/response.txt}
+\lstinputlisting[caption={API Response Testfall 3 Prompt 2 Ausführung 5}, label={lst:response325}]{../testcases/testcase3/prompt2/exec5/response.txt}
 
-\lstinputlisting[caption={AI Response Testfall 3 Prompt 3 Ausführung 1}, label={lst:response331}]{../testcases/testcase3/prompt3/exec1/response.txt}
-\lstinputlisting[caption={AI Response Testfall 3 Prompt 3 Ausführung 2}, label={lst:response332}]{../testcases/testcase3/prompt3/exec2/response.txt}
-\lstinputlisting[caption={AI Response Testfall 3 Prompt 3 Ausführung 3}, label={lst:response333}]{../testcases/testcase3/prompt3/exec3/response.txt}
-\lstinputlisting[caption={AI Response Testfall 3 Prompt 3 Ausführung 4}, label={lst:response334}]{../testcases/testcase3/prompt3/exec4/response.txt}
-\lstinputlisting[caption={AI Response Testfall 3 Prompt 3 Ausführung 5}, label={lst:response335}]{../testcases/testcase3/prompt3/exec5/response.txt}
+\lstinputlisting[caption={API Response Testfall 3 Prompt 3 Ausführung 1}, label={lst:response331}]{../testcases/testcase3/prompt3/exec1/response.txt}
+\lstinputlisting[caption={API Response Testfall 3 Prompt 3 Ausführung 2}, label={lst:response332}]{../testcases/testcase3/prompt3/exec2/response.txt}
+\lstinputlisting[caption={API Response Testfall 3 Prompt 3 Ausführung 3}, label={lst:response333}]{../testcases/testcase3/prompt3/exec3/response.txt}
+\lstinputlisting[caption={API Response Testfall 3 Prompt 3 Ausführung 4}, label={lst:response334}]{../testcases/testcase3/prompt3/exec4/response.txt}
+\lstinputlisting[caption={API Response Testfall 3 Prompt 3 Ausführung 5}, label={lst:response335}]{../testcases/testcase3/prompt3/exec5/response.txt}
 
-\lstinputlisting[caption={AI Response Testfall 4 Prompt 1 Ausführung 1}, label={lst:response411}]{../testcases/testcase4/prompt1/exec1/response.txt}
-\lstinputlisting[caption={AI Response Testfall 4 Prompt 1 Ausführung 2}, label={lst:response412}]{../testcases/testcase4/prompt1/exec2/response.txt}
-\lstinputlisting[caption={AI Response Testfall 4 Prompt 1 Ausführung 3}, label={lst:response413}]{../testcases/testcase4/prompt1/exec3/response.txt}
-\lstinputlisting[caption={AI Response Testfall 4 Prompt 1 Ausführung 4}, label={lst:response414}]{../testcases/testcase4/prompt1/exec4/response.txt}
-\lstinputlisting[caption={AI Response Testfall 4 Prompt 1 Ausführung 5}, label={lst:response415}]{../testcases/testcase4/prompt1/exec5/response.txt}
+\subsubsection{Komplette Antworten der API Requests Testfall 4}
+\label{subsec:anhang_API_responses_testfall4}
+\lstinputlisting[caption={API Response Testfall 4 Prompt 1 Ausführung 1}, label={lst:response411}]{../testcases/testcase4/prompt1/exec1/response.txt}
+\lstinputlisting[caption={API Response Testfall 4 Prompt 1 Ausführung 2}, label={lst:response412}]{../testcases/testcase4/prompt1/exec2/response.txt}
+\lstinputlisting[caption={API Response Testfall 4 Prompt 1 Ausführung 3}, label={lst:response413}]{../testcases/testcase4/prompt1/exec3/response.txt}
+\lstinputlisting[caption={API Response Testfall 4 Prompt 1 Ausführung 4}, label={lst:response414}]{../testcases/testcase4/prompt1/exec4/response.txt}
+\lstinputlisting[caption={API Response Testfall 4 Prompt 1 Ausführung 5}, label={lst:response415}]{../testcases/testcase4/prompt1/exec5/response.txt}
 
-\lstinputlisting[caption={AI Response Testfall 4 Prompt 2 Ausführung 1}, label={lst:response421}]{../testcases/testcase4/prompt2/exec1/response.txt}
-\lstinputlisting[caption={AI Response Testfall 4 Prompt 2 Ausführung 2}, label={lst:response422}]{../testcases/testcase4/prompt2/exec2/response.txt}
-\lstinputlisting[caption={AI Response Testfall 4 Prompt 2 Ausführung 3}, label={lst:response423}]{../testcases/testcase4/prompt2/exec3/response.txt}
-\lstinputlisting[caption={AI Response Testfall 4 Prompt 2 Ausführung 4}, label={lst:response424}]{../testcases/testcase4/prompt2/exec4/response.txt}
-\lstinputlisting[caption={AI Response Testfall 4 Prompt 2 Ausführung 5}, label={lst:response425}]{../testcases/testcase4/prompt2/exec5/response.txt}
+\lstinputlisting[caption={API Response Testfall 4 Prompt 2 Ausführung 1}, label={lst:response421}]{../testcases/testcase4/prompt2/exec1/response.txt}
+\lstinputlisting[caption={API Response Testfall 4 Prompt 2 Ausführung 2}, label={lst:response422}]{../testcases/testcase4/prompt2/exec2/response.txt}
+\lstinputlisting[caption={API Response Testfall 4 Prompt 2 Ausführung 3}, label={lst:response423}]{../testcases/testcase4/prompt2/exec3/response.txt}
+\lstinputlisting[caption={API Response Testfall 4 Prompt 2 Ausführung 4}, label={lst:response424}]{../testcases/testcase4/prompt2/exec4/response.txt}
+\lstinputlisting[caption={API Response Testfall 4 Prompt 2 Ausführung 5}, label={lst:response425}]{../testcases/testcase4/prompt2/exec5/response.txt}
 
-\lstinputlisting[caption={AI Response Testfall 4 Prompt 3 Ausführung 1}, label={lst:response431}]{../testcases/testcase4/prompt3/exec1/response.txt}
-\lstinputlisting[caption={AI Response Testfall 4 Prompt 3 Ausführung 2}, label={lst:response432}]{../testcases/testcase4/prompt3/exec2/response.txt}
-\lstinputlisting[caption={AI Response Testfall 4 Prompt 3 Ausführung 3}, label={lst:response433}]{../testcases/testcase4/prompt3/exec3/response.txt}
-\lstinputlisting[caption={AI Response Testfall 4 Prompt 3 Ausführung 4}, label={lst:response434}]{../testcases/testcase4/prompt3/exec4/response.txt}
-\lstinputlisting[caption={AI Response Testfall 4 Prompt 3 Ausführung 5}, label={lst:response435}]{../testcases/testcase4/prompt3/exec5/response.txt}
+\lstinputlisting[caption={API Response Testfall 4 Prompt 3 Ausführung 1}, label={lst:response431}]{../testcases/testcase4/prompt3/exec1/response.txt}
+\lstinputlisting[caption={API Response Testfall 4 Prompt 3 Ausführung 2}, label={lst:response432}]{../testcases/testcase4/prompt3/exec2/response.txt}
+\lstinputlisting[caption={API Response Testfall 4 Prompt 3 Ausführung 3}, label={lst:response433}]{../testcases/testcase4/prompt3/exec3/response.txt}
+\lstinputlisting[caption={API Response Testfall 4 Prompt 3 Ausführung 4}, label={lst:response434}]{../testcases/testcase4/prompt3/exec4/response.txt}
+\lstinputlisting[caption={API Response Testfall 4 Prompt 3 Ausführung 5}, label={lst:response435}]{../testcases/testcase4/prompt3/exec5/response.txt}
 
+\subsubsection{Komplette Antworten der API Requests Testfall 5}
+\label{subsec:anhang_API_responses_testfall5}
+% Testfall 5
+\lstinputlisting[caption={API Response Testfall 5 Prompt 1 Ausführung 1}, label={lst:response511}]{../testcases/testcase5/prompt1/exec1/response.txt}
+\lstinputlisting[caption={API Response Testfall 5 Prompt 1 Ausführung 2}, label={lst:response512}]{../testcases/testcase5/prompt1/exec2/response.txt}
+\lstinputlisting[caption={API Response Testfall 5 Prompt 1 Ausführung 3}, label={lst:response513}]{../testcases/testcase5/prompt1/exec3/response.txt}
+\lstinputlisting[caption={API Response Testfall 5 Prompt 1 Ausführung 4}, label={lst:response514}]{../testcases/testcase5/prompt1/exec4/response.txt}
+\lstinputlisting[caption={API Response Testfall 5 Prompt 1 Ausführung 5}, label={lst:response515}]{../testcases/testcase5/prompt1/exec5/response.txt}
 
-TODO: Abbildungsverzeichnis einfügen
+\lstinputlisting[caption={API Response Testfall 5 Prompt 2 Ausführung 1}, label={lst:response521}]{../testcases/testcase5/prompt2/exec1/response.txt}
+\lstinputlisting[caption={API Response Testfall 5 Prompt 2 Ausführung 2}, label={lst:response522}]{../testcases/testcase5/prompt2/exec2/response.txt}
+\lstinputlisting[caption={API Response Testfall 5 Prompt 2 Ausführung 3}, label={lst:response523}]{../testcases/testcase5/prompt2/exec3/response.txt}
+\lstinputlisting[caption={API Response Testfall 5 Prompt 2 Ausführung 4}, label={lst:response524}]{../testcases/testcase5/prompt2/exec4/response.txt}
+\lstinputlisting[caption={API Response Testfall 5 Prompt 2 Ausführung 5}, label={lst:response525}]{../testcases/testcase5/prompt2/exec5/response.txt}
+
+\lstinputlisting[caption={API Response Testfall 5 Prompt 3 Ausführung 1}, label={lst:response531}]{../testcases/testcase5/prompt3/exec1/response.txt}
+\lstinputlisting[caption={API Response Testfall 5 Prompt 3 Ausführung 2}, label={lst:response532}]{../testcases/testcase5/prompt3/exec2/response.txt}
+\lstinputlisting[caption={API Response Testfall 5 Prompt 3 Ausführung 3}, label={lst:response533}]{../testcases/testcase5/prompt3/exec3/response.txt}
+\lstinputlisting[caption={API Response Testfall 5 Prompt 3 Ausführung 4}, label={lst:response534}]{../testcases/testcase5/prompt3/exec4/response.txt}
+\lstinputlisting[caption={API Response Testfall 5 Prompt 3 Ausführung 5}, label={lst:response535}]{../testcases/testcase5/prompt3/exec5/response.txt}
+
+\subsubsection{Komplette Antworten der API Requests Testfall 6}
+\label{subsec:anhang_API_responses_testfall6}
+% Testfall 6
+\lstinputlisting[caption={API Response Testfall 6 Prompt 1 Ausführung 1}, label={lst:response611}]{../testcases/testcase6/prompt1/exec1/response.txt}
+\lstinputlisting[caption={API Response Testfall 6 Prompt 1 Ausführung 2}, label={lst:response612}]{../testcases/testcase6/prompt1/exec2/response.txt}
+\lstinputlisting[caption={API Response Testfall 6 Prompt 1 Ausführung 3}, label={lst:response613}]{../testcases/testcase6/prompt1/exec3/response.txt}
+\lstinputlisting[caption={API Response Testfall 6 Prompt 1 Ausführung 4}, label={lst:response614}]{../testcases/testcase6/prompt1/exec4/response.txt}
+\lstinputlisting[caption={API Response Testfall 6 Prompt 1 Ausführung 5}, label={lst:response615}]{../testcases/testcase6/prompt1/exec5/response.txt}
+
+\lstinputlisting[caption={API Response Testfall 6 Prompt 2 Ausführung 1}, label={lst:response621}]{../testcases/testcase6/prompt2/exec1/response.txt}
+\lstinputlisting[caption={API Response Testfall 6 Prompt 2 Ausführung 2}, label={lst:response622}]{../testcases/testcase6/prompt2/exec2/response.txt}
+\lstinputlisting[caption={API Response Testfall 6 Prompt 2 Ausführung 3}, label={lst:response623}]{../testcases/testcase6/prompt2/exec3/response.txt}
+\lstinputlisting[caption={API Response Testfall 6 Prompt 2 Ausführung 4}, label={lst:response624}]{../testcases/testcase6/prompt2/exec4/response.txt}
+\lstinputlisting[caption={API Response Testfall 6 Prompt 2 Ausführung 5}, label={lst:response625}]{../testcases/testcase6/prompt2/exec5/response.txt}
+
+\lstinputlisting[caption={API Response Testfall 6 Prompt 3 Ausführung 1}, label={lst:response631}]{../testcases/testcase6/prompt3/exec1/response.txt}
+\lstinputlisting[caption={API Response Testfall 6 Prompt 3 Ausführung 2}, label={lst:response632}]{../testcases/testcase6/prompt3/exec2/response.txt}
+\lstinputlisting[caption={API Response Testfall 6 Prompt 3 Ausführung 3}, label={lst:response633}]{../testcases/testcase6/prompt3/exec3/response.txt}
+\lstinputlisting[caption={API Response Testfall 6 Prompt 3 Ausführung 4}, label={lst:response634}]{../testcases/testcase6/prompt3/exec4/response.txt}
+\lstinputlisting[caption={API Response Testfall 6 Prompt 3 Ausführung 5}, label={lst:response635}]{../testcases/testcase6/prompt3/exec5/response.txt}
+
+% Testfälle 1-6
+\foreach \t in {1,2,3,4,5,6} {
+    \subsubsection{Komplette Ausgaben der Skripte Testfall \t}
+    \label{subsec:anhang_script_outputs_testfall\t}
+  \foreach \p in {1,2,3} {
+    \foreach \e in {1,2,3,4,5} {
+      \lstinputlisting[caption={Ausgabe Testfall \t Prompt \p Ausführung \e}, label={lst:output\t\p\e}]{../testcases/testcase\t/prompt\p/exec\e/ressources.txt}
+    }
+  }
+}
+
 \end{document}

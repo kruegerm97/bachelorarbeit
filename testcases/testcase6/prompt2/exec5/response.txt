@@ -83,7 +83,7 @@ print(top_10_df)
 
 6. **Filtern der Unterbezirke:**
    - Ausschließen der Oberbezirke mittels `isin`.
-   - Ausschließen von Zeilen, die den Begriff „nicht zuzuordnen“ enthalten (unabhängig von Groß-/Kleinschreibung).
+   - Ausschließen von Zeilen, die den Begriff nicht zuzuordnen enthalten (unabhängig von Groß-/Kleinschreibung).
 
 7. **Sicherstellen der numerischen Werte in der Straftaten-Spalte:**
    - Die Spalte `'Straftaten -insgesamt-'` wird in numerische Werte umgewandelt.

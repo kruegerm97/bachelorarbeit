@@ -69,7 +69,7 @@ if __name__ == "__main__":
    - `pandas` wird verwendet, um Excel-Dateien zu lesen und Daten zu verarbeiten.
 
 2. **Funktion `get_top_10_unterbezirke`:**
-   - **Parameter:** `excel_file` – der Pfad zu Ihrer Excel-Datei.
+   - **Parameter:** `excel_file` - der Pfad zu Ihrer Excel-Datei.
    - **Jahre:** Wir erstellen eine Liste der Jahre von 2014 bis 2023, um iterativ durch die entsprechenden Sheets zu gehen.
    - **Iterieren über die Sheets:**
      - Für jedes Jahr generieren wir den Sheet-Namen (z.B. `Fallzahlen_2014`).
